@@ -14,10 +14,7 @@ protected:
 
     {
         for (uint8_t i=0; i<PAGE_COUNT; ++i)
-        {
             memPages[i].pool = &memPagePools[i][0];
-            memPages[i].n = i;
-        }
     }
 };
 

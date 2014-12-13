@@ -20,7 +20,7 @@ CBaseVirtMemAlloc *CBaseVirtMemAlloc::instance = 0;
 
 CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t mc, const TVirtSizeType ps,
                                      const TVirtSizeType pgs)
-    : memPageList(mp), memPageCount(mc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
+    : memPageList(mp), pageCount(mc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
 {
     assert(!instance);
     instance = this;
@@ -28,56 +28,6 @@ CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint
     baseFreeList.s.next = 0;
     baseFreeList.s.size = 0;
     poolFreePos = START_OFFSET + sizeof(UMemHeader);
-}
-
-void CBaseVirtMemAlloc::start()
-{
-    doStart();
-
-    // Initialize ram file with zeros
-    const uint8_t zero[16] = { 0 };
-    for (TVirtSizeType i=0; i<poolSize; i+=sizeof(zero))
-        doWrite(&zero, i, sizeof(zero));
-}
-
-void CBaseVirtMemAlloc::printStats()
-{
-#ifdef PRINTF_STATS
-    printf("------ Memory manager stats ------\n\n");
-    printf("Pool: free_pos = %u (%u bytes left)\n\n", poolFreePos, poolSize - poolFreePos);
-
-    TVirtPointer p = START_OFFSET + sizeof(UMemHeader);
-    while (p < poolFreePos)
-    {
-        const UMemHeader *h = getHeaderConst(p);
-        printf("  * Addr: %8u; Size: %8u\n", p, h->s.size);
-        p += (h->s.size * sizeof(UMemHeader));
-        if (!h->s.size || h->s.next < p)
-            break;
-    }
-
-    printf("\nFree list:\n\n");
-
-    if (freePointer)
-    {
-        p = freePointer;
-
-        while (1)
-        {
-            const UMemHeader *h = getHeaderConst(p);
-            printf("  * Addr: %8u; Size: %8u; Next: %8u\n", p, h->s.size, h->s.next);
-
-            p = h->s.next;
-
-            if (p == freePointer)
-                break;
-        }
-    }
-    else
-        printf("Empty\n");
-
-    printf("\n");
-#endif
 }
 
 TVirtPointer CBaseVirtMemAlloc::getMem(TVirtSizeType size)
@@ -113,7 +63,7 @@ void CBaseVirtMemAlloc::syncPage(SMemPage *page)
     }
 }
 
-void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool readonly)
+void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool readonly, bool forcestart)
 {
     assert(p < poolSize);
 
@@ -129,9 +79,10 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool reado
     enum { STATE_GOTFULL, STATE_GOTPARTIAL, STATE_GOTEMPTY, STATE_GOTCLEAN, STATE_GOTDIRTY, STATE_GOTNONE } pagefindstate = STATE_GOTNONE;
 
     // Start by looking for fitting pages, the ideal situation
-    for (uint8_t i=0; i<memPageCount; ++i)
+    for (uint8_t i=0; i<pageCount; ++i)
     {
-        if (memPageList[i].start != 0 && p >= memPageList[i].start && pend < (memPageList[i].start + pageSize))
+        if (memPageList[i].start != 0 && ((forcestart && memPageList[i].start == p) ||
+            (!forcestart && p >= memPageList[i].start && pend < (memPageList[i].start + pageSize))))
         {
             page = &memPageList[i];
             pagefindstate = STATE_GOTFULL;
@@ -141,8 +92,11 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool reado
 
     if (pagefindstate != STATE_GOTFULL)
     {
-        for (uint8_t i=0; i<memPageCount; ++i)
+        for (uint8_t i=0; i<pageCount; ++i)
         {
+            if (memPageList[i].locked)
+                continue;
+
             if (memPageList[i].start != 0)
             {
                 const TVirtPointer pageend = memPageList[i].start + pageSize;
@@ -193,7 +147,7 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool reado
         if (pagefindstate == STATE_GOTDIRTY)
         {
             ++nextPageToSwap;
-            if (nextPageToSwap >= memPageCount)
+            if (nextPageToSwap >= pageCount)
                 nextPageToSwap = 0;
         }
         else
@@ -215,7 +169,7 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool reado
 
 void CBaseVirtMemAlloc::pushData(TVirtPointer p, const void *d, TVirtSizeType size)
 {
-    void *pool = pullData(p, size, false);
+    void *pool = pullData(p, size, false, false);
     memcpy(pool, d, size);
 }
 
@@ -223,14 +177,24 @@ CBaseVirtMemAlloc::UMemHeader *CBaseVirtMemAlloc::getHeader(TVirtPointer p)
 {
     if (p == BASE_INDEX)
         return &baseFreeList;
-    return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), false));
+    return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), false, false));
 }
 
 const CBaseVirtMemAlloc::UMemHeader *CBaseVirtMemAlloc::getHeaderConst(TVirtPointer p)
 {
     if (p == BASE_INDEX)
         return &baseFreeList;
-    return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), true));
+    return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), true, false));
+}
+
+void CBaseVirtMemAlloc::start()
+{
+    doStart();
+
+    // Initialize ram file with zeros
+    const uint8_t zero[16] = { 0 };
+    for (TVirtSizeType i=0; i<poolSize; i+=sizeof(zero))
+        doWrite(&zero, i, sizeof(zero));
 }
 
 TVirtPointer CBaseVirtMemAlloc::alloc(TVirtSizeType size)
@@ -349,4 +313,84 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 
     assert(p);
     freePointer = p;
+}
+
+void *CBaseVirtMemAlloc::lock(TVirtPointer p, bool ro)
+{
+    void *ret = pullData(p, pageSize, ro, true);
+
+    // Find which page was used and mark it as locked
+    for (uint8_t i=0; i<pageCount; ++i)
+    {
+        if (memPageList[i].start == p)
+            memPageList[i].locked = true;
+    }
+
+    return ret;
+}
+
+void CBaseVirtMemAlloc::unlock(TVirtPointer p)
+{
+    for (uint8_t i=0; i<pageCount; ++i)
+    {
+        if (memPageList[i].start == p)
+        {
+            assert(memPageList[i].locked);
+            memPageList[i].locked = false;
+        }
+    }
+}
+
+void CBaseVirtMemAlloc::flush()
+{
+    for (uint8_t i=0; i<pageCount; ++i)
+        syncPage(&memPageList[i]);
+}
+
+void CBaseVirtMemAlloc::clearPages()
+{
+    flush();
+    // wipe all pages
+    for (uint8_t i=0; i<pageCount; ++i)
+        memPageList[i].start = 0;
+}
+
+void CBaseVirtMemAlloc::printStats()
+{
+#ifdef PRINTF_STATS
+    printf("------ Memory manager stats ------\n\n");
+    printf("Pool: free_pos = %u (%u bytes left)\n\n", poolFreePos, poolSize - poolFreePos);
+
+    TVirtPointer p = START_OFFSET + sizeof(UMemHeader);
+    while (p < poolFreePos)
+    {
+        const UMemHeader *h = getHeaderConst(p);
+        printf("  * Addr: %8u; Size: %8u\n", p, h->s.size);
+        p += (h->s.size * sizeof(UMemHeader));
+        if (!h->s.size || h->s.next < p)
+            break;
+    }
+
+    printf("\nFree list:\n\n");
+
+    if (freePointer)
+    {
+        p = freePointer;
+
+        while (1)
+        {
+            const UMemHeader *h = getHeaderConst(p);
+            printf("  * Addr: %8u; Size: %8u; Next: %8u\n", p, h->s.size, h->s.next);
+
+            p = h->s.next;
+
+            if (p == freePointer)
+                break;
+        }
+    }
+    else
+        printf("Empty\n");
+
+    printf("\n");
+#endif
 }

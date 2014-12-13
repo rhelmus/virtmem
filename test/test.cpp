@@ -5,6 +5,10 @@
 #include <iomanip>
 #include <iostream>
 
+#include <string.h>
+
+struct STest { int x, y; };
+
 int main()
 {
     CStdioVirtMemAlloc valloc;
@@ -15,6 +19,31 @@ int main()
     *iptr = 55;
     std::cout << "iptr: " << (int)*iptr << std::endl;
     iptr.free(iptr);
+
+    TStdioVirtPtr<char>::type buf = buf.alloc(128);
+    memset(*makePtrWrapLock(buf), 'h', 128);
+    valloc.clearPages();
+
+    std::cout << "c: " << (char)buf[127] << std::endl;
+
+    TStdioVirtPtr<STest>::type test = test.alloc();
+    valloc.clearPages();
+    test->x = 55;
+    test->y = 33;
+    valloc.clearPages();
+    std::cout << "test: " << test->x << ", " << test->y << std::endl;
+
+    const TStdioVirtPtr<STest>::type ctest = test;
+    std::cout << "ctest: " << ctest->x << ", " << ctest->y << std::endl;
+
+    STest sttest = { 22, 11 };
+    const TStdioVirtPtr<STest>::type ctest2 = ctest2.wrap(&sttest);
+    std::cout << "ctest2: " << ctest2->x << ", " << ctest2->y << std::endl;
+    assert(ctest2.unwrap() == &sttest);
+
+    TStdioVirtPtr<STest>::type test2 = test2.alloc();
+    memcpy(test2, test, sizeof(STest));
+    std::cout << "test2: " << test2->x << ", " << test2->y << std::endl;
 
 #if 0
 #if 0

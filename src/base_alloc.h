@@ -32,13 +32,12 @@ class CBaseVirtMemAlloc
 protected:
     struct SMemPage
     {
-        int n;
         TVirtPointer start;
         void *pool;
-        bool dirty;
+        bool dirty, locked;
         uint8_t cleanSkips;
 
-        SMemPage(void) : start(0), dirty(false), cleanSkips(0) { }
+        SMemPage(void) : start(0), dirty(false), locked(false), cleanSkips(0) { }
     };
 
 private:
@@ -46,7 +45,7 @@ private:
 
     // Stuff configured from CVirtMemAlloc
     SMemPage *memPageList;
-    const uint8_t memPageCount;
+    const uint8_t pageCount;
     const TVirtSizeType poolSize, pageSize;
 
     UMemHeader baseFreeList;
@@ -56,7 +55,7 @@ private:
 
     TVirtPointer getMem(TVirtSizeType size);
     void syncPage(SMemPage *page);
-    void *pullData(TVirtPointer p, TVirtSizeType size, bool readonly);
+    void *pullData(TVirtPointer p, TVirtSizeType size, bool readonly, bool forcestart);
     void pushData(TVirtPointer p, const void *d, TVirtSizeType size);
     UMemHeader *getHeader(TVirtPointer p);
     const UMemHeader *getHeaderConst(TVirtPointer p);
@@ -78,8 +77,12 @@ public:
     TVirtPointer alloc(TVirtSizeType size);
     void free(TVirtPointer ptr);
 
-    void *read(TVirtPointer p, TVirtSizeType size, bool ro=true) { return pullData(p, size, ro); }
+    void *read(TVirtPointer p, TVirtSizeType size, bool ro=true) { return pullData(p, size, ro, false); }
     void write(TVirtPointer p, const void *d, TVirtSizeType size) { pushData(p, d, size); }
+    void *lock(TVirtPointer p, bool ro=true);
+    void unlock(TVirtPointer p);
+    void flush(void);
+    void clearPages(void);
 
     static CBaseVirtMemAlloc *getInstance(void) { return instance; }
 

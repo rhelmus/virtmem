@@ -13,7 +13,8 @@ CONFIG += staticlib
 SOURCES += \
     wrapper.cpp \
     base_alloc.cpp \
-    stdioalloc.cpp
+    stdioalloc.cpp \
+    utils.cpp
 
 HEADERS += \
     virtmem.h \

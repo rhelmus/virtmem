@@ -3,6 +3,8 @@
 
 #include "wrapper.h"
 
+#include <stdio.h> // UNDONE
+
 // Generic NULL type
 class CNILL
 {
@@ -14,17 +16,30 @@ public:
 
 } extern const NILL;
 
-class CPtrWrapLock
+template <typename TV> class CPtrWrapLock
 {
     static int locks;
-    CVirtPtrBase ptrWrap;
+    TV ptrWrap;
 
 public:
-    CPtrWrapLock(const CVirtPtrBase &w) : ptrWrap(w) { ++locks; /*printf("locks: %d\n", locks);*/ }
+    CPtrWrapLock(const TV &w, bool ro=false) : ptrWrap(w) { lock(ro); }
     ~CPtrWrapLock(void) { unlock(); }
 
-    void unlock(void) { --locks; /*printf("locks: %d\n", locks);*/ }
-//    void *operator &(void) { return ptrWrap.ptr; }
+    void lock(bool ro=false) { ++locks; TV::getAlloc()->lock(ptrWrap.ptr, ro); printf("locks: %d\n", locks); }
+    void unlock(void) { --locks; TV::getAlloc()->unlock(ptrWrap.ptr); printf("locks: %d\n", locks); }
+    void *operator *(void) { return TV::getAlloc()->read(ptrWrap.ptr, sizeof(typename TV::TPtr)); }
 };
+
+template <typename T> int CPtrWrapLock<T>::locks;
+
+// Shortcut
+template <typename T> CPtrWrapLock<T> makePtrWrapLock(const T &w, bool ro=false) { return CPtrWrapLock<T>(w, ro); }
+
+template <typename T, typename A> CVirtPtr<T, A> memcpy(CVirtPtr<T, A> &dest, const CVirtPtr<T, A> &src, size_t size)
+{
+    for (size_t s=0; s<size; ++s)
+        ((CVirtPtr<uint8_t, A>)dest)[s] = ((CVirtPtr<uint8_t, A>)src)[s];
+    return dest;
+}
 
 #endif // UTILS_H
