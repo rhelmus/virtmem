@@ -13,29 +13,34 @@ public:
 private:
     typedef CVirtPtr<T, TAllocator> TVirtPtr;
 
-    static T *read(TVirtPointer p, bool ro=true)
+    static T *unwrap(TPtrNum p) { return reinterpret_cast<T *>(getPtrNum(p)); }
+
+    static T *read(TPtrNum p, bool ro=true)
     {
-        if (isWrapped(p)) // NOTE: wrapped pointer, always ro
-            return *static_cast<T **>(getAlloc()->read(getPtrAddr(p), sizeof(T), true));
+        if (isWrapped(p))
+            return unwrap(p);
         return static_cast<T *>(getAlloc()->read(p, sizeof(T), ro));
     }
     T *read(bool ro=true) { return read(ptr, ro); }
     const T *readConst(void) const { return read(ptr, true); }
 
-    static void write(TVirtPointer p, const T *d)
+    static void write(TPtrNum p, const T *d)
     {
         if (isWrapped(p))
-            *read(p) = *d;
+            *unwrap(p) = *d;
         else
             getAlloc()->write(p, d, sizeof(T));
     }
+    void write(const T *d) { write(ptr, d); }
+
+    TVirtPtr copy(void) const { TVirtPtr ret; ret.ptr = ptr; return ret; }
 
 public:
     class CValueWrapper
     {
-        TVirtPointer ptr;
+        TPtrNum ptr;
 
-        CValueWrapper(TVirtPointer p) : ptr(p) { }
+        CValueWrapper(TPtrNum p) : ptr(p) { }
         CValueWrapper(const CValueWrapper &);
 
         template <typename, typename> friend class CVirtPtr;
@@ -57,7 +62,7 @@ public:
         inline T operator->(void) { return operator T(); }
         inline const T operator->(void) const { return operator T(); }
 
-        inline bool operator==(const class CNILL &) const { return getPtrAddr(ptr) == 0; }
+        inline bool operator==(const class CNILL &) const { return getPtrNum(ptr) == 0; }
         template <typename T2> inline bool operator==(const T2 &v) const { return operator T() == v; }
         template <typename T2> inline bool operator!=(const T2 &v) const { return operator T() != v; }
         inline T operator-(const T &v) const { return operator T() - v; }
@@ -105,7 +110,7 @@ public:
     }
     static void deleteArray(TVirtPtr &p)
     {
-        const TVirtPointer soffset = p.ptr - sizeof(TVirtSizeType); // pointer to size offset
+        const TPtrNum soffset = p.ptr - sizeof(TVirtSizeType); // pointer to size offset
         TVirtSizeType *size = getAlloc()->read(soffset, sizeof(TVirtSizeType));
         for (TVirtSizeType s=0; s<*size; ++s)
             (static_cast<T *>(getAlloc()->read(p.ptr, sizeof(T)) + (s * sizeof(T))))->~T();
@@ -114,12 +119,13 @@ public:
 
     static TVirtPtr wrap(void *p)
     {
-        TVirtPtr ret = alloc(sizeof(p));
-        getAlloc()->write(ret.ptr, &p, sizeof(p));
-        ret.ptr = getWrapped(ret.ptr);
+        TVirtPtr ret;
+        ret.ptr = getWrapped(reinterpret_cast<TPtrNum>(p));
         return ret;
     }
-    const T *unwrap(void) const { return readConst(); }
+    static T *unwrap(const TVirtPtr &p) { return reinterpret_cast<T *>(p.ptr); }
+    T *unwrap(void) { return unwrap(ptr); }
+    const T *unwrap(void) const { return unwrap(ptr); }
 
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }
     T *operator->(void) { return read(false); }
@@ -132,18 +138,33 @@ public:
     // pointer to pointer conversion
     template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
 
-    TVirtPtr &operator+=(int n) { ptr += (n * sizeof(T)); return *this; }
-    TVirtPtr &operator++(void) { ptr += sizeof(T); return *this; }
-    TVirtPtr operator++(int) { TVirtPtr ret; ret.ptr = ptr + sizeof(T); return ret; }
-    TVirtPtr &operator--(void) { ptr -= sizeof(T); return *this; }
-    TVirtPtr operator--(int) { TVirtPtr ret; ret.ptr = ptr -= sizeof(T); return ret; }
-    TVirtPtr operator+(int n) const { TVirtPtr ret; ret.ptr = ptr + (n * sizeof(T)); return ret; }
-    TVirtPtr operator-(int n) const { TVirtPtr ret; ret.ptr = ptr - (n * sizeof(T)); return ret; }
-    int operator-(const TVirtPtr &other) const { return (ptr - other.ptr) / sizeof(T); }
-
+    TVirtPtr &operator+=(int n)
+    {
+        if (isWrapped())
+            write(unwrap() + n);
+        else
+            ptr += (n * sizeof(T));
+        return *this;
+    }
+    inline TVirtPtr &operator++(void) { return operator +=(1); }
+    inline TVirtPtr operator++(int) { TVirtPtr ret = copy(); operator++(); return ret; }
+    inline TVirtPtr &operator-=(int n) { return operator +=(-n); }
+    inline TVirtPtr &operator--(void) { return operator -=(1); }
+    inline TVirtPtr operator--(int) { TVirtPtr ret = copy(); operator--(); return ret; }
+    inline TVirtPtr operator+(int n) const { return (copy() += n); }
+    inline TVirtPtr operator-(int n) const { TVirtPtr ret; ret.ptr = ptr - (n * sizeof(T)); return ret; }
+    int operator-(const TVirtPtr &other) const
+    {
+        if (isWrapped()) // other should also be wrapped, doesn't make sense otherwise!
+            return (unwrap() - other.unwrap()) / sizeof(T);
+        return (ptr - other.ptr) / sizeof(T);
+    }
     inline bool operator!=(const TVirtPtr &p) const { return ptr != p.ptr; }
 
-    const CValueWrapper operator[](int i) const { return CValueWrapper(ptr + (i * sizeof(T))); }
+    const CValueWrapper operator[](int i) const
+    {
+        return CValueWrapper(ptr + (i * sizeof(T)));
+    }
     CValueWrapper operator[](int i) { return CValueWrapper(ptr + (i * sizeof(T))); }
 
     static inline TAllocator *getAlloc(void) { return static_cast<TAllocator *>(TAllocator::getInstance()); }

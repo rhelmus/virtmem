@@ -9,6 +9,16 @@
 #define EXPLICIT
 #endif
 
+template <bool, typename T1, typename T2> struct TConditional
+{
+    typedef T1 type;
+};
+
+template <typename T1, typename T2> struct TConditional<false, T1, T2>
+{
+    typedef T2 type;
+};
+
 template <typename, typename> class CVirtPtr;
 
 class CVirtPtrBase
@@ -22,20 +32,24 @@ class CVirtPtrBase
     template <typename, typename> friend class CVirtPtr;
     template <typename> friend class CPtrWrapLock;
 
-    enum { WRAP_BIT = sizeof(TVirtPointer) * 8 - 1 }; // Last bit is used to check if wrapping real pointer
+protected:
+    typedef TConditional<(sizeof(intptr_t) > sizeof(TVirtPointer)), intptr_t, TVirtPointer>::type TPtrNum;
+
+private:
+    enum { WRAP_BIT = sizeof(TPtrNum) * 8 - 1 }; // Last bit is used to check if wrapping real pointer
 
 protected:
-    TVirtPointer ptr;
+    TPtrNum ptr;
 
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
-    static TVirtPointer getPtrAddr(TVirtPointer p) { return p & ~(1 << WRAP_BIT); }
-    TVirtPointer getPtrAddr(void) const { return getPtrAddr(ptr); } // Shortcut
+    static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
+    TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
 
-    static bool isWrapped(TVirtPointer p) { return p & (1<<WRAP_BIT); }
+    static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     bool isWrapped(void) const { return isWrapped(ptr); }
 
-    static TVirtPointer getWrapped(TVirtPointer p) { return p | (1 << WRAP_BIT); }
+    static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
 
 public:
     // HACK: this allows constructing CVirtPtr objects from CVirtPtrBase variables, similar to
@@ -45,10 +59,10 @@ public:
     template <typename T, typename A> EXPLICIT operator CVirtPtr<T, A>(void) const { CVirtPtr<T, A> ret; ret.ptr = ptr; return ret; }
 
     // allow checking with NULL
-    inline bool operator==(const SNull *) const { return getPtrAddr() == 0; }
-    friend inline bool operator==(const SNull *, const CVirtPtrBase &pw) { return pw.getPtrAddr() == 0; }
-    inline bool operator!=(const SNull *) const { return getPtrAddr() != 0; }
-    inline operator TSafeBool (void) const { return getPtrAddr() == 0 ? 0 : &SDummy::nonNull; }
+    inline bool operator==(const SNull *) const { return getPtrNum() == 0; }
+    friend inline bool operator==(const SNull *, const CVirtPtrBase &pw) { return pw.getPtrNum() == 0; }
+    inline bool operator!=(const SNull *) const { return getPtrNum() != 0; }
+    inline operator TSafeBool (void) const { return getPtrNum() == 0 ? 0 : &SDummy::nonNull; }
 
     inline bool operator==(const CVirtPtrBase &pb) const { return ptr == pb.ptr; }
     inline bool operator!=(const CVirtPtrBase &pb) const { return ptr != pb.ptr; }
