@@ -83,8 +83,10 @@ public:
     void unlock(TVirtPointer p);
     void flush(void);
     void clearPages(void);
+    uint8_t unlockedPages(void) const;
 
     static CBaseVirtMemAlloc *getInstance(void) { return instance; }
+    TVirtSizeType getPageSize(void) const { return pageSize; }
 
     void printStats(void);
 };

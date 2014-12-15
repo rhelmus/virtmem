@@ -34,6 +34,7 @@ private:
     void write(const T *d) { write(ptr, d); }
 
     TVirtPtr copy(void) const { TVirtPtr ret; ret.ptr = ptr; return ret; }
+    template <typename> friend class CPtrWrapLock;
 
 public:
     class CValueWrapper
@@ -138,33 +139,18 @@ public:
     // pointer to pointer conversion
     template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
 
-    TVirtPtr &operator+=(int n)
-    {
-        if (isWrapped())
-            write(unwrap() + n);
-        else
-            ptr += (n * sizeof(T));
-        return *this;
-    }
+    TVirtPtr &operator+=(int n) { ptr += (n * sizeof(T)); return *this; }
     inline TVirtPtr &operator++(void) { return operator +=(1); }
     inline TVirtPtr operator++(int) { TVirtPtr ret = copy(); operator++(); return ret; }
     inline TVirtPtr &operator-=(int n) { return operator +=(-n); }
     inline TVirtPtr &operator--(void) { return operator -=(1); }
     inline TVirtPtr operator--(int) { TVirtPtr ret = copy(); operator--(); return ret; }
     inline TVirtPtr operator+(int n) const { return (copy() += n); }
-    inline TVirtPtr operator-(int n) const { TVirtPtr ret; ret.ptr = ptr - (n * sizeof(T)); return ret; }
-    int operator-(const TVirtPtr &other) const
-    {
-        if (isWrapped()) // other should also be wrapped, doesn't make sense otherwise!
-            return (unwrap() - other.unwrap()) / sizeof(T);
-        return (ptr - other.ptr) / sizeof(T);
-    }
+    inline TVirtPtr operator-(int n) const { return (copy() -= n); }
+    int operator-(const TVirtPtr &other) const { return (ptr - other.ptr) / sizeof(T); }
     inline bool operator!=(const TVirtPtr &p) const { return ptr != p.ptr; }
 
-    const CValueWrapper operator[](int i) const
-    {
-        return CValueWrapper(ptr + (i * sizeof(T)));
-    }
+    const CValueWrapper operator[](int i) const { return CValueWrapper(ptr + (i * sizeof(T))); }
     CValueWrapper operator[](int i) { return CValueWrapper(ptr + (i * sizeof(T))); }
 
     static inline TAllocator *getAlloc(void) { return static_cast<TAllocator *>(TAllocator::getInstance()); }

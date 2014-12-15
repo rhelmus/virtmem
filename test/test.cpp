@@ -45,6 +45,11 @@ int main()
     memcpy(test2, test, sizeof(STest));
     std::cout << "test2: " << test2->x << ", " << test2->y << std::endl;
 
+    const char *teststr = "Howdy!";
+    TStdioVirtPtr<char>::type teststrw = teststrw.alloc(strlen(teststr) + 1);
+    strncpy(teststrw, teststr, 3);
+    std::cout << "teststrw: " << (char)teststrw[0] << (char)teststrw[1] << (char)teststrw[2] << std::endl;
+
 #if 0
 #if 0
     int val = 33, val2 = 42;

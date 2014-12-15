@@ -1,6 +1,7 @@
 #ifndef BASE_WRAPPER_H
 #define BASE_WRAPPER_H
 
+#include "config.h"
 #include "alloc.h"
 
 #if __cplusplus > 199711L
@@ -33,7 +34,17 @@ class CVirtPtrBase
     template <typename> friend class CPtrWrapLock;
 
 protected:
+#ifdef VIRTMEM_WRAP_CPOINTERS
+#if defined(__x86_64__) || defined(_M_X64)
+    typedef unsigned __int128 TPtrNum;
+#elif defined(__i386) || defined(_M_IX86)
+    typedef uint64_t TPtrNum;
+#else
     typedef TConditional<(sizeof(intptr_t) > sizeof(TVirtPointer)), intptr_t, TVirtPointer>::type TPtrNum;
+#endif
+#else
+    typedef TVirtPointer TPtrNum;
+#endif
 
 private:
     enum { WRAP_BIT = sizeof(TPtrNum) * 8 - 1 }; // Last bit is used to check if wrapping real pointer
@@ -46,12 +57,12 @@ protected:
     static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
     TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
 
-    static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
-    bool isWrapped(void) const { return isWrapped(ptr); }
-
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
 
 public:
+    static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
+    bool isWrapped(void) const { return isWrapped(ptr); }
+
     // HACK: this allows constructing CVirtPtr objects from CVirtPtrBase variables, similar to
     // initializing non void pointers with a void pointer
     // Note that we could have used a copy constructor in CVirtPtr instead, but this would make the latter

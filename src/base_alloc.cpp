@@ -355,6 +355,20 @@ void CBaseVirtMemAlloc::clearPages()
         memPageList[i].start = 0;
 }
 
+uint8_t CBaseVirtMemAlloc::unlockedPages() const
+{
+    uint8_t ret = pageCount;
+
+    // wipe all pages
+    for (uint8_t i=0; i<pageCount; ++i)
+    {
+        if (memPageList[i].locked)
+            --ret;
+    }
+
+    return ret;
+}
+
 void CBaseVirtMemAlloc::printStats()
 {
 #ifdef PRINTF_STATS
