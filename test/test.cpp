@@ -48,7 +48,10 @@ int main()
     const char *teststr = "Howdy!";
     TStdioVirtPtr<char>::type teststrw = teststrw.alloc(strlen(teststr) + 1);
     strncpy(teststrw, teststr, 3);
+    teststrw[3] = 0;
     std::cout << "teststrw: " << (char)teststrw[0] << (char)teststrw[1] << (char)teststrw[2] << std::endl;
+    std::cout << "len: " << strlen(teststrw) << std::endl;
+    assert(strncmp(teststrw, teststr, 3) == 0);
 
 #if 0
 #if 0

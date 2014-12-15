@@ -18,8 +18,8 @@
 
 CBaseVirtMemAlloc *CBaseVirtMemAlloc::instance = 0;
 
-CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t mc, const TVirtSizeType ps,
-                                     const TVirtSizeType pgs)
+CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t mc, const TVirtPtrSize ps,
+                                     const TVirtPtrSize pgs)
     : memPageList(mp), pageCount(mc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
 {
     assert(!instance);
@@ -30,10 +30,10 @@ CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint
     poolFreePos = START_OFFSET + sizeof(UMemHeader);
 }
 
-TVirtPointer CBaseVirtMemAlloc::getMem(TVirtSizeType size)
+TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
 {
-    size = std::max(size, (TVirtSizeType)MIN_ALLOC_SIZE); // UNDONE
-    const TVirtSizeType totalsize = size * sizeof(UMemHeader);
+    size = std::max(size, (TVirtPtrSize)MIN_ALLOC_SIZE); // UNDONE
+    const TVirtPtrSize totalsize = size * sizeof(UMemHeader);
 
     if ((poolFreePos + totalsize) <= poolSize)
     {
@@ -63,7 +63,7 @@ void CBaseVirtMemAlloc::syncPage(SMemPage *page)
     }
 }
 
-void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool readonly, bool forcestart)
+void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
 {
     assert(p < poolSize);
 
@@ -167,7 +167,7 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtSizeType size, bool reado
     return &((uint8_t *)page->pool)[p - page->start];
 }
 
-void CBaseVirtMemAlloc::pushData(TVirtPointer p, const void *d, TVirtSizeType size)
+void CBaseVirtMemAlloc::pushData(TVirtPointer p, const void *d, TVirtPtrSize size)
 {
     void *pool = pullData(p, size, false, false);
     memcpy(pool, d, size);
@@ -193,13 +193,13 @@ void CBaseVirtMemAlloc::start()
 
     // Initialize ram file with zeros
     const uint8_t zero[16] = { 0 };
-    for (TVirtSizeType i=0; i<poolSize; i+=sizeof(zero))
+    for (TVirtPtrSize i=0; i<poolSize; i+=sizeof(zero))
         doWrite(&zero, i, sizeof(zero));
 }
 
-TVirtPointer CBaseVirtMemAlloc::alloc(TVirtSizeType size)
+TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
 {
-    const TVirtSizeType quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
+    const TVirtPtrSize quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
     TVirtPointer prevp = freePointer;
 
     // First alloc call, and no free list yet ? Use 'base' for an initial

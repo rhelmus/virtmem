@@ -10,8 +10,8 @@ class CStdioVirtMemAlloc : public CVirtMemAlloc<>
     void doStart(void);
     void doSuspend(void);
     void doStop(void);
-    void doRead(void *data, TVirtSizeType offset, TVirtSizeType size);
-    void doWrite(const void *data, TVirtSizeType offset, TVirtSizeType size);
+    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size);
+    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size);
 
     FILE *ramFile;
 

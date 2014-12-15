@@ -24,7 +24,8 @@ HEADERS += \
     alloc.h \
     base_alloc.h \
     stdioalloc.h \
-    config.h
+    config.h \
+    utils.hpp
 unix {
     target.path = /usr/lib
     INSTALLS += target

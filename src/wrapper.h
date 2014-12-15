@@ -71,7 +71,7 @@ public:
     };
 
     // C style malloc/free
-    static TVirtPtr alloc(TVirtSizeType size=sizeof(T))
+    static TVirtPtr alloc(TVirtPtrSize size=sizeof(T))
     {
         TVirtPtr ret;
         ret.ptr = getAlloc()->alloc(size);
@@ -84,7 +84,7 @@ public:
     }
 
     // C++ style new/delete --> call constructors (by placement new) and destructors
-    static TVirtPtr newClass(TVirtSizeType size=sizeof(T))
+    static TVirtPtr newClass(TVirtPtrSize size=sizeof(T))
     {
         TVirtPtr ret = alloc(size);
         new (read(ret.ptr, false)) T; // UNDONE: can this be ro?
@@ -100,20 +100,20 @@ public:
     // C++ style new []/delete [] --> calls constructors and destructors
     // the size of the array (necessary for destruction) is stored at the beginning of the block.
     // A pointer offset from this is returned.
-    static TVirtPtr newArray(TVirtSizeType elements)
+    static TVirtPtr newArray(TVirtPtrSize elements)
     {
-        TVirtPtr ret = alloc(sizeof(T) * elements + sizeof(TVirtSizeType));
-        getAlloc()->write(ret.ptr, &elements, sizeof(TVirtSizeType));
-        ret.ptr += sizeof(TVirtSizeType);
-        for (TVirtSizeType s=0; s<elements; ++s)
+        TVirtPtr ret = alloc(sizeof(T) * elements + sizeof(TVirtPtrSize));
+        getAlloc()->write(ret.ptr, &elements, sizeof(TVirtPtrSize));
+        ret.ptr += sizeof(TVirtPtrSize);
+        for (TVirtPtrSize s=0; s<elements; ++s)
             new (getAlloc()->read(ret.ptr + (s * sizeof(T)), sizeof(T), false)) T; // UNDONE: can this be ro?
         return ret;
     }
     static void deleteArray(TVirtPtr &p)
     {
-        const TPtrNum soffset = p.ptr - sizeof(TVirtSizeType); // pointer to size offset
-        TVirtSizeType *size = getAlloc()->read(soffset, sizeof(TVirtSizeType));
-        for (TVirtSizeType s=0; s<*size; ++s)
+        const TPtrNum soffset = p.ptr - sizeof(TVirtPtrSize); // pointer to size offset
+        TVirtPtrSize *size = getAlloc()->read(soffset, sizeof(TVirtPtrSize));
+        for (TVirtPtrSize s=0; s<*size; ++s)
             (static_cast<T *>(getAlloc()->read(p.ptr, sizeof(T)) + (s * sizeof(T))))->~T();
         getAlloc()->free(soffset); // soffset points at beginning of actual block
     }

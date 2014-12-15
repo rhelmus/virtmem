@@ -25,7 +25,7 @@ void CStdioVirtMemAlloc::doStop()
     }
 }
 
-void CStdioVirtMemAlloc::doRead(void *data, TVirtSizeType offset, TVirtSizeType size)
+void CStdioVirtMemAlloc::doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
 {
     if (fseek(ramFile, offset, SEEK_SET) != 0)
         fprintf(stderr, "fseek error: %s\n", strerror(errno));
@@ -36,7 +36,7 @@ void CStdioVirtMemAlloc::doRead(void *data, TVirtSizeType offset, TVirtSizeType 
 
 }
 
-void CStdioVirtMemAlloc::doWrite(const void *data, TVirtSizeType offset, TVirtSizeType size)
+void CStdioVirtMemAlloc::doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
 {
     if (fseek(ramFile, offset, SEEK_SET) != 0)
         fprintf(stderr, "fseek error: %s\n", strerror(errno));

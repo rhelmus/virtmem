@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef uint32_t TVirtPointer;
-typedef uint32_t TVirtSizeType;
+typedef uint32_t TVirtPtrSize;
 
 class CBaseVirtMemAlloc
 {
@@ -23,7 +23,7 @@ class CBaseVirtMemAlloc
         struct
         {
             TVirtPointer next;
-            TVirtSizeType size;
+            TVirtPtrSize size;
         } s;
 
         TAlign alignDummy;
@@ -46,39 +46,39 @@ private:
     // Stuff configured from CVirtMemAlloc
     SMemPage *memPageList;
     const uint8_t pageCount;
-    const TVirtSizeType poolSize, pageSize;
+    const TVirtPtrSize poolSize, pageSize;
 
     UMemHeader baseFreeList;
     TVirtPointer freePointer;
     TVirtPointer poolFreePos;
     uint8_t nextPageToSwap;
 
-    TVirtPointer getMem(TVirtSizeType size);
+    TVirtPointer getMem(TVirtPtrSize size);
     void syncPage(SMemPage *page);
-    void *pullData(TVirtPointer p, TVirtSizeType size, bool readonly, bool forcestart);
-    void pushData(TVirtPointer p, const void *d, TVirtSizeType size);
+    void *pullData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
+    void pushData(TVirtPointer p, const void *d, TVirtPtrSize size);
     UMemHeader *getHeader(TVirtPointer p);
     const UMemHeader *getHeaderConst(TVirtPointer p);
 
 protected:
-    CBaseVirtMemAlloc(SMemPage *mp, const uint8_t mc, const TVirtSizeType ps, const TVirtSizeType pgs);
+    CBaseVirtMemAlloc(SMemPage *mp, const uint8_t mc, const TVirtPtrSize ps, const TVirtPtrSize pgs);
     ~CBaseVirtMemAlloc(void) { }
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;
     virtual void doStop(void) = 0;
-    virtual void doRead(void *data, TVirtSizeType offset, TVirtSizeType size) = 0;
-    virtual void doWrite(const void *data, TVirtSizeType offset, TVirtSizeType size) = 0;
+    virtual void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size) = 0;
+    virtual void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size) = 0;
 
 public:
     void start(void);
     void stop(void) { doStop(); }
 
-    TVirtPointer alloc(TVirtSizeType size);
+    TVirtPointer alloc(TVirtPtrSize size);
     void free(TVirtPointer ptr);
 
-    void *read(TVirtPointer p, TVirtSizeType size, bool ro=true) { return pullData(p, size, ro, false); }
-    void write(TVirtPointer p, const void *d, TVirtSizeType size) { pushData(p, d, size); }
+    void *read(TVirtPointer p, TVirtPtrSize size, bool ro=true) { return pullData(p, size, ro, false); }
+    void write(TVirtPointer p, const void *d, TVirtPtrSize size) { pushData(p, d, size); }
     void *lock(TVirtPointer p, bool ro=true);
     void unlock(TVirtPointer p);
     void flush(void);
@@ -86,7 +86,7 @@ public:
     uint8_t unlockedPages(void) const;
 
     static CBaseVirtMemAlloc *getInstance(void) { return instance; }
-    TVirtSizeType getPageSize(void) const { return pageSize; }
+    TVirtPtrSize getPageSize(void) const { return pageSize; }
 
     void printStats(void);
 };
