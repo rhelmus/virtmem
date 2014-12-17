@@ -22,6 +22,7 @@ void CStdioVirtMemAlloc::doStop()
     {
         fclose(ramFile);
         remove("ramdisk");
+        ramFile = 0;
     }
 }
 

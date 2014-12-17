@@ -62,7 +62,7 @@ private:
 
 protected:
     CBaseVirtMemAlloc(SMemPage *mp, const uint8_t mc, const TVirtPtrSize ps, const TVirtPtrSize pgs);
-    ~CBaseVirtMemAlloc(void) { }
+    ~CBaseVirtMemAlloc(void) { instance = 0; }
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;
@@ -79,13 +79,15 @@ public:
 
     void *read(TVirtPointer p, TVirtPtrSize size, bool ro=true) { return pullData(p, size, ro, false); }
     void write(TVirtPointer p, const void *d, TVirtPtrSize size) { pushData(p, d, size); }
-    void *lock(TVirtPointer p, bool ro=true);
+    void *lock(TVirtPointer p, bool ro=false);
     void unlock(TVirtPointer p);
     void flush(void);
     void clearPages(void);
-    uint8_t unlockedPages(void) const;
+    uint8_t getUnlockedPages(void) const;
+    uint8_t getFreePages(void) const;
 
     static CBaseVirtMemAlloc *getInstance(void) { return instance; }
+    uint8_t getPageCount(void) const { return pageCount; }
     TVirtPtrSize getPageSize(void) const { return pageSize; }
 
     void printStats(void);

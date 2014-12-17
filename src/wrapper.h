@@ -63,7 +63,8 @@ public:
         inline T operator->(void) { return operator T(); }
         inline const T operator->(void) const { return operator T(); }
 
-        inline bool operator==(const class CNILL &) const { return getPtrNum(ptr) == 0; }
+        /*inline bool operator==(const class CNILL &) const { return getPtrNum(ptr) == 0; }
+        inline bool operator!=(const class CNILL &) const { return getPtrNum(ptr) != 0; }*/
         template <typename T2> inline bool operator==(const T2 &v) const { return operator T() == v; }
         template <typename T2> inline bool operator!=(const T2 &v) const { return operator T() != v; }
         inline T operator-(const T &v) const { return operator T() - v; }
@@ -81,6 +82,7 @@ public:
     static void free(TVirtPtr &p)
     {
         getAlloc()->free(p.ptr);
+        p.ptr = 0;
     }
 
     // C++ style new/delete --> call constructors (by placement new) and destructors

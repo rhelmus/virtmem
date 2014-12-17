@@ -10,6 +10,8 @@
 #define EXPLICIT
 #endif
 
+class CNILL;
+
 template <bool, typename T1, typename T2> struct TConditional
 {
     typedef T1 type;
@@ -72,7 +74,12 @@ public:
     // allow checking with NULL
     inline bool operator==(const SNull *) const { return getPtrNum() == 0; }
     friend inline bool operator==(const SNull *, const CVirtPtrBase &pw) { return pw.getPtrNum() == 0; }
+    inline bool operator==(const CNILL &) const { return getPtrNum() == 0; }
+    friend inline bool operator==(const CNILL &, const CVirtPtrBase &pw) { return pw.getPtrNum() == 0; }
     inline bool operator!=(const SNull *) const { return getPtrNum() != 0; }
+    friend inline bool operator!=(const SNull *, const CVirtPtrBase &pw) { return pw.getPtrNum() != 0; }
+    inline bool operator!=(const CNILL &) const { return getPtrNum() != 0; }
+    friend inline bool operator!=(const CNILL &, const CVirtPtrBase &pw) { return pw.getPtrNum() != 0; }
     inline operator TSafeBool (void) const { return getPtrNum() == 0 ? 0 : &SDummy::nonNull; }
 
     inline bool operator==(const CVirtPtrBase &pb) const { return ptr == pb.ptr; }

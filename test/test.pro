@@ -3,9 +3,12 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += test.cpp
+SOURCES += \
+    test_alloc.cpp \
+    test_wrapper.cpp
 
-HEADERS +=
+HEADERS += \
+    test.h
 
 INCLUDEPATH += .
 
@@ -15,3 +18,5 @@ INCLUDEPATH += $$PWD/../src
 DEPENDPATH += $$PWD/../src
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../src/libvirtmem.a
+
+LIBS += -lgtest -lgtest_main
