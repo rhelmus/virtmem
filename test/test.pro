@@ -22,3 +22,4 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/../src/libvirtmem.a
 
 LIBS += -lgtest -lgtest_main
 DEFINES += __STDC_FORMAT_MACROS
+QMAKE_CXXFLAGS += -std=gnu++11 -Os

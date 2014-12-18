@@ -3,10 +3,133 @@
 
 #include "config.h"
 
+#include <string.h>
+
+namespace private_utils {
+
+template <typename T, typename T2> struct TSameType { static const bool flag = false; };
+template <typename T> struct TSameType<T, T> { static const bool flag = true; };
+
+template <typename T> struct TVirtPtrTraits { };
+
+template <typename T, typename A> struct TVirtPtrTraits<CVirtPtr<T, A> >
+{
+    static bool isWrapped(CVirtPtr<T, A> p) { return p.isWrapped(); }
+    static T *unwrap(CVirtPtr<T, A> p) { return p.unwrap(); }
+    static bool isVirtPtr(void) { return true; }
+    static CPtrWrapLock<CVirtPtr<T, A> > makeLock(const CVirtPtr<T, A> &w, bool ro=false)
+    { return makePtrWrapLock(w, ro); }
+    static uint8_t getUnlockedPages(CVirtPtr<T, A>)
+    { return A::getInstance()->getUnlockedPages(); }
+    static TVirtPtrSize getPageSize(CVirtPtr<T, A>)
+    { return A::getInstance()->getPageSize(); }
+};
+
+template <typename T> struct TVirtPtrTraits<T *>
+{
+    static bool isWrapped(T *) { return false; }
+    static T *unwrap(T *p) { return (T *)p; }
+    static bool isVirtPtr(void) { return false; }
+    static T **makeLock(T *&p, __attribute__ ((unused)) bool ro=false) { return &p; }
+    static uint8_t getUnlockedPages(const T *) { return 0; }
+    static TVirtPtrSize getPageSize(const T *) { return (TVirtPtrSize)-1; }
+};
+
+template <typename T> T min(const T &v1, const T &v2) { return (v1 < v2) ? v1 : v2; }
+
+template <typename T1, typename T2, typename T3> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize size,
+                                                            T3 native_copier, int terminator)
+{
+#ifdef VIRTMEM_WRAP_CPOINTERS
+    if (TVirtPtrTraits<T1>::isWrapped(dest) && TVirtPtrTraits<T2>::isWrapped(src))
+    {
+        native_copier(TVirtPtrTraits<T1>::unwrap(dest), TVirtPtrTraits<T2>::unwrap(src), size);
+        return dest;
+    }
+    else if (TVirtPtrTraits<T1>::isWrapped(dest))
+    {
+        rawCopy(TVirtPtrTraits<T1>::unwrap(dest), src, size, native_copier, terminator);
+        return dest;
+    }
+    else if (TVirtPtrTraits<T2>::isWrapped(src))
+        return rawCopy(dest, TVirtPtrTraits<T2>::unwrap(src), size, native_copier, terminator);
+#endif
+
+    /* if both are virtual pointers and are same type: both must be locked, check for two
+     * if both are virtual pointers and are inequal type: lock both, check both allocators if one slot available
+     * if one is virtual pointer, check if it can be locked */
+
+    bool uselock = false;
+
+    if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
+        uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 2);
+    else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
+        uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 1) &&
+                  (TVirtPtrTraits<T2>::getUnlockedPages(src) >= 1);
+    else if (TVirtPtrTraits<T1>::isVirtPtr())
+        uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 1);
+    else if (TVirtPtrTraits<T2>::isVirtPtr())
+        uselock = (TVirtPtrTraits<T2>::getUnlockedPages(src) >= 1);
+
+    if (uselock)
+    {
+        TVirtPtrSize start = 0;
+        const TVirtPtrSize psize = min(TVirtPtrTraits<T1>::getPageSize(dest),
+                                       TVirtPtrTraits<T2>::getPageSize(src));
+        while (start < size)
+        {
+            const TVirtPtrSize cpsize = (start + psize) < size ? psize : (size-start);
+            T1 tmpdest = dest + start;
+            T2 tmpsrc = src + start;
+            native_copier(*TVirtPtrTraits<T1>::makeLock(tmpdest),
+                          *TVirtPtrTraits<T2>::makeLock(tmpsrc, true), cpsize);
+            if (src[start+cpsize-1] == terminator)
+                break;
+            start += psize;
+        }
+    }
+    else
+    {
+        for (TVirtPtrSize s=0; s<size; ++s)
+        {
+            if ((dest[s] = src[s]) == terminator)
+                break;
+        }
+    }
+
+    return dest;
+}
+
+}
+
+
 // Specialize memcpy/memset/memcmp for uint8_t types: we have to convert to this type anyway,
 // and this saves some template code duplication for other types. A general template function will just
 // cast to the specialized function.
 
+template <typename T, typename A> CVirtPtr<T, A> memcpy(CVirtPtr<T, A> dest, const CVirtPtr<T, A> src,
+                                                        TVirtPtrSize size)
+{
+    return static_cast<CVirtPtr<T, A> >(private_utils::rawCopy(static_cast<CVirtPtr<char, A> >(dest),
+                                                               static_cast<CVirtPtr<char, A> >(src), size,
+                                                               static_cast<void *(*)(void *, const void *, size_t)>(::memcpy), -1));
+}
+
+template <typename T, typename A> CVirtPtr<T, A> memcpy(CVirtPtr<T, A> dest, const void *src, TVirtPtrSize size)
+{
+    return static_cast<CVirtPtr<T, A> >(private_utils::rawCopy(static_cast<CVirtPtr<char, A> >(dest),
+                                                               static_cast<const char *>(src), size,
+                                                               static_cast<void *(*)(void *, const void *, size_t)>(::memcpy), -1));
+}
+
+template <typename T, typename A> void *memcpy(void *dest, CVirtPtr<T, A> src, TVirtPtrSize size)
+{
+    return private_utils::rawCopy(static_cast<char *>(dest),
+                                  static_cast<CVirtPtr<char, A> >(src), size,
+                                  static_cast<void *(*)(void *, const void *, size_t)>(::memcpy), -1);
+}
+
+#if 0
 template <typename A> CVirtPtr<uint8_t, A> memcpy(CVirtPtr<uint8_t, A> dest, const CVirtPtr<uint8_t, A> src,
                                                   TVirtPtrSize size)
 {
@@ -40,7 +163,7 @@ template <typename A> CVirtPtr<uint8_t, A> memcpy(CVirtPtr<uint8_t, A> dest, con
     else
     {
         for (TVirtPtrSize s=0; s<size; ++s)
-            ((CVirtPtr<uint8_t, A>)dest)[s] = ((CVirtPtr<uint8_t, A>)src)[s];
+            dest[s] = src[s];
     }
 
     return dest;
@@ -121,6 +244,7 @@ template <typename T, typename A> void *memcpy(void *dest, const CVirtPtr<T, A> 
 {
     return memcpy(dest, static_cast<const CVirtPtr<uint8_t, A> >(src), size);
 }
+#endif
 
 template <typename A> CVirtPtr<uint8_t, A> memset(CVirtPtr<uint8_t, A> dest, int c, TVirtPtrSize size)
 {
@@ -155,7 +279,7 @@ template <typename A> CVirtPtr<uint8_t, A> memset(CVirtPtr<uint8_t, A> dest, int
 
 template <typename T, typename A> CVirtPtr<T, A> memset(CVirtPtr<T, A> dest, int c, TVirtPtrSize size)
 {
-    return memset(static_cast<CVirtPtr<uint8_t, A> >(dest), c, size);
+    return static_cast<CVirtPtr<T, A> >(memset(static_cast<CVirtPtr<uint8_t, A> >(dest), c, size));
 }
 
 // Generic version
@@ -187,6 +311,7 @@ template <typename T, typename A> int memcmp(CVirtPtr<T, A> s1, const void *s2, 
 template <typename T, typename A> int memcmp(const void *s1, CVirtPtr<T, A> s2, TVirtPtrSize n)
 { return memcmp_G(static_cast<const uint8_t *>(s1), static_cast<CVirtPtr<uint8_t, A> >(s2), n); }
 
+#if 0
 template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const CVirtPtr<char, A> src,
                                                 TVirtPtrSize n)
 {
@@ -265,7 +390,7 @@ template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const ch
     return dest;
 }
 
-template <typename A> CVirtPtr<char, A> strncpy(char *dest, const CVirtPtr<char, A> src, TVirtPtrSize n)
+template <typename A> char *strncpy(char *dest, const CVirtPtr<char, A> src, TVirtPtrSize n)
 {
 #ifdef VIRTMEM_WRAP_CPOINTERS
     if (src.isWrapped())
@@ -295,6 +420,27 @@ template <typename A> CVirtPtr<char, A> strncpy(char *dest, const CVirtPtr<char,
     }
 
     return dest;
+}
+
+#endif
+
+template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const CVirtPtr<char, A> src,
+                                                TVirtPtrSize n)
+{
+    return private_utils::rawCopy(dest, src, n,
+                                  static_cast<char *(*)(char *, const char *, size_t)>(::strncpy), 0);
+}
+
+template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const char *src, TVirtPtrSize n)
+{
+    return private_utils::rawCopy(dest, src, n,
+                                  static_cast<char *(*)(char *, const char *, size_t)>(::strncpy), 0);
+}
+
+template <typename A> char *strncpy(char *dest, CVirtPtr<char, A> src, TVirtPtrSize n)
+{
+    return private_utils::rawCopy(dest, src, n,
+                                  static_cast<char *(*)(char *, const char *, size_t)>(::strncpy), 0);
 }
 
 template <typename A> CVirtPtr<char, A> strcpy(CVirtPtr<char, A> dest, const CVirtPtr<char, A> src)

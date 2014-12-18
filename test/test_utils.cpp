@@ -2,8 +2,8 @@
 #include "stdioalloc.h"
 #include "test.h"
 
-typedef CWrapFixture<char> CCharWrapFixture;
 typedef TStdioVirtPtr<uint8_t>::type TUCharVirtPtr;
+typedef TStdioVirtPtr<char>::type TCharVirtPtr;
 
 // Clamp between -1 - +1
 inline int clampOne(int n)
@@ -60,16 +60,16 @@ TEST_F(CAllocFixture, memcpyTest)
 
     valloc.clearPages();
 
-    memcpy(vbuf2, vbuf1, bufsize);
+    EXPECT_EQ(memcpy(vbuf2, vbuf1, bufsize), vbuf2);
     valloc.clearPages();
     EXPECT_EQ(memcmp(vbuf1, vbuf2, bufsize), 0);
 
     memset(buf, 0, bufsize);
-    memcpy(buf, vbuf1, bufsize);
+    EXPECT_EQ(memcpy(buf, vbuf1, bufsize), buf);
     EXPECT_EQ(memcmp(vbuf1, buf, bufsize), 0);
 
     buf[3] = 65;
-    memcpy(vbuf2, buf, bufsize);
+    EXPECT_EQ(memcpy(vbuf2, buf, bufsize), vbuf2);
     valloc.clearPages();
     EXPECT_EQ(memcmp(buf, vbuf2, bufsize), 0);
 }
@@ -92,4 +92,32 @@ TEST_F(CAllocFixture, memcpyLargeTest)
     memcpy(vbuf2, vbuf, bufsize);
     valloc.clearPages();
     EXPECT_EQ(memcmp(vbuf, vbuf2, bufsize), 0);
+}
+
+// memset
+
+TEST_F(CAllocFixture, strlenTest)
+{
+    const int strsize = 10;
+    TCharVirtPtr vstr = vstr.alloc(strsize);
+
+    vstr[0] = 0;
+    valloc.clearPages();
+    EXPECT_EQ(strlen(vstr), 0);
+
+    memset(vstr, 'A', strsize-1);
+    vstr[strsize-1] = 0;
+    valloc.clearPages();
+    EXPECT_EQ(strlen(vstr), strsize-1);
+}
+
+TEST_F(CAllocFixture, strncpyTest)
+{
+    const int strsize = 10;
+    TCharVirtPtr vstr = vstr.alloc(strsize);
+
+    char str[strsize] = "Howdy!", str2[strsize];
+    EXPECT_EQ(strncpy(vstr, str, strsize), vstr);
+    EXPECT_EQ(strncpy(str2, vstr, strsize), str2);
+    EXPECT_EQ(strncmp(str, str2, strsize), 0);
 }
