@@ -96,7 +96,7 @@ public:
     static void deleteClass(TVirtPtr &p)
     {
         read(p.ptr)->~T();
-        virtFree(p);
+        free(p);
     }
 
     // C++ style new []/delete [] --> calls constructors and destructors
@@ -114,9 +114,9 @@ public:
     static void deleteArray(TVirtPtr &p)
     {
         const TPtrNum soffset = p.ptr - sizeof(TVirtPtrSize); // pointer to size offset
-        TVirtPtrSize *size = getAlloc()->read(soffset, sizeof(TVirtPtrSize));
+        TVirtPtrSize *size = static_cast<TVirtPtrSize *>(getAlloc()->read(soffset, sizeof(TVirtPtrSize)));
         for (TVirtPtrSize s=0; s<*size; ++s)
-            (static_cast<T *>(getAlloc()->read(p.ptr, sizeof(T)) + (s * sizeof(T))))->~T();
+            (read(p.ptr + (s * sizeof(T))))->~T();
         getAlloc()->free(soffset); // soffset points at beginning of actual block
     }
 
@@ -141,7 +141,8 @@ public:
     // pointer to pointer conversion
     template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
 
-    TVirtPtr &operator+=(int n) { ptr += (n * sizeof(T)); return *this; }
+    // NOTE: int cast is necessary to deal with negative numbers
+    TVirtPtr &operator+=(int n) { ptr += (n * (int)sizeof(T)); return *this; }
     inline TVirtPtr &operator++(void) { return operator +=(1); }
     inline TVirtPtr operator++(int) { TVirtPtr ret = copy(); operator++(); return ret; }
     inline TVirtPtr &operator-=(int n) { return operator +=(-n); }

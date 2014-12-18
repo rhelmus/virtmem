@@ -95,7 +95,7 @@ TEST_F(CAllocFixture, SimplePageTest)
     }
 }
 
-TEST_F(CAllocFixture, PageLockTests)
+TEST_F(CAllocFixture, PageLockTest)
 {
     EXPECT_EQ(valloc.getUnlockedPages(), valloc.getPageCount());
 
@@ -120,7 +120,72 @@ TEST_F(CAllocFixture, PageLockTests)
     }
 }
 
-// Big file and/or other large data
+TEST_F(CAllocFixture, LargeDataTest)
+{
+    const TVirtPtrSize size = 1024 * 1024 * 8; // 8 mb data block
+
+    const TVirtPointer vbuffer = valloc.alloc(size);
+    for (TVirtPtrSize i=0; i<size; ++i)
+    {
+        char val = size - i;
+        valloc.write(vbuffer + i, &val, sizeof(val));
+    }
+
+    valloc.clearPages();
+
+    // Linear access check
+    for (TVirtPtrSize i=0; i<size; ++i)
+    {
+        char val = size - i;
+        ASSERT_EQ(*(char *)valloc.read(vbuffer + i, sizeof(val)), val);
+    }
+
+    valloc.clearPages();
+
+    // Random access check
+    for (TVirtPtrSize i=0; i<200; ++i)
+    {
+        const TVirtPtrSize index = (rand() % size);
+        char val = size - index;
+        ASSERT_EQ(*(char *)valloc.read(vbuffer + index, sizeof(val)), val);
+    }
+}
+
+TEST_F(CAllocFixture, LargeRandomDataTest)
+{
+    const TVirtPtrSize size = 1024 * 1024 * 8; // 8 mb data block
+
+    srand(::testing::UnitTest::GetInstance()->random_seed());
+    std::vector<char> buffer;
+    buffer.reserve(size);
+    for (size_t s=0; s<size; ++s)
+        buffer.push_back(rand());
+
+    const TVirtPointer vbuffer = valloc.alloc(size);
+    for (TVirtPtrSize i=0; i<size; ++i)
+    {
+        char val = buffer[i];
+        valloc.write(vbuffer + i, &val, sizeof(val));
+    }
+
+    valloc.clearPages();
+
+    // Linear access check
+    for (TVirtPtrSize i=0; i<size; ++i)
+    {
+        ASSERT_EQ(*(char *)valloc.read(vbuffer + i, sizeof(char)), buffer[i]);
+    }
+
+    valloc.clearPages();
+
+    // Random access check
+    for (TVirtPtrSize i=0; i<200; ++i)
+    {
+        const TVirtPtrSize index = (rand() % size);
+        ASSERT_EQ(*(char *)valloc.read(vbuffer + index, sizeof(char)), buffer[index]);
+    }
+}
+
 
 #if 0
 struct STest { int x, y; };

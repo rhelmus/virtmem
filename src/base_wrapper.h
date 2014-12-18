@@ -38,7 +38,7 @@ class CVirtPtrBase
 protected:
 #ifdef VIRTMEM_WRAP_CPOINTERS
 #if defined(__x86_64__) || defined(_M_X64)
-    typedef unsigned __int128 TPtrNum;
+    typedef __uint128_t TPtrNum;
 #elif defined(__i386) || defined(_M_IX86)
     typedef uint64_t TPtrNum;
 #else
@@ -54,16 +54,17 @@ private:
 protected:
     TPtrNum ptr;
 
-public:
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
     static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
     TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
-
+public:
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
 
     static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     bool isWrapped(void) const { return isWrapped(ptr); }
+
+    TPtrNum getRawNum(void) const { return ptr; }
 
     // HACK: this allows constructing CVirtPtr objects from CVirtPtrBase variables, similar to
     // initializing non void pointers with a void pointer

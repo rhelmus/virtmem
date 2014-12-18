@@ -18,9 +18,9 @@
 
 CBaseVirtMemAlloc *CBaseVirtMemAlloc::instance = 0;
 
-CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t mc, const TVirtPtrSize ps,
+CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps,
                                      const TVirtPtrSize pgs)
-    : memPageList(mp), pageCount(mc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
+    : memPageList(mp), pageCount(pc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
 {
     assert(!instance);
     instance = this;
@@ -95,7 +95,11 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readon
         for (uint8_t i=0; i<pageCount; ++i)
         {
             if (memPageList[i].locked)
+            {
+                if (i == nextPageToSwap)
+                    ++nextPageToSwap;
                 continue;
+            }
 
             if (memPageList[i].start != 0)
             {
@@ -191,10 +195,13 @@ void CBaseVirtMemAlloc::start()
 {
     doStart();
 
-    // Initialize ram file with zeros
-    const uint8_t zero[16] = { 0 };
-    for (TVirtPtrSize i=0; i<poolSize; i+=sizeof(zero))
-        doWrite(&zero, i, sizeof(zero));
+    // Initialize ram file with zeros. Use zeroed page as buffer.
+    memset(memPageList[0].pool, 0, pageSize);
+    for (TVirtPtrSize i=0; i<poolSize; i+=pageSize)
+    {
+        const TVirtPtrSize s = (i + pageSize) < poolSize ? (pageSize) : (poolSize - i);
+        doWrite(memPageList[0].pool, i, s);
+    }
 }
 
 TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
@@ -323,7 +330,11 @@ void *CBaseVirtMemAlloc::lock(TVirtPointer p, bool ro)
     for (uint8_t i=0; i<pageCount; ++i)
     {
         if (memPageList[i].start == p)
+        {
             memPageList[i].locked = true;
+            std::cout << "lock page: " << (int)i << std::endl;
+            break;
+        }
     }
 
     return ret;
@@ -337,6 +348,8 @@ void CBaseVirtMemAlloc::unlock(TVirtPointer p)
         {
             assert(memPageList[i].locked);
             memPageList[i].locked = false;
+            std::cout << "unlock page: " << (int)i << std::endl;
+            break;
         }
     }
 }

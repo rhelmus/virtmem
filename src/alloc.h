@@ -3,7 +3,7 @@
 
 #include "base_alloc.h"
 
-template <TVirtPtrSize POOL_SIZE = 1024*1024, TVirtPtrSize PAGE_SIZE=512, uint8_t PAGE_COUNT=4>
+template <TVirtPtrSize POOL_SIZE = 1024*1024*10, TVirtPtrSize PAGE_SIZE=512, uint8_t PAGE_COUNT=4>
 class CVirtMemAlloc : public CBaseVirtMemAlloc
 {
     SMemPage memPages[PAGE_COUNT];

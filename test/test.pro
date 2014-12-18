@@ -5,7 +5,8 @@ CONFIG -= qt
 
 SOURCES += \
     test_alloc.cpp \
-    test_wrapper.cpp
+    test_wrapper.cpp \
+    test_utils.cpp
 
 HEADERS += \
     test.h
@@ -20,3 +21,4 @@ DEPENDPATH += $$PWD/../src
 unix:!macx: PRE_TARGETDEPS += $$PWD/../src/libvirtmem.a
 
 LIBS += -lgtest -lgtest_main
+DEFINES += __STDC_FORMAT_MACROS

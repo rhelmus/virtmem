@@ -3,8 +3,8 @@
 
 #include "config.h"
 
-// Specialize memcpy/memset for uint8_t types: we have to convert to this type anyway, and this saves some
-// template code duplication for other types. A general template function will just
+// Specialize memcpy/memset/memcmp for uint8_t types: we have to convert to this type anyway,
+// and this saves some template code duplication for other types. A general template function will just
 // cast to the specialized function.
 
 template <typename A> CVirtPtr<uint8_t, A> memcpy(CVirtPtr<uint8_t, A> dest, const CVirtPtr<uint8_t, A> src,
@@ -26,13 +26,14 @@ template <typename A> CVirtPtr<uint8_t, A> memcpy(CVirtPtr<uint8_t, A> dest, con
 #endif
 
     // If dest and src can be locked, use regular memcpy
-    if (A::getInstance()->unlockedPages() >= 2)
+    if (A::getInstance()->getUnlockedPages() >= 2)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
         while (start < size)
         {
-            memcpy(*makePtrWrapLock(dest + start), *makePtrWrapLock(src + start, true), psize);
+            const TVirtPtrSize cpsize = (start + psize) < size ? psize : (size-start);
+            memcpy(*makePtrWrapLock(dest + start), *makePtrWrapLock(src + start, true), cpsize);
             start += psize;
         }
     }
@@ -63,14 +64,15 @@ template <typename A> CVirtPtr<uint8_t, A> memcpy(CVirtPtr<uint8_t, A> dest, con
 #endif
 
     // If dest can be locked, use regular memcpy
-    if (A::getInstance()->unlockedPages() >= 1)
+    if (A::getInstance()->getUnlockedPages() >= 1)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
 
         while (start < size)
         {
-            memcpy(*makePtrWrapLock(dest + start), (uint8_t *)src + start, psize);
+            const TVirtPtrSize cpsize = (start + psize) < size ? psize : (size-start);
+            memcpy(*makePtrWrapLock(dest + start), (uint8_t *)src + start, cpsize);
             start += psize;
         }
     }
@@ -95,14 +97,15 @@ template <typename A> void *memcpy(void *dest, const CVirtPtr<uint8_t, A> src, T
 #endif
 
     // If src can be locked, use regular memcpy
-    if (A::getInstance()->unlockedPages() >= 1)
+    if (A::getInstance()->getUnlockedPages() >= 1)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
 
         while (start < size)
         {
-            memcpy((uint8_t *)dest + start, *makePtrWrapLock(src + start, true), psize);
+            const TVirtPtrSize cpsize = (start + psize) < size ? psize : (size-start);
+            memcpy((uint8_t *)dest + start, *makePtrWrapLock(src + start, true), cpsize);
             start += psize;
         }
     }
@@ -130,13 +133,14 @@ template <typename A> CVirtPtr<uint8_t, A> memset(CVirtPtr<uint8_t, A> dest, int
 #endif
 
     // If dest can be locked, use regular memset
-    if (A::getInstance()->unlockedPages() >= 1)
+    if (A::getInstance()->getUnlockedPages() >= 1)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
         while (start < size)
         {
-            memset(*makePtrWrapLock(dest + start), c, psize);
+            const TVirtPtrSize cpsize = (start + psize) < size ? psize : (size-start);
+            memset(*makePtrWrapLock(dest + start), c, cpsize);
             start += psize;
         }
     }
@@ -153,6 +157,35 @@ template <typename T, typename A> CVirtPtr<T, A> memset(CVirtPtr<T, A> dest, int
 {
     return memset(static_cast<CVirtPtr<uint8_t, A> >(dest), c, size);
 }
+
+// Generic version
+template <typename T1, typename T2> int memcmp_G(T1 s1, T2 s2, TVirtPtrSize n)
+{
+    for (TVirtPtrSize i=0; i<n; ++i, ++s1, ++s2)
+    {
+        if (*s1 < *s2)
+            return -1;
+        if (*s1 > *s2)
+            return 1;
+    }
+
+    return 0;
+}
+
+template <typename T, typename A> int memcmp(CVirtPtr<T, A> s1, const CVirtPtr<T, A> s2, TVirtPtrSize n)
+{
+#ifdef VIRTMEM_WRAP_CPOINTERS
+    if (s1.isWrapped() && s2.isWrapped())
+        return memcmp(s1.unwrap(), s2.unwrap(), n);
+#endif
+
+    return memcmp_G(static_cast<CVirtPtr<uint8_t, A> >(s1), static_cast<CVirtPtr<uint8_t, A> >(s2), n);
+}
+
+template <typename T, typename A> int memcmp(CVirtPtr<T, A> s1, const void *s2, TVirtPtrSize n)
+{ return memcmp_G(static_cast<CVirtPtr<uint8_t, A> >(s1), static_cast<const uint8_t *>(s2), n); }
+template <typename T, typename A> int memcmp(const void *s1, CVirtPtr<T, A> s2, TVirtPtrSize n)
+{ return memcmp_G(static_cast<const uint8_t *>(s1), static_cast<CVirtPtr<uint8_t, A> >(s2), n); }
 
 template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const CVirtPtr<char, A> src,
                                                 TVirtPtrSize n)
@@ -173,7 +206,7 @@ template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const CV
 #endif
 
     // If dest and src can be locked, use regular strncpy
-    if (A::getInstance()->unlockedPages() >= 2)
+    if (A::getInstance()->getUnlockedPages() >= 2)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
@@ -208,7 +241,7 @@ template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const ch
 #endif
 
     // If dest can be locked, use regular strncpy
-    if (A::getInstance()->unlockedPages() >= 1)
+    if (A::getInstance()->getUnlockedPages() >= 1)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
@@ -240,7 +273,7 @@ template <typename A> CVirtPtr<char, A> strncpy(char *dest, const CVirtPtr<char,
 #endif
 
     // If src can be locked, use regular strncpy
-    if (A::getInstance()->unlockedPages() >= 1)
+    if (A::getInstance()->getUnlockedPages() >= 1)
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
@@ -299,10 +332,7 @@ template <typename A> int strncmp(CVirtPtr<char, A> dest, CVirtPtr<char, A> src,
 {
 #ifdef VIRTMEM_WRAP_CPOINTERS
     if (dest.isWrapped() && src.isWrapped())
-    {
         return strncmp(dest.unwrap(), src.unwrap(), n);
-        return dest;
-    }
 #endif
     return strncmp_G(dest, src, n);
 }
