@@ -2,13 +2,6 @@
 #include "stdioalloc.h"
 #include "test.h"
 
-#include <assert.h>
-#include <iomanip>
-#include <iostream>
-
-#include <string.h>
-
-
 #include <vector>
 
 
@@ -21,6 +14,8 @@ TEST_F(CAllocFixture, SimpleAllocTest)
     valloc.write(ptr, &val, sizeof(val));
     EXPECT_EQ(*(int *)valloc.read(ptr, sizeof(val)), val);
     valloc.flush();
+    EXPECT_EQ(*(int *)valloc.read(ptr, sizeof(val)), val);
+    valloc.clearPages();
     EXPECT_EQ(*(int *)valloc.read(ptr, sizeof(val)), val);
 
     valloc.free(ptr);
@@ -63,7 +58,7 @@ TEST_F(CAllocFixture, MultiAllocTest)
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
 
-    valloc.flush();
+    valloc.clearPages();
 
     for (int i=0; i<(int)valloc.getPageCount(); ++i)
     {
@@ -84,16 +79,15 @@ TEST_F(CAllocFixture, SimplePageTest)
 
     EXPECT_EQ(valloc.getFreePages(), 0);
 
-    valloc.clearPages();
-
-    EXPECT_EQ(valloc.getFreePages(), valloc.getPageCount());
+    valloc.flush();
 
     for (int i=0; i<(int)valloc.getPageCount(); ++i)
     {
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
 
-    valloc.flush();
+    valloc.clearPages();
+    EXPECT_EQ(valloc.getFreePages(), valloc.getPageCount());
 
     for (int i=0; i<(int)valloc.getPageCount(); ++i)
     {
@@ -125,6 +119,8 @@ TEST_F(CAllocFixture, PageLockTests)
         EXPECT_EQ(valloc.getUnlockedPages(), (p+1));
     }
 }
+
+// Big file and/or other large data
 
 #if 0
 struct STest { int x, y; };

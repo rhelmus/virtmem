@@ -54,6 +54,7 @@ private:
 protected:
     TPtrNum ptr;
 
+public:
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
     static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
@@ -61,7 +62,6 @@ protected:
 
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
 
-public:
     static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     bool isWrapped(void) const { return isWrapped(ptr); }
 
