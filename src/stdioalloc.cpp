@@ -1,8 +1,9 @@
 #include "stdioalloc.h"
 
-#include <errno.h>
+
 #include <string.h>
 
+#if 0
 void CStdioVirtMemAlloc::doStart()
 {
     ramFile = fopen("ramdisk", "wb+");
@@ -46,3 +47,4 @@ void CStdioVirtMemAlloc::doWrite(const void *data, TVirtPtrSize offset, TVirtPtr
     if (ferror(ramFile))
         fprintf(stderr, "didn't write correctly: %s\n", strerror(errno));
 }
+#endif

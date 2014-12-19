@@ -4,6 +4,16 @@
 #include "alloc.h"
 #include "base_wrapper.h"
 
+namespace private_utils {
+
+template <typename T> struct TAntiConst { typedef T type; };
+template <typename T> struct TAntiConst<const T> { typedef T type; };
+
+}
+
+#include <assert.h>
+#include <stdio.h> // UNDONE
+
 template <typename T, typename TA> class CVirtPtr : public CVirtPtrBase
 {
 public:
@@ -48,14 +58,31 @@ public:
 
     public:
         inline operator T(void) const { return *read(ptr); }
-
         template <typename T2> inline operator T2(void) const { return static_cast<T2>(operator T()); } // UNDONE: explicit?
-        CValueWrapper &operator=(const CValueWrapper &v)
+
+//        CValueWrapper &operator=(const CValueWrapper &v)
+        // HACK: 'allow' non const assignment of types. In reality this makes sure we don't doubly define
+        // the assignment operator twice for const types (where T == const T)
+        CValueWrapper &operator=(const typename CVirtPtr<typename private_utils::TAntiConst<T>::type, TA>::CValueWrapper &v)
         {
             if (ptr != v.ptr)
-                write(ptr, read(v.ptr));
+            {
+                const T val = *read(v.ptr);
+                write(ptr, &val);
+            }
             return *this;
         }
+        // const conversion
+        CValueWrapper &operator=(const typename CVirtPtr<const T, TA>::CValueWrapper &v)
+        {
+            if (ptr != v.ptr)
+            {
+                const T val = *read(v.ptr);
+                write(ptr, &val);
+            }
+            return *this;
+        }
+
         inline CValueWrapper &operator=(const T &v) { write(ptr, &v); return *this; }
         inline TVirtPtr operator&(void) { TVirtPtr ret; ret.ptr = ptr; return ret; }
 
@@ -63,12 +90,24 @@ public:
         inline T operator->(void) { return operator T(); }
         inline const T operator->(void) const { return operator T(); }
 
-        /*inline bool operator==(const class CNILL &) const { return getPtrNum(ptr) == 0; }
-        inline bool operator!=(const class CNILL &) const { return getPtrNum(ptr) != 0; }*/
         template <typename T2> inline bool operator==(const T2 &v) const { return operator T() == v; }
         template <typename T2> inline bool operator!=(const T2 &v) const { return operator T() != v; }
+
+        CValueWrapper &operator+=(int n) { T newv = operator T() + n; write(ptr, &newv); return *this; }
+        CValueWrapper &operator-=(int n) { return operator+=(-n); }
+        CValueWrapper &operator*=(int n) { T newv = operator T() * n; write(ptr, &newv); return *this; }
+        CValueWrapper &operator/=(int n) { T newv = operator T() / n; write(ptr, &newv); return *this; }
+
+#if 0
+        inline T operator+(const T &v) const { return operator T() + v; }
+        friend inline T operator+(const T &v, const CValueWrapper &vw) { return v + vw.operator T(); }
         inline T operator-(const T &v) const { return operator T() - v; }
-        // UNDONE: more operators
+        friend inline T operator-(const T &v, const CValueWrapper &vw) { return v - vw.operator T(); }
+        inline T operator*(const T &v) const { return operator T() * v; }
+        friend inline T operator*(const T &v, const CValueWrapper &vw) { return v * vw.operator T(); }
+        inline T operator/(const T &v) const { return operator T() / v; }
+        friend inline T operator/(const T &v, const CValueWrapper &vw) { return v / vw.operator T(); }
+#endif
     };
 
     // C style malloc/free

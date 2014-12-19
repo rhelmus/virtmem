@@ -95,7 +95,8 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
     {
         for (TVirtPtrSize s=0; s<size; ++s)
         {
-            if ((dest[s] = src[s]) == 0 && checknull)
+            dest[s] = src[s];
+            if (/*(dest[s] = src[s])*/dest[s] == 0 && checknull)
                 break;
         }
     }
@@ -153,7 +154,7 @@ template <typename T, typename A> CVirtPtr<T, A> memcpy(CVirtPtr<T, A> dest, con
 {
     return static_cast<CVirtPtr<T, A> >(
                 private_utils::rawCopy(static_cast<CVirtPtr<char, A> >(dest),
-                                       static_cast<CVirtPtr<char, A> >(src), size,
+                                       static_cast<const CVirtPtr<const char, A> >(src), size,
                                        private_utils::memCopier, false));
 }
 
@@ -168,7 +169,7 @@ template <typename T, typename A> CVirtPtr<T, A> memcpy(CVirtPtr<T, A> dest, con
 template <typename T, typename A> void *memcpy(void *dest, CVirtPtr<T, A> src, TVirtPtrSize size)
 {
     return private_utils::rawCopy(static_cast<char *>(dest),
-                                  static_cast<CVirtPtr<char, A> >(src), size,
+                                  static_cast<const CVirtPtr<const char, A> >(src), size,
                                   private_utils::memCopier, false);
 }
 
@@ -225,7 +226,7 @@ template <typename T, typename A> int memcmp(CVirtPtr<T, A> s1, const void *s2, 
                                      static_cast<const char *>(s2), n, false);
 }
 
-template <typename T, typename A> int memcmp(const void *s1, CVirtPtr<T, A> s2, TVirtPtrSize n)
+template <typename T, typename A> int memcmp(const void *s1, const CVirtPtr<T, A> s2, TVirtPtrSize n)
 {
     return private_utils::rawCompare(static_cast<const char *>(s1),
                                      static_cast<CVirtPtr<char, A> >(s2), n, false);
@@ -234,7 +235,8 @@ template <typename T, typename A> int memcmp(const void *s1, CVirtPtr<T, A> s2, 
 template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const CVirtPtr<char, A> src,
                                                 TVirtPtrSize n)
 {
-    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier, true);
+    return private_utils::rawCopy(dest, static_cast<const CVirtPtr<const char, A> >(src), n,
+                                  private_utils::strnCopier, true);
 }
 
 template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const char *src, TVirtPtrSize n)
@@ -242,14 +244,16 @@ template <typename A> CVirtPtr<char, A> strncpy(CVirtPtr<char, A> dest, const ch
     return private_utils::rawCopy(dest, src, n, private_utils::strnCopier, true);
 }
 
-template <typename A> char *strncpy(char *dest, CVirtPtr<char, A> src, TVirtPtrSize n)
+template <typename A> char *strncpy(char *dest, const CVirtPtr<char, A> src, TVirtPtrSize n)
 {
-    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier, true);
+    return private_utils::rawCopy(dest, static_cast<const CVirtPtr<const char, A> >(src), n,
+                                  private_utils::strnCopier, true);
 }
 
 template <typename A> CVirtPtr<char, A> strcpy(CVirtPtr<char, A> dest, const CVirtPtr<char, A> src)
 {
-    return private_utils::rawCopy(dest, src, (TVirtPtrSize)-1, private_utils::strCopier, true);
+    return private_utils::rawCopy(dest, static_cast<const CVirtPtr<const char, A> >(src),
+                                  (TVirtPtrSize)-1, private_utils::strCopier, true);
 }
 
 template <typename A> CVirtPtr<char, A> strcpy(CVirtPtr<char, A> dest, const char *src)
@@ -259,7 +263,8 @@ template <typename A> CVirtPtr<char, A> strcpy(CVirtPtr<char, A> dest, const cha
 
 template <typename A> char *strcpy(char *dest, const CVirtPtr<char, A> src)
 {
-    return private_utils::rawCopy(dest, src, (TVirtPtrSize)-1, private_utils::strCopier, true);
+    return private_utils::rawCopy(dest, static_cast<const CVirtPtr<const char, A> >(src),
+                                  (TVirtPtrSize)-1, private_utils::strCopier, true);
 }
 
 template <typename A> int strncmp(CVirtPtr<char, A> dest, CVirtPtr<char, A> src, TVirtPtrSize n)

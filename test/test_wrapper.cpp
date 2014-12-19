@@ -40,6 +40,7 @@ template <typename T> class CLimitedWrapFixture: public CWrapFixture<T> { };
 typedef ::testing::Types<char, int, long, float, double> TLimitedWrapTypes;
 TYPED_TEST_CASE(CLimitedWrapFixture, TLimitedWrapTypes);
 
+typedef CWrapFixture<int> CIntWrapFixture;
 typedef CWrapFixture<CTestClass> CClassWrapFixture;
 
 TYPED_TEST(CWrapFixture, SimpleWrapTest)
@@ -58,9 +59,35 @@ TYPED_TEST(CWrapFixture, SimpleWrapTest)
     this->valloc.clearPages();
     EXPECT_EQ((TypeParam)*this->wrapper, val);
 
+    typename TStdioVirtPtr<TypeParam>::type wrp2 = wrp2.alloc();
+    *wrp2 = *this->wrapper;
+    EXPECT_EQ((TypeParam)*this->wrapper, (TypeParam)*wrp2);
+
     this->wrapper.free(this->wrapper);
     EXPECT_TRUE(wrapperIsNull(this->wrapper));
     EXPECT_EQ(this->wrapper, NILL);
+}
+
+TYPED_TEST(CWrapFixture, ConstWrapTest)
+{
+    this->wrapper = this->wrapper.alloc();
+    TypeParam val;
+    memset(&val, 10, sizeof(val));
+    *this->wrapper = val;
+
+    typename TStdioVirtPtr<TypeParam>::type wrp2 = wrp2.alloc();
+    *wrp2 = *this->wrapper;
+    typename TStdioVirtPtr<const TypeParam>::type cwrp2 = wrp2;
+    EXPECT_EQ((TypeParam)*wrp2, (TypeParam)*cwrp2);
+    EXPECT_EQ((TypeParam)*cwrp2, (TypeParam)*wrp2);
+
+    memset(&val, 20, sizeof(val));
+    *this->wrapper = val;
+    // fails if assignment yielded shallow copy
+    EXPECT_NE((TypeParam)*this->wrapper, (TypeParam)*cwrp2) << "ptrs: " << (uint64_t)this->wrapper.getRawNum() << "/" << (uint64_t)cwrp2.getRawNum();
+
+    *this->wrapper = *cwrp2;
+    EXPECT_EQ((TypeParam)*this->wrapper, (TypeParam)*cwrp2);
 }
 
 TYPED_TEST(CWrapFixture, BaseWrapTest)
@@ -213,4 +240,68 @@ TEST_F(CClassWrapFixture, ClassArrayAllocTest)
     EXPECT_EQ(CTestClass::constructedClasses, elements);
     cptr.deleteArray(cptr);
     EXPECT_EQ(CTestClass::constructedClasses, 0);
+}
+
+// Tests for CVirtPtr::CValueWrapper
+TEST_F(CIntWrapFixture, OperatorTest)
+{
+    const int start = 100;
+
+    TStdioVirtPtr<int>::type vptr = vptr.alloc();
+    int i = start;
+
+    EXPECT_EQ(*vptr = start, start);
+    EXPECT_EQ(*vptr + 1, i + 1);
+    EXPECT_EQ(*vptr - 1, i - 1);
+    EXPECT_EQ(*vptr * 2, i * 2);
+    EXPECT_EQ(*vptr / 2, i / 2);
+
+    EXPECT_EQ(i, *vptr);
+    EXPECT_EQ(i + 1, *vptr + 1);
+    EXPECT_EQ(i - 1, *vptr - 1);
+    EXPECT_EQ(i * 2, *vptr * 2);
+    EXPECT_EQ(i / 2, *vptr / 2);
+
+    i += 10;
+    *vptr += 10;
+    EXPECT_EQ(*vptr, i);
+
+    i -= 10;
+    *vptr -= 10;
+    EXPECT_EQ(*vptr, i);
+
+    ++i;
+    EXPECT_NE(*vptr, i);
+    EXPECT_NE(i, *vptr);
+    EXPECT_LT(*vptr, i);
+    EXPECT_LE(*vptr, i);
+    EXPECT_GT(i, *vptr);
+    EXPECT_GE(i, *vptr);
+
+    *vptr += 10;
+    EXPECT_EQ(*vptr, i + 9);
+    EXPECT_LT(i, *vptr);
+    EXPECT_LE(i, *vptr);
+    EXPECT_GT(*vptr, i);
+    EXPECT_GE(*vptr, i);
+
+    *vptr -= 9;
+    EXPECT_EQ(*vptr, i);
+
+    i *= 10;
+    *vptr *= 10;
+    EXPECT_EQ(*vptr, i);
+
+    i /= 10;
+    *vptr /= 10;
+    EXPECT_EQ(*vptr, i);
+
+    i = *vptr = start;
+    EXPECT_EQ(!*vptr, !i);
+    EXPECT_EQ(~*vptr, ~i);
+    EXPECT_EQ(*vptr | 10, i | 10);
+    EXPECT_EQ(*vptr & 10, i & 10);
+    EXPECT_EQ(*vptr ^ 10, i ^ 10);
+    EXPECT_EQ((int)*vptr << 10, i << 10); // this cast is necessary for google test (ambiguous otherwise)
+    EXPECT_EQ(*vptr >> 10, i >> 10);
 }

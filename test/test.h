@@ -8,7 +8,7 @@
 class CAllocFixture: public ::testing::Test
 {
 protected:
-    CStdioVirtMemAlloc valloc;
+    CStdioVirtMemAlloc<> valloc;
 
 public:
     void SetUp(void) { valloc.start(); }
