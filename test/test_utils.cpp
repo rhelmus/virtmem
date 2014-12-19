@@ -4,6 +4,7 @@
 
 typedef TStdioVirtPtr<uint8_t>::type TUCharVirtPtr;
 typedef TStdioVirtPtr<char>::type TCharVirtPtr;
+typedef CAllocFixture CUtilsFixture;
 
 // Clamp between -1 - +1
 inline int clampOne(int n)
@@ -11,7 +12,7 @@ inline int clampOne(int n)
     return (n < 0) ? -1 : (n == 0) ? 0 : 1;
 }
 
-TEST_F(CAllocFixture, memcmpTest)
+TEST_F(CUtilsFixture, memcmpTest)
 {
     const int bufsize = 10;
     TUCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
@@ -48,7 +49,7 @@ TEST_F(CAllocFixture, memcmpTest)
     EXPECT_EQ(clampOne(memcmp(vbuf2, buf1, bufsize)), clampOne(memcmp(buf2, buf1, bufsize)));
 }
 
-TEST_F(CAllocFixture, memcpyTest)
+TEST_F(CUtilsFixture, memcpyTest)
 {
     const int bufsize = 10;
     TUCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
@@ -74,7 +75,7 @@ TEST_F(CAllocFixture, memcpyTest)
     EXPECT_EQ(memcmp(buf, vbuf2, bufsize), 0);
 }
 
-TEST_F(CAllocFixture, memcpyLargeTest)
+TEST_F(CUtilsFixture, memcpyLargeTest)
 {
     const int bufsize = valloc.getPoolSize() / 3;
     std::vector<uint8_t> buf;
@@ -94,9 +95,21 @@ TEST_F(CAllocFixture, memcpyLargeTest)
     EXPECT_EQ(memcmp(vbuf, vbuf2, bufsize), 0);
 }
 
-// memset
+TEST_F(CUtilsFixture, memsetTest)
+{
+    const int bufsize = valloc.getPageSize() * 3;
+    const uint8_t fill = 'A';
 
-TEST_F(CAllocFixture, strlenTest)
+    TUCharVirtPtr vbuf = vbuf.alloc(bufsize);
+    EXPECT_EQ(memset(vbuf, fill, bufsize), vbuf);
+
+    valloc.clearPages();
+
+    std::vector<uint8_t> buf(bufsize, fill);
+    EXPECT_EQ(memcmp(vbuf, &buf[0], bufsize), 0);
+}
+
+TEST_F(CUtilsFixture, strlenTest)
 {
     const int strsize = 10;
     TCharVirtPtr vstr = vstr.alloc(strsize);
@@ -111,7 +124,7 @@ TEST_F(CAllocFixture, strlenTest)
     EXPECT_EQ(strlen(vstr), strsize-1);
 }
 
-TEST_F(CAllocFixture, strncpyTest)
+TEST_F(CUtilsFixture, strncpyTest)
 {
     const int strsize = 10;
     TCharVirtPtr vstr = vstr.alloc(strsize);
@@ -120,4 +133,38 @@ TEST_F(CAllocFixture, strncpyTest)
     EXPECT_EQ(strncpy(vstr, str, strsize), vstr);
     EXPECT_EQ(strncpy(str2, vstr, strsize), str2);
     EXPECT_EQ(strncmp(str, str2, strsize), 0);
+
+    // non length versions. Zero terminated, so should be the same
+    memset(vstr, 0, strsize);
+    memset(str2, 0, strsize);
+    EXPECT_EQ(strcpy(vstr, str), vstr);
+    EXPECT_EQ(strcpy(str2, vstr), str2);
+    EXPECT_EQ(strncmp(str, str2, strsize), 0);
+
+}
+
+TEST_F(CUtilsFixture, strncmpTest)
+{
+    const int strsize = 10;
+    TCharVirtPtr vstr = vstr.alloc(strsize);
+    TCharVirtPtr vstr2 = vstr.alloc(strsize);
+    char str[strsize] = "Howdy!", str2[strsize];
+
+    strncpy(vstr, str, strsize);
+    strncpy(vstr2, str, strsize);
+    EXPECT_EQ(strncmp(vstr, str, strsize), 0);
+    EXPECT_EQ(strncmp(str, vstr, strsize), 0);
+    EXPECT_EQ(strncmp(vstr, vstr2, strsize), 0);
+
+    strcpy(str2, str);
+
+    str2[1] = 'a'; vstr2[1] = 'a';
+    EXPECT_EQ(clampOne(strncmp(vstr, vstr2, strsize)), clampOne(strncmp(str, str2, strsize)));
+    EXPECT_EQ(clampOne(strncmp(vstr2, vstr, strsize)), clampOne(strncmp(str2, str, strsize)));
+
+    // non length versions. Zero terminated, so should be the same
+    EXPECT_EQ(strncmp(vstr, vstr2, strsize), strcmp(vstr, vstr2));
+    EXPECT_EQ(strncmp(vstr2, vstr, strsize), strcmp(vstr2, vstr));
+    EXPECT_EQ(strncmp(vstr, str2, strsize), strcmp(vstr, str2));
+    EXPECT_EQ(strncmp(str2, vstr, strsize), strcmp(str2, vstr));
 }
