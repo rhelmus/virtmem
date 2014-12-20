@@ -109,6 +109,23 @@ TEST_F(CUtilsFixture, memsetTest)
     EXPECT_EQ(memcmp(vbuf, &buf[0], bufsize), 0);
 }
 
+TEST_F(CUtilsFixture, memcpyLargeMultiAllocTest)
+{
+    // Second allocator. NOTE: the type is slightly different (different poolsize), so should give no singleton problems
+    typedef CStdioVirtMemAlloc<1024*1024, 512, 4> TAlloc2;
+    TAlloc2 valloc2;
+    valloc2.start();
+
+    const int bufsize = valloc2.getPoolSize() / 2;
+
+    TUCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
+    CVirtPtr<uint8_t, TAlloc2> vbuf2 = vbuf2.alloc(bufsize);
+
+    memset(vbuf1, 'A', bufsize);
+    memcpy(vbuf2, vbuf1, bufsize);
+    EXPECT_EQ(memcmp(vbuf1, vbuf2, bufsize), 0);
+}
+
 TEST_F(CUtilsFixture, strlenTest)
 {
     const int strsize = 10;

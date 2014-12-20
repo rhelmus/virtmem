@@ -1,3 +1,4 @@
-#include "virtmem.h"
+#include "wrapper.h"
 
+//CBaseVirtMemAlloc *CBaseVirtMemAlloc::instance = 0;
 

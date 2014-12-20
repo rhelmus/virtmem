@@ -305,3 +305,23 @@ TEST_F(CIntWrapFixture, OperatorTest)
     EXPECT_EQ((int)*vptr << 10, i << 10); // this cast is necessary for google test (ambiguous otherwise)
     EXPECT_EQ(*vptr >> 10, i >> 10);
 }
+
+TEST_F(CIntWrapFixture, MultiAllocTest)
+{
+    // Second allocator. NOTE: the type is slightly different (different poolsize), so should give no singleton problems
+    typedef CStdioVirtMemAlloc<1024*1024, 512, 4> TAlloc2;
+    TAlloc2 valloc2;
+    valloc2.start();
+
+    this->wrapper = this->wrapper.alloc();
+    CVirtPtr<int, TAlloc2> vptr2 = vptr2.alloc();
+
+    *this->wrapper = 55;
+    *vptr2 = (int)*this->wrapper;
+    EXPECT_EQ(*this->wrapper, *vptr2);
+    valloc.clearPages();
+    valloc2.clearPages();
+    EXPECT_EQ(*this->wrapper, *vptr2);
+
+    valloc2.stop();
+}

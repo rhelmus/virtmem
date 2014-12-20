@@ -16,15 +16,10 @@
 #include <stdio.h>
 #endif
 
-CBaseVirtMemAlloc *CBaseVirtMemAlloc::instance = 0;
-
 CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps,
                                      const TVirtPtrSize pgs)
     : memPageList(mp), pageCount(pc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
 {
-    assert(!instance);
-    instance = this;
-
     baseFreeList.s.next = 0;
     baseFreeList.s.size = 0;
     poolFreePos = START_OFFSET + sizeof(UMemHeader);

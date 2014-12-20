@@ -7,8 +7,11 @@
 #include <stdio.h>
 #include <string.h>
 
+template <TVirtPtrSize, TVirtPtrSize, uint8_t> class CStdioVirtMemAlloc;
+
 template <TVirtPtrSize POOL_SIZE = 1024*1024*10, TVirtPtrSize PAGE_SIZE=512, uint8_t PAGE_COUNT=4>
-class CStdioVirtMemAlloc : public CVirtMemAlloc<POOL_SIZE, PAGE_SIZE, PAGE_COUNT>
+class CStdioVirtMemAlloc : public CVirtMemAlloc<POOL_SIZE, PAGE_SIZE, PAGE_COUNT,
+        CStdioVirtMemAlloc<POOL_SIZE, PAGE_SIZE, PAGE_COUNT> >
 {
     FILE *ramFile;
 

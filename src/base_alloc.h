@@ -41,8 +41,6 @@ protected:
     };
 
 private:
-    static CBaseVirtMemAlloc *instance;
-
     // Stuff configured from CVirtMemAlloc
     SMemPage *memPageList;
     const uint8_t pageCount;
@@ -62,7 +60,6 @@ private:
 
 protected:
     CBaseVirtMemAlloc(SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps, const TVirtPtrSize pgs);
-    ~CBaseVirtMemAlloc(void) { instance = 0; }
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;
@@ -86,7 +83,6 @@ public:
     uint8_t getUnlockedPages(void) const;
     uint8_t getFreePages(void) const;
 
-    static CBaseVirtMemAlloc *getInstance(void) { return instance; }
     uint8_t getPageCount(void) const { return pageCount; }
     TVirtPtrSize getPageSize(void) const { return pageSize; }
     TVirtPtrSize getPoolSize(void) const { return poolSize; }
