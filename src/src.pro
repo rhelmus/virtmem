@@ -29,3 +29,5 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+QMAKE_CXXFLAGS += -g3 -m32

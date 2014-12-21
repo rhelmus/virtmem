@@ -57,6 +57,7 @@ private:
     void pushData(TVirtPointer p, const void *d, TVirtPtrSize size);
     UMemHeader *getHeader(TVirtPointer p);
     const UMemHeader *getHeaderConst(TVirtPointer p);
+    void updateHeader(TVirtPointer p, UMemHeader *h);
 
 protected:
     CBaseVirtMemAlloc(SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps, const TVirtPtrSize pgs);

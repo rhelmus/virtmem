@@ -4,10 +4,14 @@
 #include "alloc.h"
 #include "base_wrapper.h"
 
+#include <stddef.h>
+
 namespace private_utils {
 
 template <typename T> struct TAntiConst { typedef T type; };
 template <typename T> struct TAntiConst<const T> { typedef T type; };
+
+inline ptrdiff_t getMembrPtrDiff(const void *c, const void *m) { return (const char *)m - (const char *)c; }
 
 }
 
@@ -23,21 +27,19 @@ public:
 private:
     typedef CVirtPtr<T, TAllocator> TVirtPtr;
 
-    static T *unwrap(TPtrNum p) { return reinterpret_cast<T *>(getPtrNum(p)); }
-
     static T *read(TPtrNum p, bool ro=true)
     {
         if (isWrapped(p))
-            return unwrap(p);
+            return static_cast<T *>(CVirtPtrBase::unwrap(p));
         return static_cast<T *>(getAlloc()->read(p, sizeof(T), ro));
     }
-    T *read(bool ro=true) { return read(ptr, ro); }
+    T *read(bool ro=true) const { return read(ptr, ro); }
     const T *readConst(void) const { return read(ptr, true); }
 
     static void write(TPtrNum p, const T *d)
     {
         if (isWrapped(p))
-            *unwrap(p) = *d;
+            *(static_cast<T *>(CVirtPtrBase::unwrap(p))) = *d;
         else
             getAlloc()->write(p, d, sizeof(T));
     }
@@ -97,17 +99,6 @@ public:
         CValueWrapper &operator-=(int n) { return operator+=(-n); }
         CValueWrapper &operator*=(int n) { T newv = operator T() * n; write(ptr, &newv); return *this; }
         CValueWrapper &operator/=(int n) { T newv = operator T() / n; write(ptr, &newv); return *this; }
-
-#if 0
-        inline T operator+(const T &v) const { return operator T() + v; }
-        friend inline T operator+(const T &v, const CValueWrapper &vw) { return v + vw.operator T(); }
-        inline T operator-(const T &v) const { return operator T() - v; }
-        friend inline T operator-(const T &v, const CValueWrapper &vw) { return v - vw.operator T(); }
-        inline T operator*(const T &v) const { return operator T() * v; }
-        friend inline T operator*(const T &v, const CValueWrapper &vw) { return v * vw.operator T(); }
-        inline T operator/(const T &v) const { return operator T() / v; }
-        friend inline T operator/(const T &v, const CValueWrapper &vw) { return v / vw.operator T(); }
-#endif
     };
 
     // C style malloc/free
@@ -159,21 +150,28 @@ public:
         getAlloc()->free(soffset); // soffset points at beginning of actual block
     }
 
-    static TVirtPtr wrap(void *p)
+    static TVirtPtr wrap(const void *p)
     {
         TVirtPtr ret;
         ret.ptr = getWrapped(reinterpret_cast<TPtrNum>(p));
         return ret;
     }
-    static T *unwrap(const TVirtPtr &p) { return reinterpret_cast<T *>(p.ptr); }
-    T *unwrap(void) { return unwrap(ptr); }
-    const T *unwrap(void) const { return unwrap(ptr); }
+    static T *unwrap(const TVirtPtr &p) { return static_cast<T *>(CVirtPtrBase::unwrap(p)); }
+    T *unwrap(void) { return static_cast<T *>(CVirtPtrBase::unwrap(ptr)); }
+    const T *unwrap(void) const { return static_cast<const T *>(CVirtPtrBase::unwrap(ptr)); }
+
+    template <typename M> inline CVirtPtr<M, TAllocator> getMembrPtr(const M *m) const
+    { CVirtPtr<M, TAllocator> ret; ret.ptr = ptr + private_utils::getMembrPtrDiff(read(), m); return ret; }
+    // virt pointer to another, obtained by & operator
+    template <typename T2, typename TA2>
+    inline CVirtPtr<CVirtPtr<T2, TA2>, TA2> getMembrPtr(const CVirtPtr<CVirtPtr<T2, TA2>, TA2> &m) const
+    { CVirtPtr<CVirtPtr<T2, TA2>, TA2> ret; ret.ptr = ptr + private_utils::getMembrPtrDiff(read(), m.unwrap()); return ret; }
 
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }
     T *operator->(void) { return read(false); }
     const T *operator->(void) const { return readConst(); }
     // allow double wrapped pointer
-    CVirtPtr<TVirtPtr, TAllocator> operator&(void) { return wrap(this); }
+    CVirtPtr<TVirtPtr, TAllocator> operator&(void) { CVirtPtr<TVirtPtr, TAllocator> ret = ret.wrap(this); return ret; }
 
     // const conversion
     inline operator CVirtPtr<const T, TAllocator>(void) { CVirtPtr<const T, TAllocator> ret; ret.ptr = ptr; return ret; }

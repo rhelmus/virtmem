@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <stddef.h>
+
 // helper function, can't use assertions directly
 template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const CVirtPtr<T, A> &p)
 {
@@ -13,7 +15,14 @@ template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const 
         return ::testing::AssertionFailure() << "ptr wrapper not null: " << (uint64_t)p.getRawNum();
 }
 
-struct STestStruct { int x, y; };
+struct STestStruct
+{
+    int x, y;
+    // For membr ptr tests
+    char buf[10];
+    TStdioVirtPtr<char>::type vbuf;
+};
+
 bool operator==(const STestStruct &s1, const STestStruct &s2) { return s1.x == s2.x && s1.y == s2.y; }
 bool operator!=(const STestStruct &s1, const STestStruct &s2) { return s1.x != s2.x && s1.y != s2.y; }
 
@@ -42,6 +51,7 @@ TYPED_TEST_CASE(CLimitedWrapFixture, TLimitedWrapTypes);
 
 typedef CWrapFixture<int> CIntWrapFixture;
 typedef CWrapFixture<CTestClass> CClassWrapFixture;
+typedef CWrapFixture<STestStruct> CStructWrapFixture;
 
 TYPED_TEST(CWrapFixture, SimpleWrapTest)
 {
@@ -324,4 +334,26 @@ TEST_F(CIntWrapFixture, MultiAllocTest)
     EXPECT_EQ(*this->wrapper, *vptr2);
 
     valloc2.stop();
+}
+
+TEST_F(CStructWrapFixture, membrDiffTest)
+{
+    this->wrapper = this->wrapper.alloc();
+
+    const size_t offset_x = offsetof(STestStruct, x);
+    const size_t offset_y = offsetof(STestStruct, y);
+    const size_t offset_buf = offsetof(STestStruct, buf);
+    const size_t offset_vbuf = offsetof(STestStruct, vbuf);
+
+    TUCharVirtPtr vptr_x = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->x));
+    TUCharVirtPtr vptr_y = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->y));
+    TUCharVirtPtr vptr_buf = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->buf));
+    TUCharVirtPtr vptr_vbuf = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->vbuf));
+
+    const TUCharVirtPtr base = static_cast<TUCharVirtPtr>(this->wrapper);
+
+    EXPECT_EQ(vptr_x - base, offset_x);
+    EXPECT_EQ(vptr_y - base, offset_y);
+    EXPECT_EQ(vptr_buf - base, offset_buf);
+    EXPECT_EQ(vptr_vbuf - base, offset_vbuf);
 }

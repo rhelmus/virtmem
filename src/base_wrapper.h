@@ -35,7 +35,7 @@ class CVirtPtrBase
     template <typename, typename> friend class CVirtPtr;
     template <typename> friend class CPtrWrapLock;
 
-protected:
+public:
 #ifdef VIRTMEM_WRAP_CPOINTERS
 #if defined(__x86_64__) || defined(_M_X64)
     typedef __uint128_t TPtrNum;
@@ -58,6 +58,9 @@ protected:
     // static so that CValueWrapper can use it as well
     static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
     TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
+
+    static void *unwrap(TPtrNum p) { return reinterpret_cast<void *>(getPtrNum(p)); }
+
 public:
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
 
@@ -65,6 +68,17 @@ public:
     bool isWrapped(void) const { return isWrapped(ptr); }
 
     TPtrNum getRawNum(void) const { return ptr; }
+    void setRawNum(TPtrNum p) { ptr = p; }
+
+    static CVirtPtrBase wrap(const void *p)
+    {
+        CVirtPtrBase ret;
+        ret.ptr = getWrapped(reinterpret_cast<TPtrNum>(p));
+        return ret;
+    }
+    void *unwrap(const CVirtPtrBase &p) { assert(p.isWrapped()); return reinterpret_cast<void *>(p.getPtrNum()); }
+    void *unwrap(void) { return unwrap(ptr); }
+    const void *unwrap(void) const { return unwrap(ptr); }
 
     // HACK: this allows constructing CVirtPtr objects from CVirtPtrBase variables, similar to
     // initializing non void pointers with a void pointer

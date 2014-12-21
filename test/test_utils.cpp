@@ -2,7 +2,6 @@
 #include "stdioalloc.h"
 #include "test.h"
 
-typedef TStdioVirtPtr<uint8_t>::type TUCharVirtPtr;
 typedef TStdioVirtPtr<char>::type TCharVirtPtr;
 typedef CAllocFixture CUtilsFixture;
 
@@ -139,6 +138,12 @@ TEST_F(CUtilsFixture, strlenTest)
     vstr[strsize-1] = 0;
     valloc.clearPages();
     EXPECT_EQ(strlen(vstr), strsize-1);
+
+    vstr[5] = 0;
+    EXPECT_EQ(strlen(vstr), 5);
+
+    vstr[1] = 0;
+    EXPECT_EQ(strlen(vstr), 1);
 }
 
 TEST_F(CUtilsFixture, strncpyTest)
@@ -184,4 +189,7 @@ TEST_F(CUtilsFixture, strncmpTest)
     EXPECT_EQ(strncmp(vstr2, vstr, strsize), strcmp(vstr2, vstr));
     EXPECT_EQ(strncmp(vstr, str2, strsize), strcmp(vstr, str2));
     EXPECT_EQ(strncmp(str2, vstr, strsize), strcmp(str2, vstr));
+
+    CVirtPtr<const char, CStdioVirtMemAlloc<> > cvstr = vstr;
+    EXPECT_EQ(strcmp(cvstr, vstr), 0);
 }

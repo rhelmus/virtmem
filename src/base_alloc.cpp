@@ -186,6 +186,14 @@ const CBaseVirtMemAlloc::UMemHeader *CBaseVirtMemAlloc::getHeaderConst(TVirtPoin
     return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), true, false));
 }
 
+void CBaseVirtMemAlloc::updateHeader(TVirtPointer p, UMemHeader *h)
+{
+    if (p == BASE_INDEX)
+        memcpy(&baseFreeList, h, sizeof(UMemHeader));
+    else
+        pushData(p, h, sizeof(UMemHeader));
+}
+
 void CBaseVirtMemAlloc::start()
 {
     doStart();
@@ -204,6 +212,8 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
     const TVirtPtrSize quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
     TVirtPointer prevp = freePointer;
 
+    assert(size && quantity);
+
     // First alloc call, and no free list yet ? Use 'base' for an initial
     // denegerate block of size 0, which points to itself
     if (prevp == 0)
@@ -212,8 +222,7 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
         baseFreeList.s.size = 0;
     }
 
-    UMemHeader *prevh = getHeader(prevp);
-    TVirtPointer p = prevh->s.next;
+    TVirtPointer p = getHeader(prevp)->s.next;
     while (true)
     {
         UMemHeader *h = getHeader(p);
@@ -227,7 +236,9 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
                 // just eliminate this block from the free list by pointing
                 // its prev's next to its next
 
-                prevh->s.next = h->s.next;
+                TVirtPointer next = h->s.next;
+                getHeader(prevp)->s.next = next;
+                // NOTE: getHeader might invalidate h from here ----
             }
             else // too big
             {
@@ -259,8 +270,8 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
         }
 
         prevp = p;
-        prevh = h;
         p = h->s.next;
+        assert(p);
     }
 }
 
@@ -272,7 +283,8 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 {
     // acquire pointer to block header
     const TVirtPointer hdrptr = ptr - sizeof(UMemHeader);
-    UMemHeader *header = getHeader(hdrptr);
+    UMemHeader statheader;
+    memcpy(&statheader, getHeaderConst(hdrptr), sizeof(UMemHeader));
 
     // Find the correct place to place the block in (the free list is sorted by
     // address, increasing order)
@@ -292,28 +304,35 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
         consth = getHeaderConst(p);
     }
 
-    UMemHeader *h = getHeader(p); // now get a writable copy (so searching won't mark every page dirty)
+    UMemHeader stath;
+    memcpy(&stath, consth, sizeof(UMemHeader));
 
     // Try to combine with the higher neighbor
-    if ((hdrptr + header->s.size) == h->s.next)
+    if ((hdrptr + statheader.s.size) == stath.s.next)
     {
-        const UMemHeader *nexth = getHeaderConst(h->s.next);
-        header->s.size += nexth->s.size;
-        header->s.next = nexth->s.next;
+        const UMemHeader *nexth = getHeaderConst(stath.s.next);
+        statheader.s.size += nexth->s.size;
+        statheader.s.next = nexth->s.next;
     }
     else
-        header->s.next = h->s.next;
+        statheader.s.next = stath.s.next;
+
+    // update blockheader
+    updateHeader(hdrptr, &statheader);
+
+    UMemHeader *h = getHeader(p); // now get a writable copy (so searching won't mark every page dirty)
 
     // Try to combine with the lower neighbor
     if (p + h->s.size == hdrptr)
     {
-        h->s.size += header->s.size;
-        h->s.next = header->s.next;
+        h->s.size += statheader.s.size;
+        h->s.next = statheader.s.next;
     }
     else
         h->s.next = hdrptr;
 
     assert(p);
+    assert(h->s.next);
     freePointer = p;
 }
 
