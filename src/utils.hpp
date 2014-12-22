@@ -48,7 +48,7 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
 {
     if (size == 0)
         return dest;
-
+#if 0
     if (!TVirtPtrTraits<T1>::isVirtPtr() && !TVirtPtrTraits<T2>::isVirtPtr())
     {
         // Even though it is a pointer, we must unwrap to avoid compile errors
@@ -74,9 +74,9 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
     /* if both are virtual pointers and are same type: both must be locked, check for two
      * if both are virtual pointers and are inequal type: lock both, check both allocators if one slot available
      * if one is virtual pointer, check if it can be locked */
-
+#endif
     bool uselock = false;
-
+#if 0
     if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
         uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 2);
     else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
@@ -86,7 +86,7 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
         uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 1);
     else if (TVirtPtrTraits<T2>::isVirtPtr())
         uselock = (TVirtPtrTraits<T2>::getUnlockedPages(src) >= 1);
-
+#endif
     if (uselock)
     {
         TVirtPtrSize start = 0;

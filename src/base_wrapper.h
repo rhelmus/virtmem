@@ -67,8 +67,8 @@ public:
     static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     bool isWrapped(void) const { return isWrapped(ptr); }
 
-    TPtrNum getRawNum(void) const { return ptr; }
-    void setRawNum(TPtrNum p) { ptr = p; }
+    TPtrNum getRawNum(void) const { assert(isWrapped(ptr)); return ptr; }
+    void setRawNum(TPtrNum p) { assert(isWrapped(p)); ptr = p; }
 
     static CVirtPtrBase wrap(const void *p)
     {
