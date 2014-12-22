@@ -53,7 +53,7 @@ public:
     {
         TPtrNum ptr;
 
-        CValueWrapper(TPtrNum p) : ptr(p) { }
+        CValueWrapper(TPtrNum p) : ptr(p) { assert(isWrapped(p)); }
         CValueWrapper(const CValueWrapper &);
 
         template <typename, typename> friend class CVirtPtr;
@@ -176,7 +176,7 @@ public:
     // const conversion
     inline operator CVirtPtr<const T, TAllocator>(void) { CVirtPtr<const T, TAllocator> ret; ret.ptr = ptr; return ret; }
     // pointer to pointer conversion
-    template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
+    template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { assert(isWrapped()); CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
 
     // NOTE: int cast is necessary to deal with negative numbers
     TVirtPtr &operator+=(int n) { ptr += (n * (int)sizeof(T)); return *this; }

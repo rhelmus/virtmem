@@ -84,7 +84,7 @@ public:
     // initializing non void pointers with a void pointer
     // Note that we could have used a copy constructor in CVirtPtr instead, but this would make the latter
     // class non-POD
-    template <typename T, typename A> EXPLICIT operator CVirtPtr<T, A>(void) const { CVirtPtr<T, A> ret; ret.ptr = ptr; return ret; }
+    template <typename T, typename A> EXPLICIT operator CVirtPtr<T, A>(void) const { assert(isWrapped()); CVirtPtr<T, A> ret; ret.ptr = ptr; return ret; }
 
     // allow checking with NULL
     inline bool operator==(const SNull *) const { return getPtrNum() == 0; }
