@@ -202,7 +202,7 @@ int main()
     iptr.free(iptr);
 
     TStdioVirtPtr<char>::type buf = buf.alloc(128);
-    memset(*makePtrWrapLock(buf), 'h', 128);
+    memset(*makeVirtPtrLock(buf), 'h', 128);
     valloc.clearPages();
 
     std::cout << "c: " << (char)buf[127] << std::endl;

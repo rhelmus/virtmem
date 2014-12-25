@@ -6,6 +6,7 @@
 #include <inttypes.h>
 
 typedef TStdioVirtPtr<uint8_t>::type TUCharVirtPtr;
+typedef TStdioVirtPtr<char>::type TCharVirtPtr;
 
 class CAllocFixture: public ::testing::Test
 {

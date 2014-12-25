@@ -2,7 +2,6 @@
 #include "stdioalloc.h"
 #include "test.h"
 
-typedef TStdioVirtPtr<char>::type TCharVirtPtr;
 typedef CAllocFixture CUtilsFixture;
 
 // Clamp between -1 - +1

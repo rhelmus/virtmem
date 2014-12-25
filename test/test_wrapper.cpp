@@ -18,9 +18,11 @@ template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const 
 struct STestStruct
 {
     int x, y;
+
     // For membr ptr tests
-    char buf[10];
-    TStdioVirtPtr<char>::type vbuf;
+    struct SSubStruct { int x, y; } sub;
+    TCharVirtPtr vbuf;
+    char buf[10]; // NOTE: this has to be last for MembrAssignTest
 };
 
 bool operator==(const STestStruct &s1, const STestStruct &s2) { return s1.x == s2.x && s1.y == s2.y; }
@@ -336,7 +338,40 @@ TEST_F(CIntWrapFixture, MultiAllocTest)
     valloc2.stop();
 }
 
-TEST_F(CStructWrapFixture, membrDiffTest)
+TEST_F(CStructWrapFixture, MembrAssignTest)
+{
+    this->wrapper = this->wrapper.alloc();
+    this->wrapper->x = 55;
+    EXPECT_EQ(this->wrapper->x, 55);
+
+    // test if usage of other struct fields messes up assignment
+    this->wrapper->y = this->wrapper->x * this->wrapper->x;
+    EXPECT_EQ(this->wrapper->y, (55*55));
+
+    // Test partial data structures (useful for unions or partially allocated structs)
+    // The struct is partially allocated, without the char buffer, while some extra space is requested right after for a virt char buffer
+    const size_t bufsize = sizeof((STestStruct *)0)->buf;
+    const size_t vbufsize = sizeof((STestStruct *)0)->vbuf;
+    const int vbufelements = 64;
+
+    this->wrapper.free(this->wrapper);
+    this->wrapper = this->wrapper.alloc(sizeof(STestStruct) - bufsize + vbufsize + vbufelements);
+    this->wrapper->x = 55; this->wrapper->y = 66;
+    this->wrapper->vbuf = (TCharVirtPtr)getMembrPtr(this->wrapper, &STestStruct::vbuf) + vbufsize; // point to end of struct
+
+    const char *str = "Does this somewhat boring sentence compares well?";
+    strcpy(this->wrapper->vbuf, str);
+
+    // struct is still ok?
+    EXPECT_EQ(this->wrapper->x, 55);
+    EXPECT_EQ(this->wrapper->y, 66);
+    // vbuf ok?
+    EXPECT_EQ(strcmp(this->wrapper->vbuf, str), 0);
+
+    // UNDONE: test data in partial struct with larger datatype than char
+}
+
+TEST_F(CStructWrapFixture, MembrDiffTest)
 {
     this->wrapper = this->wrapper.alloc();
 
@@ -345,15 +380,32 @@ TEST_F(CStructWrapFixture, membrDiffTest)
     const size_t offset_buf = offsetof(STestStruct, buf);
     const size_t offset_vbuf = offsetof(STestStruct, vbuf);
 
-    TUCharVirtPtr vptr_x = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->x));
-    TUCharVirtPtr vptr_y = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->y));
-    TUCharVirtPtr vptr_buf = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->buf));
-    TUCharVirtPtr vptr_vbuf = static_cast<TUCharVirtPtr>(this->wrapper.getMembrPtr(&this->wrapper->vbuf));
+    const TUCharVirtPtr vptr_x = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::x));
+    const TUCharVirtPtr vptr_y = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::y));
+    const TUCharVirtPtr vptr_buf = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::buf));
+    const TUCharVirtPtr vptr_vbuf = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::vbuf));
 
     const TUCharVirtPtr base = static_cast<TUCharVirtPtr>(this->wrapper);
-
     EXPECT_EQ(vptr_x - base, offset_x);
     EXPECT_EQ(vptr_y - base, offset_y);
     EXPECT_EQ(vptr_buf - base, offset_buf);
     EXPECT_EQ(vptr_vbuf - base, offset_vbuf);
+
+    // Regular pointers
+    STestStruct dummy;
+    const uint8_t *dbase = reinterpret_cast<uint8_t *>(&dummy);
+    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::x)) - dbase, offset_x);
+    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::y)) - dbase, offset_y);
+    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::buf)) - dbase, offset_buf);
+    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::vbuf)) - dbase, offset_vbuf);
+
+    // Sub structure
+    const size_t offset_sub = offsetof(STestStruct, sub);
+    const size_t offset_sub_x = offset_sub + offsetof(STestStruct::SSubStruct, x);
+    const size_t offset_sub_y = offset_sub + offsetof(STestStruct::SSubStruct, y);
+
+    const TUCharVirtPtr vptr_sub_x = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::sub, &STestStruct::SSubStruct::x));
+    const TUCharVirtPtr vptr_sub_y = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::sub, &STestStruct::SSubStruct::y));
+    EXPECT_EQ(vptr_sub_x - base, offset_sub_x);
+    EXPECT_EQ(vptr_sub_y - base, offset_sub_y);
 }

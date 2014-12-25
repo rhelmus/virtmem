@@ -12,6 +12,7 @@ class CBaseVirtMemAlloc
 
     enum
     {
+        MAX_PARTIAL_LOCK_PAGES = 16, // UNDONE: make amount configurable
         PAGE_MAX_CLEAN_SKIPS = 5, // if page is dirty: max tries for finding another clean page when swapping
         START_OFFSET = sizeof(TAlign), // don't start at zero so we can have NULL pointers
         BASE_INDEX = 1, // Special pointer to baseFreeList, not actually stored in file
@@ -34,10 +35,21 @@ protected:
     {
         TVirtPointer start;
         void *pool;
-        bool dirty, locked;
-        uint8_t cleanSkips;
+        bool dirty;
+        uint8_t locks, cleanSkips;
 
-        SMemPage(void) : start(0), dirty(false), locked(false), cleanSkips(0) { }
+        SMemPage(void) : start(0), dirty(false), locks(0), cleanSkips(0) { }
+    };
+
+    struct SPartialLockPage
+    {
+        TVirtPointer start;
+        TVirtPtrSize size;
+        void *data;
+        uint8_t locks;
+        bool readOnly;
+
+        SPartialLockPage(void) : start(0), size(0), data(0), locks(0), readOnly(false) { }
     };
 
 private:
@@ -46,6 +58,8 @@ private:
     const uint8_t pageCount;
     const TVirtPtrSize poolSize, pageSize;
 
+    SPartialLockPage partialLockPages[MAX_PARTIAL_LOCK_PAGES];
+
     UMemHeader baseFreeList;
     TVirtPointer freePointer;
     TVirtPointer poolFreePos;
@@ -53,11 +67,12 @@ private:
 
     TVirtPointer getMem(TVirtPtrSize size);
     void syncPage(SMemPage *page);
-    void *pullData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
-    void pushData(TVirtPointer p, const void *d, TVirtPtrSize size);
+    void *pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
+    void pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size);
     UMemHeader *getHeader(TVirtPointer p);
     const UMemHeader *getHeaderConst(TVirtPointer p);
     void updateHeader(TVirtPointer p, UMemHeader *h);
+    SPartialLockPage *findPartialLockPage(TVirtPointer p);
 
 protected:
     CBaseVirtMemAlloc(SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps, const TVirtPtrSize pgs);
@@ -75,14 +90,18 @@ public:
     TVirtPointer alloc(TVirtPtrSize size);
     void free(TVirtPointer ptr);
 
-    void *read(TVirtPointer p, TVirtPtrSize size, bool ro=true) { return pullData(p, size, ro, false); }
-    void write(TVirtPointer p, const void *d, TVirtPtrSize size) { pushData(p, d, size); }
-    void *lock(TVirtPointer p, bool ro=false);
-    void unlock(TVirtPointer p);
+    void *read(TVirtPointer p, TVirtPtrSize size, bool readonly=true);
+    void write(TVirtPointer p, const void *d, TVirtPtrSize size);
     void flush(void);
     void clearPages(void);
-    uint8_t getUnlockedPages(void) const;
     uint8_t getFreePages(void) const;
+
+    void *lock(TVirtPointer p, bool ro=false);
+    void unlock(TVirtPointer p);
+    uint8_t getUnlockedPages(void) const;
+
+    void *makePartialLock(TVirtPointer ptr, TVirtPtrSize size, void *data, bool ro=false);
+    void releasePartialLock(TVirtPointer ptr);
 
     uint8_t getPageCount(void) const { return pageCount; }
     TVirtPtrSize getPageSize(void) const { return pageSize; }

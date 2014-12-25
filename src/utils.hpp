@@ -18,7 +18,7 @@ template <typename T, typename A> struct TVirtPtrTraits<CVirtPtr<T, A> >
     static T *unwrap(CVirtPtr<T, A> p) { return p.unwrap(); }
     static bool isVirtPtr(void) { return true; }
     static CPtrWrapLock<CVirtPtr<T, A> > makeLock(const CVirtPtr<T, A> &w, bool ro=false)
-    { return makePtrWrapLock(w, ro); }
+    { return makeVirtPtrLock(w, ro); }
     static uint8_t getUnlockedPages(CVirtPtr<T, A>)
     { return A::getInstance()->getUnlockedPages(); }
     static TVirtPtrSize getPageSize(CVirtPtr<T, A>)
@@ -36,8 +36,6 @@ template <typename T> struct TVirtPtrTraits<T *>
     static TVirtPtrSize getPageSize(const T *) { return (TVirtPtrSize)-1; }
     typedef T TValue;
 };
-
-template <typename T> T min(const T &v1, const T &v2) { return (v1 < v2) ? v1 : v2; }
 
 // copier function that works with raw pointers for rawCopy, return false if copying should be aborted
 typedef bool (*TRawCopier)(char *, const char *, TVirtPtrSize);
@@ -108,7 +106,7 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
         for (TVirtPtrSize s=0; s<size; ++s)
         {
             dest[s] = (typename TVirtPtrTraits<T2>::TValue)(src[s]);
-            if (dest[s] == 0 && checknull)
+            if (checknull && dest[s] == 0)
                 break;
         }
     }
@@ -203,15 +201,19 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
     }
 #endif
 
+#if 0
     // If dest can be locked, use regular memset
     if (A::getInstance()->getUnlockedPages() >= 1)
+#else
+    if (false)
+#endif
     {
         TVirtPtrSize start = 0;
         const TVirtPtrSize psize = A::getInstance()->getPageSize();
         while (start < size)
         {
             const TVirtPtrSize cpsize = (start + psize) < size ? psize : (size-start);
-            memset(*makePtrWrapLock(dest + start), c, cpsize);
+            memset(*makeVirtPtrLock(dest + start), c, cpsize);
             start += psize;
         }
     }

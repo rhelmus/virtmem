@@ -4,6 +4,7 @@
  */
 
 #include "alloc.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -32,12 +33,12 @@ TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
 
     if ((poolFreePos + totalsize) <= poolSize)
     {
-        std::cout << "new mem at " << poolFreePos << "/" << (poolFreePos + sizeof(UMemHeader)) << std::endl;
+//        std::cout << "new mem at " << poolFreePos << "/" << (poolFreePos + sizeof(UMemHeader)) << std::endl;
 
         UMemHeader h;
         h.s.size = size;
         h.s.next = 0;
-        pushData(poolFreePos, &h, sizeof(UMemHeader));
+        write(poolFreePos, &h, sizeof(UMemHeader));
         free(poolFreePos + sizeof(UMemHeader));
         poolFreePos += totalsize;
     }
@@ -51,16 +52,16 @@ void CBaseVirtMemAlloc::syncPage(SMemPage *page)
 {
     if (page->dirty)
     {
-        std::cout << "dirty page\n";
+//        std::cout << "dirty page\n";
         doWrite(page->pool, page->start, pageSize);
         page->dirty = false;
         page->cleanSkips = 0;
     }
 }
 
-void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
+void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
 {
-    assert(p < poolSize);
+    assert(p && p < poolSize);
 
     /* If a page is found which fits within the pointer: take that and abort search; no overlap can occur
      * If a page partially overlaps take that, as it has to be cleared out anyway. Keep searching for
@@ -77,7 +78,7 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readon
     for (uint8_t i=0; i<pageCount; ++i)
     {
         if (memPageList[i].start != 0 && ((forcestart && memPageList[i].start == p) ||
-            (!forcestart && p >= memPageList[i].start && pend < (memPageList[i].start + pageSize))))
+            (!forcestart && p >= memPageList[i].start && pend <= (memPageList[i].start + pageSize))))
         {
             page = &memPageList[i];
             pagefindstate = STATE_GOTFULL;
@@ -89,7 +90,7 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readon
     {
         for (uint8_t i=0; i<pageCount; ++i)
         {
-            if (memPageList[i].locked)
+            if (memPageList[i].locks)
             {
                 if (i == nextPageToSwap)
                     ++nextPageToSwap;
@@ -100,12 +101,12 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readon
             {
                 const TVirtPointer pageend = memPageList[i].start + pageSize;
                 if ((p >= memPageList[i].start && p < pageend) ||
-                    (newpageend >= memPageList[i].start && newpageend < pageend))
+                    (newpageend >= memPageList[i].start && newpageend <= pageend))
                 {
                     // partial overlap. Clean page and use it later.
                     page = &memPageList[i];
                     syncPage(page);
-                    std::cout << "invalidate page " << page->start << std::endl;
+//                    std::cout << "invalidate page " << page->start << std::endl;
                     page->start = 0; // invalidate
                     pagefindstate = STATE_GOTPARTIAL;
                 }
@@ -138,7 +139,7 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readon
     // do we need to swap a page?
     if (pagefindstate != STATE_GOTFULL)
     {
-        std::cout << "getPool switches " << (page - memPageList) << " from: " << page->start << " to " << p << std::endl;
+//        std::cout << "getPool switches " << (page - memPageList) << " from: " << page->start << " to " << p << std::endl;
 
         if (page->start != 0)
             syncPage(page);
@@ -166,9 +167,9 @@ void *CBaseVirtMemAlloc::pullData(TVirtPointer p, TVirtPtrSize size, bool readon
     return &((uint8_t *)page->pool)[p - page->start];
 }
 
-void CBaseVirtMemAlloc::pushData(TVirtPointer p, const void *d, TVirtPtrSize size)
+void CBaseVirtMemAlloc::pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size)
 {
-    void *pool = pullData(p, size, false, false);
+    void *pool = pullRawData(p, size, false, false);
     memcpy(pool, d, size);
 }
 
@@ -176,14 +177,14 @@ CBaseVirtMemAlloc::UMemHeader *CBaseVirtMemAlloc::getHeader(TVirtPointer p)
 {
     if (p == BASE_INDEX)
         return &baseFreeList;
-    return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), false, false));
+    return reinterpret_cast<UMemHeader *>(read(p, sizeof(UMemHeader), false));
 }
 
 const CBaseVirtMemAlloc::UMemHeader *CBaseVirtMemAlloc::getHeaderConst(TVirtPointer p)
 {
     if (p == BASE_INDEX)
         return &baseFreeList;
-    return reinterpret_cast<UMemHeader *>(pullData(p, sizeof(UMemHeader), true, false));
+    return reinterpret_cast<UMemHeader *>(read(p, sizeof(UMemHeader), true));
 }
 
 void CBaseVirtMemAlloc::updateHeader(TVirtPointer p, UMemHeader *h)
@@ -191,7 +192,20 @@ void CBaseVirtMemAlloc::updateHeader(TVirtPointer p, UMemHeader *h)
     if (p == BASE_INDEX)
         memcpy(&baseFreeList, h, sizeof(UMemHeader));
     else
-        pushData(p, h, sizeof(UMemHeader));
+        write(p, h, sizeof(UMemHeader));
+}
+
+CBaseVirtMemAlloc::SPartialLockPage *CBaseVirtMemAlloc::findPartialLockPage(TVirtPointer p)
+{
+    for (int i=0; i<MAX_PARTIAL_LOCK_PAGES; ++i)
+    {
+        const TVirtPointer offset = p - partialLockPages[i].start;
+
+        if (partialLockPages[i].locks && p >= partialLockPages[i].start && offset < partialLockPages[i].size)
+            return &partialLockPages[i];
+    }
+
+    return 0;
 }
 
 void CBaseVirtMemAlloc::start()
@@ -281,6 +295,9 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
 // the adjacent blocks are combined.
 void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 {
+    if (!ptr)
+        return;
+
     // acquire pointer to block header
     const TVirtPointer hdrptr = ptr - sizeof(UMemHeader);
     UMemHeader statheader;
@@ -336,35 +353,65 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
     freePointer = p;
 }
 
-void *CBaseVirtMemAlloc::lock(TVirtPointer p, bool ro)
+void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size, bool readonly)
 {
-    void *ret = pullData(p, pageSize, ro, true);
-
-    // Find which page was used and mark it as locked
-    for (uint8_t i=0; i<pageCount; ++i)
+    // check if data is in a partial locked page first
+    // UNDONE: does this mess up regular page locking?
+    SPartialLockPage *page = findPartialLockPage(p);
+    if (page)
     {
-        if (memPageList[i].start == p)
+        const TVirtPointer offset = p - page->start;
+
+        // data fits in this page?
+        if ((offset + size) <= page->size)
         {
-            memPageList[i].locked = true;
-            std::cout << "lock page: " << (int)i << std::endl;
-            break;
+            if (!readonly && page->readOnly)
+                page->readOnly = false;
+//            std::cout << "using temp lock page " << (int)(page - partialLockPages) << ", " << p << std::endl;
+
+            return (char *)page->data + offset;
         }
+
+        // only fits partially... mirror data to normal page so a continuous block can be returned
+        pushRawData(page->start, page->data, page->size); // UNDONE
+//        std::cout << "mirrored partial page " << (int)(page - partialLockPages) << std::endl;
     }
 
-    return ret;
+    // not in or too big for partial page, use regular paged memory
+    return pullRawData(p, size, readonly, false);
 }
 
-void CBaseVirtMemAlloc::unlock(TVirtPointer p)
+void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
 {
-    for (uint8_t i=0; i<pageCount; ++i)
+    // check if data is in a partial locked page first
+    // UNDONE: does this mess up regular page locking?
+    SPartialLockPage *page = findPartialLockPage(p);
+    if (page)
     {
-        if (memPageList[i].start == p)
+        const TVirtPointer offset = p - page->start;
+
+        if (page->readOnly)
+            page->readOnly = false;
+
+        // data fits in this page?
+        if ((offset + size) <= page->size)
         {
-            assert(memPageList[i].locked);
-            memPageList[i].locked = false;
-            std::cout << "unlock page: " << (int)i << std::endl;
-            break;
+            memcpy((char *)page->data + offset, d, size);
+//            std::cout << "write in part locked page " << (int)(page - partialLockPages) << ", " << p << "/" << size << ": " << (int)*(char *)d << std::endl;
         }
+        else
+        {
+            // partial fit, copy stuff that fits in partial page and rest to regular memory
+            const TVirtPtrSize partsize = page->size - offset;
+            memcpy((char *)page->data + offset, d, partsize);
+            pushRawData(p + partsize, (char *)d + partsize, size - partsize);
+//            std::cout << "partial write in page " << (int)(page - partialLockPages) << std::endl;
+        }
+    }
+    else
+    {
+        pushRawData(p, d, size);
+//        std::cout << "write in regular page " << p << "/" << size << ": " << (int)*(char *)d << std::endl;
     }
 }
 
@@ -395,17 +442,142 @@ uint8_t CBaseVirtMemAlloc::getFreePages() const
     return ret;
 }
 
+void *CBaseVirtMemAlloc::lock(TVirtPointer p, bool ro)
+{
+    void *ret = pullRawData(p, pageSize, ro, true);
+
+    // Find which page was used and mark it as locked
+    for (uint8_t i=0; i<pageCount; ++i)
+    {
+        if (memPageList[i].start == p)
+        {
+//            if (!memPageList[i].locks)
+//                std::cout << "lock page: " << (int)i << std::endl;
+            ++memPageList[i].locks;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+void CBaseVirtMemAlloc::unlock(TVirtPointer p)
+{
+    for (uint8_t i=0; i<pageCount; ++i)
+    {
+        if (memPageList[i].start == p)
+        {
+            assert(memPageList[i].locks);
+            --memPageList[i].locks;
+//            if (!memPageList[i].locks)
+//                std::cout << "unlock page: " << (int)i << std::endl;
+            break;
+        }
+    }
+}
+
+
 uint8_t CBaseVirtMemAlloc::getUnlockedPages() const
 {
     uint8_t ret = pageCount;
 
     for (uint8_t i=0; i<pageCount; ++i)
     {
-        if (memPageList[i].locked)
+        if (memPageList[i].locks)
             --ret;
     }
 
     return ret;
+}
+
+void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPtrSize size, void *data, bool ro)
+{
+    SPartialLockPage *page = NULL;
+    TVirtPtrSize copyoffset = 0;
+
+    for (int i=0; i<MAX_PARTIAL_LOCK_PAGES; ++i)
+    {
+        // already locked?
+        if (partialLockPages[i].locks)
+        {
+            if (partialLockPages[i].start == ptr) // same data, add to lock count
+            {
+                assert(partialLockPages[i].size <= size);
+                ++partialLockPages[i].locks;
+                if (!ro && partialLockPages[i].readOnly)
+                    partialLockPages[i].readOnly = false;
+                return partialLockPages[i].data;
+            }
+
+            if (ptr < partialLockPages[i].start && (ptr + size) >= partialLockPages[i].start) // end overlaps
+            {
+//                std::cout << "shrink new page from " << size << " to ";
+                size = partialLockPages[i].start - ptr; // Shrink so it fits
+//                std::cout << size << std::endl;
+            }
+            else if (ptr > partialLockPages[i].start && ptr < (partialLockPages[i].start + partialLockPages[i].size))
+            {
+                // copy their overlapping data (assume this is the most up to date)
+                const TVirtPtrSize offsetold = ptr - partialLockPages[i].start, copysize = private_utils::min(partialLockPages[i].size - offsetold, size);
+                memcpy(data, (char *)partialLockPages[i].data + offsetold, copysize);
+                copyoffset = copysize;
+//                std::cout << "shrink page " << i << "from " << partialLockPages[i].size << " to ";
+                partialLockPages[i].size = offsetold; // shrink other so this one fits
+//                std::cout << partialLockPages[i].size << std::endl;
+            }
+
+//            assert((ptr+size) <= partialLockPages[i].start || ptr >= (partialLockPages[i].start + partialLockPages[i].size));
+        }
+        else if (!page)
+            page = &partialLockPages[i];
+    }
+
+    assert(page);
+
+    // if we are here there was no locked page found
+
+    if (copyoffset < size)
+    {
+        const TVirtPtrSize copysize = size - copyoffset;
+        memcpy((char *)data + copyoffset, pullRawData(ptr + copyoffset, copysize, true, false), copysize); // UNDONE: make this more efficient
+    }
+
+    page->locks = 1;
+    page->start = ptr;
+    page->size = size;
+    page->data = data;
+
+//    std::cout << "temp lock page: " << (int)(page - partialLockPages) << ", " << ptr << "/" << size << std::endl;
+
+    return page->data;
+}
+
+void CBaseVirtMemAlloc::releasePartialLock(TVirtPointer ptr)
+{
+    for (int i=0; i<MAX_PARTIAL_LOCK_PAGES; ++i)
+    {
+        if (partialLockPages[i].start == ptr)
+        {
+            assert(partialLockPages[i].locks);
+            --partialLockPages[i].locks;
+
+            if (partialLockPages[i].locks == 0)
+            {
+                partialLockPages[i].start = 0;
+                if (!partialLockPages[i].readOnly)
+                {
+                    pushRawData(ptr, partialLockPages[i].data, partialLockPages[i].size); // UNDONE: make this more efficient
+//                    std::cout << "temp unlock page: " << i << ", " << ptr << "/" << partialLockPages[i].size << std::endl;
+                }
+                /*else
+                    std::cout << "temp unlock page: " << i << ", " << ptr << std::endl;*/
+            }
+            return;
+        }
+    }
+
+    // Shouldn't be here
+    assert(false);
 }
 
 void CBaseVirtMemAlloc::printStats()

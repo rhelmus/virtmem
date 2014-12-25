@@ -11,8 +11,6 @@ namespace private_utils {
 template <typename T> struct TAntiConst { typedef T type; };
 template <typename T> struct TAntiConst<const T> { typedef T type; };
 
-inline ptrdiff_t getMembrPtrDiff(const void *c, const void *m) { return (const char *)m - (const char *)c; }
-
 }
 
 #include <assert.h>
@@ -53,7 +51,7 @@ public:
     {
         TPtrNum ptr;
 
-        CValueWrapper(TPtrNum p) : ptr(p) { assert(isWrapped(p)); }
+        CValueWrapper(TPtrNum p) : ptr(p) { }
         CValueWrapper(const CValueWrapper &);
 
         template <typename, typename> friend class CVirtPtr;
@@ -63,7 +61,7 @@ public:
         template <typename T2> inline operator T2(void) const { return static_cast<T2>(operator T()); } // UNDONE: explicit?
 
 //        CValueWrapper &operator=(const CValueWrapper &v)
-        // HACK: 'allow' non const assignment of types. In reality this makes sure we don't doubly define
+        // HACK: 'allow' non const assignment of types. In reality this makes sure we don't define
         // the assignment operator twice for const types (where T == const T)
         CValueWrapper &operator=(const typename CVirtPtr<typename private_utils::TAntiConst<T>::type, TA>::CValueWrapper &v)
         {
@@ -99,6 +97,38 @@ public:
         CValueWrapper &operator-=(int n) { return operator+=(-n); }
         CValueWrapper &operator*=(int n) { T newv = operator T() * n; write(ptr, &newv); return *this; }
         CValueWrapper &operator/=(int n) { T newv = operator T() / n; write(ptr, &newv); return *this; }
+    };
+
+    // Based on Strousstrup's general wrapper paper (http://www.stroustrup.com/wrapper.pdf)
+    class CMemberWrapper
+    {
+        const TPtrNum ptr;
+        char buffer[sizeof(T)]; // UNDONE: perhaps some dynamic allocation strategy would be nice as we don't always need this buffer
+
+        template <typename, typename> friend class CVirtPtr;
+
+        CMemberWrapper(TPtrNum p) : ptr(p) { }
+        CMemberWrapper(const CMemberWrapper &);
+
+        CMemberWrapper &operator=(const CMemberWrapper &); // No assignment
+
+    public:
+        ~CMemberWrapper(void) { if (!isWrapped(ptr)) getAlloc()->releasePartialLock(ptr); }
+
+        T *operator->(void)
+        {
+            if (isWrapped(ptr))
+                return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
+
+            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T), buffer));
+        }
+        const T *operator->(void) const
+        {
+            if (isWrapped(ptr))
+                return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
+
+            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T), buffer, true));
+        }
     };
 
     // C style malloc/free
@@ -160,23 +190,19 @@ public:
     T *unwrap(void) { return static_cast<T *>(CVirtPtrBase::unwrap(ptr)); }
     const T *unwrap(void) const { return static_cast<const T *>(CVirtPtrBase::unwrap(ptr)); }
 
-    template <typename M> inline CVirtPtr<M, TAllocator> getMembrPtr(const M *m) const
-    { CVirtPtr<M, TAllocator> ret; ret.ptr = ptr + private_utils::getMembrPtrDiff(read(), m); return ret; }
-    // virt pointer to another, obtained by & operator
-    template <typename T2, typename TA2>
-    inline CVirtPtr<CVirtPtr<T2, TA2>, TA2> getMembrPtr(const CVirtPtr<CVirtPtr<T2, TA2>, TA2> &m) const
-    { CVirtPtr<CVirtPtr<T2, TA2>, TA2> ret; ret.ptr = ptr + private_utils::getMembrPtrDiff(read(), m.unwrap()); return ret; }
-
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }
-    T *operator->(void) { return read(false); }
-    const T *operator->(void) const { return readConst(); }
+    CMemberWrapper operator->(void) { return CMemberWrapper(ptr); }
+    const CMemberWrapper operator->(void) const { return CMemberWrapper(ptr); }
     // allow double wrapped pointer
     CVirtPtr<TVirtPtr, TAllocator> operator&(void) { CVirtPtr<TVirtPtr, TAllocator> ret = ret.wrap(this); return ret; }
 
     // const conversion
     inline operator CVirtPtr<const T, TAllocator>(void) { CVirtPtr<const T, TAllocator> ret; ret.ptr = ptr; return ret; }
     // pointer to pointer conversion
-    template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { assert(isWrapped()); CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
+    template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
+
+    const CVirtPtr *addressOf(void) const { return this; }
+    CVirtPtr *addressOf(void) { return this; }
 
     // NOTE: int cast is necessary to deal with negative numbers
     TVirtPtr &operator+=(int n) { ptr += (n * (int)sizeof(T)); return *this; }

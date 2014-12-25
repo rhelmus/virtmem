@@ -59,7 +59,7 @@ protected:
     static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
     TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
 
-    static void *unwrap(TPtrNum p) { return reinterpret_cast<void *>(getPtrNum(p)); }
+    static void *unwrap(TPtrNum p) { assert(isWrapped(p)); return reinterpret_cast<void *>(getPtrNum(p)); }
 
 public:
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
@@ -67,8 +67,8 @@ public:
     static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     bool isWrapped(void) const { return isWrapped(ptr); }
 
-    TPtrNum getRawNum(void) const { assert(isWrapped(ptr)); return ptr; }
-    void setRawNum(TPtrNum p) { assert(isWrapped(p)); ptr = p; }
+    TPtrNum getRawNum(void) const { return ptr; }
+    void setRawNum(TPtrNum p) { ptr = p; }
 
     static CVirtPtrBase wrap(const void *p)
     {
@@ -76,7 +76,7 @@ public:
         ret.ptr = getWrapped(reinterpret_cast<TPtrNum>(p));
         return ret;
     }
-    void *unwrap(const CVirtPtrBase &p) { assert(p.isWrapped()); return reinterpret_cast<void *>(p.getPtrNum()); }
+    void *unwrap(const CVirtPtrBase &p) {  return unwrap(p); }
     void *unwrap(void) { return unwrap(ptr); }
     const void *unwrap(void) const { return unwrap(ptr); }
 
@@ -84,7 +84,7 @@ public:
     // initializing non void pointers with a void pointer
     // Note that we could have used a copy constructor in CVirtPtr instead, but this would make the latter
     // class non-POD
-    template <typename T, typename A> EXPLICIT operator CVirtPtr<T, A>(void) const { assert(isWrapped()); CVirtPtr<T, A> ret; ret.ptr = ptr; return ret; }
+    template <typename T, typename A> EXPLICIT operator CVirtPtr<T, A>(void) const { CVirtPtr<T, A> ret; ret.ptr = ptr; return ret; }
 
     // allow checking with NULL
     inline bool operator==(const SNull *) const { return getPtrNum() == 0; }

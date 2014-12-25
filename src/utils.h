@@ -48,7 +48,29 @@ public:
 template <typename T> int CPtrWrapLock<T>::locks;
 
 // Shortcut
-template <typename T> CPtrWrapLock<T> makePtrWrapLock(const T &w, bool ro=false) { return CPtrWrapLock<T>(w, ro); }
+template <typename T> CPtrWrapLock<T> makeVirtPtrLock(const T &w, bool ro=false) { return CPtrWrapLock<T>(w, ro); }
+
+namespace private_utils {
+// Ugly hack from http://stackoverflow.com/a/12141673
+// a null pointer of T is used to get the offset of m. The char & is to avoid any dereference operator overloads and the
+// char * subtraction to get the actual offset.
+template <typename C, typename M> ptrdiff_t getMembrOffset(const M C::*m)
+{ return ((char *)&((char &)((C *)(0)->*m)) - (char *)(0)); }
+
+template <typename T> T min(const T &v1, const T &v2) { return (v1 < v2) ? v1 : v2; }
+template <typename T> T max(const T &v1, const T &v2) { return (v1 > v2) ? v1 : v2; }
+
+}
+
+template <typename C, typename M, typename A> inline CVirtPtr<M, A> getMembrPtr(const CVirtPtr<C, A> &c, const M C::*m)
+{ CVirtPtr<M, A> ret; ret.setRawNum(c.getRawNum() + private_utils::getMembrOffset(m)); return ret; }
+// for nested member
+template <typename C, typename M, typename NC, typename NM, typename A> inline CVirtPtr<NM, A> getMembrPtr(const CVirtPtr<C, A> &c, const M C::*m, const NM NC::*nm)
+{ CVirtPtr<NM, A> ret = static_cast<CVirtPtr<NM, A> >(static_cast<CVirtPtr<char, A> >(getMembrPtr(c, m)) + private_utils::getMembrOffset(nm)); return ret; }
+// for regular pointers
+template <typename C, typename M> inline M *getMembrPtr(const C *c, const M C::*m) { return (M *)((char *)c + private_utils::getMembrOffset(m)); }
+template <typename C, typename M, typename NC, typename NM> inline NM *getMembrPtr(const C *c, M const C::*m, const NM NC::*m2)
+{ return (M *)((char *)c + private_utils::getMembrOffset(m) + private_utils::getMembrOffset(m2)); }
 
 #include "utils.hpp"
 
