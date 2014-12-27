@@ -99,6 +99,7 @@ public:
     void *lock(TVirtPointer p, bool ro=false);
     void unlock(TVirtPointer p);
     uint8_t getUnlockedPages(void) const;
+    TVirtPtrSize getMaxLockSize(TVirtPointer p, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize) const;
 
     void *makePartialLock(TVirtPointer ptr, TVirtPtrSize size, void *data, bool ro=false);
     void releasePartialLock(TVirtPointer ptr);

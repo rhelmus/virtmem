@@ -4,7 +4,6 @@
 #include "wrapper.h"
 
 #include <string.h>
-#include <stdio.h> // UNDONE
 
 // Generic NULL type
 class CNILL
@@ -19,33 +18,28 @@ public:
 
 template <typename TV> class CPtrWrapLock
 {
-    static int locks;
     TV ptrWrap;
     bool readOnly;
 
 public:
     CPtrWrapLock(const TV &w, bool ro=false) : ptrWrap(w) { lock(ro); }
     ~CPtrWrapLock(void) { unlock(); }
+    // add extra lock on copying
+    CPtrWrapLock(const CPtrWrapLock &other) : ptrWrap(other.ptrWrap), readOnly(other.readOnly) { lock(readOnly); }
 
     void lock(bool ro=false)
     {
-        ++locks;
         if (!ptrWrap.isWrapped())
             TV::getAlloc()->lock(ptrWrap.ptr, ro);
         readOnly = ro;
-        printf("locks: %d\n", locks);
     }
     void unlock(void)
     {
-        --locks;
         if (!ptrWrap.isWrapped())
             TV::getAlloc()->unlock(ptrWrap.ptr);
-        printf("locks: %d\n", locks);
     }
     typename TV::TPtr operator *(void) { return ptrWrap.read(readOnly); }
 };
-
-template <typename T> int CPtrWrapLock<T>::locks;
 
 // Shortcut
 template <typename T> CPtrWrapLock<T> makeVirtPtrLock(const T &w, bool ro=false) { return CPtrWrapLock<T>(w, ro); }

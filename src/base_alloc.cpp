@@ -454,11 +454,12 @@ void *CBaseVirtMemAlloc::lock(TVirtPointer p, bool ro)
 //            if (!memPageList[i].locks)
 //                std::cout << "lock page: " << (int)i << std::endl;
             ++memPageList[i].locks;
-            break;
+            assert(ret == memPageList[i].pool);
+            return ret;
         }
     }
 
-    return ret;
+    assert(false);
 }
 
 void CBaseVirtMemAlloc::unlock(TVirtPointer p)
@@ -490,10 +491,44 @@ uint8_t CBaseVirtMemAlloc::getUnlockedPages() const
     return ret;
 }
 
+TVirtPtrSize CBaseVirtMemAlloc::getMaxLockSize(TVirtPointer p, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize) const
+{
+    TVirtPtrSize retsize = private_utils::min(reqsize, pageSize);
+    TVirtPtrSize blsize = 0;
+
+    for (int i=0; i<MAX_PARTIAL_LOCK_PAGES; ++i)
+    {
+        if (partialLockPages[i].locks)
+        {
+            // start block within partial page?
+            if (p >= partialLockPages[i].start && p < (partialLockPages[i].start + partialLockPages[i].size))
+            {
+                retsize = 0;
+                blsize = private_utils::max(blsize, partialLockPages[i].size);
+            }
+            // end block within partial page?
+            else if (p < partialLockPages[i].start && (p + retsize) > partialLockPages[i].start)
+            {
+                retsize = private_utils::min(retsize, (partialLockPages[i].start - p));
+                blsize = private_utils::max(blsize, partialLockPages[i].size);
+            }
+        }
+    }
+
+    if (blockedsize)
+        *blockedsize = blsize;
+
+    assert(retsize <= reqsize);
+
+    return retsize;
+}
+
 void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPtrSize size, void *data, bool ro)
 {
     SPartialLockPage *page = NULL;
     TVirtPtrSize copyoffset = 0;
+
+    assert(ptr != 0);
 
     for (int i=0; i<MAX_PARTIAL_LOCK_PAGES; ++i)
     {
