@@ -45,11 +45,12 @@ protected:
     {
         TVirtPointer start;
         TVirtPtrSize size;
-        void *data;
+        uint8_t data[128]; // UNDONE
         uint8_t locks;
         bool readOnly;
+        int8_t next;
 
-        SPartialLockPage(void) : start(0), size(0), data(0), locks(0), readOnly(false) { }
+        SPartialLockPage(void) : start(0), size(0), locks(0), readOnly(false), next(-1) { }
     };
 
 private:
@@ -57,6 +58,7 @@ private:
     SMemPage *memPageList;
     const uint8_t pageCount;
     const TVirtPtrSize poolSize, pageSize;
+    int8_t freePageIndex, usedPageIndex;
 
     SPartialLockPage partialLockPages[MAX_PARTIAL_LOCK_PAGES];
 
@@ -72,7 +74,9 @@ private:
     UMemHeader *getHeader(TVirtPointer p);
     const UMemHeader *getHeaderConst(TVirtPointer p);
     void updateHeader(TVirtPointer p, UMemHeader *h);
-    SPartialLockPage *findPartialLockPage(TVirtPointer p);
+    void syncPartialPage(int8_t index);
+    int8_t freePartialPage(int8_t index);
+    int8_t findPartialLockPage(TVirtPointer p);
 
 protected:
     CBaseVirtMemAlloc(SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps, const TVirtPtrSize pgs);

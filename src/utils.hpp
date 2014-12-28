@@ -44,7 +44,7 @@ template <typename T> struct TVirtPtrTraits<T *>
 
 template <typename T1, typename A1, typename T2, typename A2>
 bool canLockBoth(CVirtPtr<T1, A1> p1, CVirtPtr<T2, A2> p2)
-{ return (!TSameType<A1, A2>::flag || abs(p1 - (CVirtPtr<T1, A1>)p2) > A1::getInstance()->getPageSize()); }
+{ return (!TSameType<A1, A2>::flag || abs(p1 - (CVirtPtr<T1, A1>)p2) > (int)A1::getInstance()->getPageSize()); }
 template <typename T1, typename T2> bool canLockBoth(T1, T2) { return true; }
 
 
