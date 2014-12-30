@@ -95,7 +95,7 @@ TEST_F(CUtilsFixture, memcpyLargeTest)
 
 TEST_F(CUtilsFixture, memsetTest)
 {
-    const int bufsize = valloc.getPageSize() * 3;
+    const int bufsize = valloc.getBigPageSize() * 3;
     const uint8_t fill = 'A';
 
     TUCharVirtPtr vbuf = vbuf.alloc(bufsize);

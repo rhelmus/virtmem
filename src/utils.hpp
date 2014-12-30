@@ -20,10 +20,10 @@ template <typename T, typename A> struct TVirtPtrTraits<CVirtPtr<T, A> >
     static bool isVirtPtr(void) { return true; }
     static CPtrWrapLock<CVirtPtr<T, A> > makeLock(const CVirtPtr<T, A> &w, bool ro=false)
     { return makeVirtPtrLock(w, ro); }
-    static uint8_t getUnlockedPages(CVirtPtr<T, A>)
-    { return A::getInstance()->getUnlockedPages(); }
+    static uint8_t getUnlockedBigPages(CVirtPtr<T, A>)
+    { return A::getInstance()->getUnlockedBigPages(); }
     static TVirtPtrSize getPageSize(CVirtPtr<T, A>)
-    { return A::getInstance()->getPageSize(); }
+    { return A::getInstance()->getBigPageSize(); }
     static TVirtPtrSize getMaxLockSize(CVirtPtr<T, A> p, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize)
     { return A::getInstance()->getMaxLockSize(p.getRawNum(), reqsize, blockedsize); }
     typedef T TValue;
@@ -35,7 +35,7 @@ template <typename T> struct TVirtPtrTraits<T *>
     static T *unwrap(T *p) { return (T *)p; }
     static bool isVirtPtr(void) { return false; }
     static T **makeLock(T *&p, __attribute__ ((unused)) bool ro=false) { return &p; }
-    static uint8_t getUnlockedPages(const T *) { return 0; }
+    static uint8_t getUnlockedBigPages(const T *) { return 0; }
     static TVirtPtrSize getPageSize(const T *) { return (TVirtPtrSize)-1; }
     static TVirtPtrSize getMaxLockSize(T *, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize)
     { if (blockedsize) *blockedsize = 0; return reqsize; }
@@ -44,7 +44,7 @@ template <typename T> struct TVirtPtrTraits<T *>
 
 template <typename T1, typename A1, typename T2, typename A2>
 bool canLockBoth(CVirtPtr<T1, A1> p1, CVirtPtr<T2, A2> p2)
-{ return (!TSameType<A1, A2>::flag || abs(p1 - (CVirtPtr<T1, A1>)p2) > (int)A1::getInstance()->getPageSize()); }
+{ return (!TSameType<A1, A2>::flag || abs(p1 - (CVirtPtr<T1, A1>)p2) > (int)A1::getInstance()->getBigPageSize()); }
 template <typename T1, typename T2> bool canLockBoth(T1, T2) { return true; }
 
 
@@ -87,14 +87,14 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
     bool uselock = false;
 
     if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 2 && canLockBoth(dest, src));
+        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 2 && canLockBoth(dest, src));
     else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 1) &&
-                  (TVirtPtrTraits<T2>::getUnlockedPages(src) >= 1) && canLockBoth(dest, src);
+        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 1) &&
+                  (TVirtPtrTraits<T2>::getUnlockedBigPages(src) >= 1) && canLockBoth(dest, src);
     else if (TVirtPtrTraits<T1>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T1>::getUnlockedPages(dest) >= 1);
+        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 1);
     else if (TVirtPtrTraits<T2>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T2>::getUnlockedPages(src) >= 1);
+        uselock = (TVirtPtrTraits<T2>::getUnlockedBigPages(src) >= 1);
 
     TVirtPtrSize sizeleft = size;
     T1 p1 = dest;
@@ -228,7 +228,7 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
 
     CVirtPtr<char, A> p = dest;
     TVirtPtrSize sizeleft = size;
-    const bool uselock = (A::getInstance()->getUnlockedPages() >= 1);
+    const bool uselock = (A::getInstance()->getUnlockedBigPages() >= 1);
     while (sizeleft)
     {
         TVirtPtrSize setsize;

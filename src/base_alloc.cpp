@@ -17,9 +17,7 @@
 #include <stdio.h>
 #endif
 
-CBaseVirtMemAlloc::CBaseVirtMemAlloc(CBaseVirtMemAlloc::SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps,
-                                     const TVirtPtrSize pgs)
-    : memPageList(mp), pageCount(pc), poolSize(ps), pageSize(pgs), freePointer(0), nextPageToSwap(0)
+CBaseVirtMemAlloc::CBaseVirtMemAlloc(const TVirtPtrSize ps) : poolSize(ps), freePointer(0), nextPageToSwap(0)
 {
     baseFreeList.s.next = 0;
     baseFreeList.s.size = 0;
@@ -32,7 +30,7 @@ void CBaseVirtMemAlloc::initPages(SPageInfo *info, SPartialLockPage *pages, uint
     info->count = pcount;
     info->size = psize;
     info->freeIndex = 0;
-    info->usedIndex = -1;
+    info->lockedIndex = -1;
 
     for (uint8_t i=0; i<pcount; ++i)
     {
@@ -66,12 +64,12 @@ TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
     return freePointer;
 }
 
-void CBaseVirtMemAlloc::syncPage(SMemPage *page)
+void CBaseVirtMemAlloc::syncBigPage(SPartialLockPage *page)
 {
     if (page->dirty)
     {
 //        std::cout << "dirty page\n";
-        doWrite(page->pool, page->start, pageSize);
+        doWrite(page->pool, page->start, bigPages.size);
         page->dirty = false;
         page->cleanSkips = 0;
     }
@@ -88,6 +86,87 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
      * Otherwise if a 'clean' page is found use that but keep searching for the above.
      * Otherwise look for dirty pages in a FIFO way. */
 
+    int8_t pageindex = -1;
+    const TVirtPointer newpageend = p + bigPages.size;
+    enum { STATE_GOTFULL, STATE_GOTPARTIAL, STATE_GOTEMPTY, STATE_GOTCLEAN, STATE_GOTDIRTY, STATE_GOTNONE } pagefindstate = STATE_GOTNONE;
+
+    // Start by looking for fitting pages, the ideal situation
+    if ((pageindex = findFreePage(&bigPages, p, size, forcestart)) != -1)
+        pagefindstate = STATE_GOTFULL;
+    else if (pagefindstate != STATE_GOTFULL)
+    {
+        for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
+        {
+            if (bigPages.pages[i].start != 0)
+            {
+                const TVirtPointer pageend = bigPages.pages[i].start + bigPages.size;
+                if ((p >= bigPages.pages[i].start && p < pageend) ||
+                    (newpageend >= bigPages.pages[i].start && newpageend <= pageend))
+                {
+                    // partial overlap. Clean page and use it later.
+                    pageindex = i;
+                    syncBigPage(&bigPages.pages[pageindex]);
+//                    std::cout << "invalidate page " << page->start << std::endl;
+                    bigPages.pages[i].start = 0; // invalidate
+                    pagefindstate = STATE_GOTPARTIAL;
+                }
+            }
+            else if (pagefindstate != STATE_GOTPARTIAL)
+            {
+                pageindex = i;
+                pagefindstate = STATE_GOTEMPTY;
+            }
+
+            if (pagefindstate > STATE_GOTCLEAN)
+            {
+                if (!bigPages.pages[i].dirty || (++bigPages.pages[i].cleanSkips) >= PAGE_MAX_CLEAN_SKIPS)
+                {
+                    pageindex = i;
+                    pagefindstate = STATE_GOTCLEAN;
+                }
+                else if (pagefindstate != STATE_GOTDIRTY && i == nextPageToSwap)
+                {
+                    pageindex = i;
+                    pagefindstate = STATE_GOTDIRTY;
+                }
+            }
+        }
+    }
+
+    // 'pageindex' should now point to page which is within or closest to pointer range
+    assert(pageindex != -1);
+
+    // do we need to swap a page?
+    if (pagefindstate != STATE_GOTFULL)
+    {
+//        std::cout << "getPool switches " << (page - memPageList) << " from: " << page->start << " to " << p << std::endl;
+
+        if (bigPages.pages[pageindex].start != 0)
+            syncBigPage(&bigPages.pages[pageindex]);
+
+        if (pagefindstate == STATE_GOTDIRTY)
+        {
+            nextPageToSwap = bigPages.pages[pageindex].next;
+            if (nextPageToSwap == -1)
+                nextPageToSwap = bigPages.freeIndex;
+        }
+        else
+            nextPageToSwap = bigPages.freeIndex;
+
+        // Load in page
+        doRead(bigPages.pages[pageindex].pool, p, bigPages.size);
+
+        bigPages.pages[pageindex].start = p;
+    }
+
+    if (!readonly)
+        bigPages.pages[pageindex].dirty = true;
+
+    assert(p >= bigPages.pages[pageindex].start);
+
+    return &((uint8_t *)bigPages.pages[pageindex].pool)[p - bigPages.pages[pageindex].start];
+
+#if 0
     SMemPage *page = 0;
     const TVirtPointer pend = p + size, newpageend = p + pageSize;
     enum { STATE_GOTFULL, STATE_GOTPARTIAL, STATE_GOTEMPTY, STATE_GOTCLEAN, STATE_GOTDIRTY, STATE_GOTNONE } pagefindstate = STATE_GOTNONE;
@@ -183,6 +262,7 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
     assert(p >= page->start);
 
     return &((uint8_t *)page->pool)[p - page->start];
+#endif
 }
 
 void CBaseVirtMemAlloc::pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size)
@@ -206,7 +286,20 @@ void CBaseVirtMemAlloc::updateHeader(TVirtPointer p, UMemHeader *h)
         write(p, h, sizeof(UMemHeader));
 }
 
-void CBaseVirtMemAlloc::syncPartialPage(CBaseVirtMemAlloc::SPartialLockPage *page)
+int8_t CBaseVirtMemAlloc::findFreePage(CBaseVirtMemAlloc::SPageInfo *pinfo, TVirtPointer p, TVirtPtrSize size, bool atstart)
+{
+    const TVirtPointer pend = p + size;
+    for (int8_t i=pinfo->freeIndex; i!=-1; i=pinfo->pages[i].next)
+    {
+        if (pinfo->pages[i].start != 0 && ((atstart && pinfo->pages[i].start == p) ||
+            (!atstart && p >= pinfo->pages[i].start && pend <= (pinfo->pages[i].start + pinfo->size))))
+            return i;
+    }
+
+    return -1;
+}
+
+void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SPartialLockPage *page)
 {
     if (page->dirty)
     {
@@ -215,17 +308,90 @@ void CBaseVirtMemAlloc::syncPartialPage(CBaseVirtMemAlloc::SPartialLockPage *pag
     }
 }
 
+void CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, int8_t index)
+{
+    if (index == pinfo->freeIndex)
+        pinfo->freeIndex = pinfo->pages[pinfo->freeIndex].next;
+    else
+    {
+        // find previous
+        int8_t previ = pinfo->freeIndex;
+        for (; index!=pinfo->pages[previ].next; previ=pinfo->pages[previ].next)
+            ;
+        pinfo->pages[previ].next = pinfo->pages[index].next;
+
+    }
+
+    if (pinfo == &bigPages && nextPageToSwap == index)
+        nextPageToSwap = pinfo->freeIndex; // locked page, can't swap it anymore
+
+    pinfo->pages[index].next = pinfo->lockedIndex;
+    pinfo->lockedIndex = index;
+}
+
 int8_t CBaseVirtMemAlloc::freePartialPage(CBaseVirtMemAlloc::SPageInfo *pinfo, int8_t index)
 {
-    syncPartialPage(&pinfo->pages[index]);
+    if (pinfo != &bigPages)
+        syncLockedPage(&pinfo->pages[index]);
+    else if (pinfo->pages[index].size < pinfo->size)
+    {
+        // only synchronize shrunk big pages as they cannot be used for regular IO
+        syncLockedPage(&pinfo->pages[index]);
+        // restore as regular unused free page
+        pinfo->pages[index].start = 0;
+        pinfo->pages[index].size = pinfo->size;
+    }
+#if 0
+    else
+    {
+
+        std::cout << "freeing big page: " << (int)index << ", " << pinfo->pages[index].start << "/" << pinfo->pages[index].size << std::endl;
+
+        if (pinfo->pages[index].size < pinfo->size)
+        {
+            // check if free'd page will overlap with another (possible since full size is taken again),
+            // if so synchronize it and clear, otherwise it can be used for regular IO
+            for (int8_t i=pinfo->freeIndex; i!=-1; i=pinfo->pages[i].next)
+            {
+                if (pinfo->pages[i].start == 0)
+                    continue;
+
+                bool dosomething = false;
+                dosomething = (pinfo->pages[index].start >= pinfo->pages[i].start &&
+                               pinfo->pages[index].start < (pinfo->pages[i].start + pinfo->pages[i].size));
+                if (!dosomething)
+                    dosomething = (pinfo->pages[index].start < pinfo->pages[i].start &&
+                                   (pinfo->pages[index].start + pinfo->pages[index].size) > pinfo->pages[i].start);
+
+                /*if (pinfo->pages[i].start != 0 && ((pinfo->pages[index].start >= pinfo->pages[i].start &&
+                pinfo->pages[index].start < (pinfo->pages[i].start + pinfo->pages[i].size)) ||
+                (pinfo->pages[index].start < pinfo->pages[i].start &&
+                 (pinfo->pages[index].start + pinfo->pages[index].size) > pinfo->pages[i].start)))*/
+                if (dosomething)
+                {
+                    syncLockedPage(&pinfo->pages[index]);
+                    pinfo->pages[index].start = 0;
+                    break;
+                }
+                else
+                {
+                    std::cout << "non-overlapping page: " << (int)i << ", " << pinfo->pages[i].start << "/" << pinfo->pages[i].size << std::endl;
+                }
+            }
+
+            pinfo->pages[index].size = pinfo->size; // restore full size
+            pinfo->
+        }
+    }
+#endif
 
     const int8_t ret = pinfo->pages[index].next;
 
-    if (index == pinfo->usedIndex)
-        pinfo->usedIndex = pinfo->pages[index].next;
+    if (index == pinfo->lockedIndex)
+        pinfo->lockedIndex = pinfo->pages[index].next;
     else
     {
-        int prevind = pinfo->usedIndex;
+        int prevind = pinfo->lockedIndex;
         for (; pinfo->pages[prevind].next != index; prevind=pinfo->pages[prevind].next)
             ;
         pinfo->pages[prevind].next = pinfo->pages[index].next;
@@ -234,6 +400,9 @@ int8_t CBaseVirtMemAlloc::freePartialPage(CBaseVirtMemAlloc::SPageInfo *pinfo, i
     pinfo->freeIndex = index;
 //    printf("freeing page %d - free/used: %d/%d\n", index, pinfo->freeIndex, pinfo->usedIndex);
 
+    if (pinfo == &bigPages && nextPageToSwap == -1)
+        nextPageToSwap = pinfo->freeIndex;
+
     pinfo->pages[index].locks = 0;
 
     return ret;
@@ -241,7 +410,7 @@ int8_t CBaseVirtMemAlloc::freePartialPage(CBaseVirtMemAlloc::SPageInfo *pinfo, i
 
 int8_t CBaseVirtMemAlloc::findPartialLockPage(SPageInfo *pinfo, TVirtPointer p)
 {
-    for (int8_t i=pinfo->usedIndex; i!=-1; i=pinfo->pages[i].next)
+    for (int8_t i=pinfo->lockedIndex; i!=-1; i=pinfo->pages[i].next)
     {
         if (p >= pinfo->pages[i].start && (p - pinfo->pages[i].start) < pinfo->pages[i].size)
             return i;
@@ -279,11 +448,11 @@ void CBaseVirtMemAlloc::start()
     doStart();
 
     // Initialize ram file with zeros. Use zeroed page as buffer.
-    memset(memPageList[0].pool, 0, pageSize);
-    for (TVirtPtrSize i=0; i<poolSize; i+=pageSize)
+    memset(bigPages.pages[0].pool, 0, bigPages.size);
+    for (TVirtPtrSize i=0; i<poolSize; i+=bigPages.size)
     {
-        const TVirtPtrSize s = (i + pageSize) < poolSize ? (pageSize) : (poolSize - i);
-        doWrite(memPageList[0].pool, i, s);
+        const TVirtPtrSize s = (i + bigPages.size) < poolSize ? (bigPages.size) : (poolSize - i);
+        doWrite(bigPages.pages[0].pool, i, s);
     }
 }
 
@@ -483,26 +652,29 @@ void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
 
 void CBaseVirtMemAlloc::flush()
 {
-    for (uint8_t i=0; i<pageCount; ++i)
-        syncPage(&memPageList[i]);
+    // UNDONE: also flush locked pages?
+    for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
+        syncBigPage(&bigPages.pages[i]);
 }
 
 void CBaseVirtMemAlloc::clearPages()
 {
-    flush();
     // wipe all pages
-    for (uint8_t i=0; i<pageCount; ++i)
-        memPageList[i].start = 0;
+    for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
+    {
+        syncBigPage(&bigPages.pages[i]);
+        bigPages.pages[i].start = 0;
+    }
 }
 
 uint8_t CBaseVirtMemAlloc::getFreePages() const
 {
-    uint8_t ret = pageCount;
+    uint8_t ret = 0;
 
-    for (uint8_t i=0; i<pageCount; ++i)
+    for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
     {
-        if (memPageList[i].start != 0)
-            --ret;
+        if (bigPages.pages[i].start == 0)
+            ++ret;
     }
 
     return ret;
@@ -510,26 +682,34 @@ uint8_t CBaseVirtMemAlloc::getFreePages() const
 
 void *CBaseVirtMemAlloc::lock(TVirtPointer p, bool ro)
 {
-    void *ret = pullRawData(p, pageSize, ro, true);
+    // UNDONE
+    return makePartialLock(p, bigPages.size, ro);
+#if 0
+
+    void *ret = pullRawData(p, bigPages.size, ro, true);
 
     // Find which page was used and mark it as locked
     for (uint8_t i=0; i<pageCount; ++i)
     {
-        if (memPageList[i].start == p)
+        if (bigPages.pages[i].start == p)
         {
 //            if (!memPageList[i].locks)
 //                std::cout << "lock page: " << (int)i << std::endl;
-            ++memPageList[i].locks;
+            ++bigPages.pages[i].locks;
             assert(ret == memPageList[i].pool);
             return ret;
         }
     }
 
     assert(false);
+#endif
 }
 
 void CBaseVirtMemAlloc::unlock(TVirtPointer p)
 {
+    // UNDONE
+    return releasePartialLock(p);
+#if 0
     for (uint8_t i=0; i<pageCount; ++i)
     {
         if (memPageList[i].start == p)
@@ -541,18 +721,16 @@ void CBaseVirtMemAlloc::unlock(TVirtPointer p)
             break;
         }
     }
+#endif
 }
 
 
-uint8_t CBaseVirtMemAlloc::getUnlockedPages() const
+uint8_t CBaseVirtMemAlloc::getUnlockedBigPages() const
 {
-    uint8_t ret = pageCount;
+    uint8_t ret = 0;
 
-    for (uint8_t i=0; i<pageCount; ++i)
-    {
-        if (memPageList[i].locks)
-            --ret;
-    }
+    for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
+        ++ret;
 
     return ret;
 }
@@ -565,7 +743,7 @@ TVirtPtrSize CBaseVirtMemAlloc::getMaxLockSize(TVirtPointer p, TVirtPtrSize reqs
 
     for (uint8_t pindex=0; pindex<3; ++pindex)
     {
-        for (int8_t i=pinfos[pindex]->usedIndex; i!=-1; i=pinfos[pindex]->pages[i].next)
+        for (int8_t i=pinfos[pindex]->lockedIndex; i!=-1; i=pinfos[pindex]->pages[i].next)
         {
             // start block within partial page?
             if (p >= pinfos[pindex]->pages[i].start && p < (pinfos[pindex]->pages[i].start + pinfos[pindex]->pages[i].size))
@@ -623,7 +801,7 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
     bool fixbeginningoverlap = false, done = false;
     for (uint8_t pindex=0; pindex<3 && !done; ++pindex)
     {
-        for (int8_t i=plist[pindex]->usedIndex; i!=-1;)
+        for (int8_t i=plist[pindex]->lockedIndex; i!=-1;)
         {
             // already there?
             if (plist[pindex]->pages[i].start == ptr)
@@ -645,8 +823,15 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
                         // ...fallthrough...
                     }
                 }
-                else
-                    assert(plist[pindex]->pages[i].size <= size);
+                else if (plist[pindex]->pages[i].size > size) // requested size smaller than page?
+                {
+                    assert(plist[pindex]->pages[i].locks == 0);
+                    // write excess data
+                    pushRawData(plist[pindex]->pages[i].start + size, plist[pindex]->pages[i].pool + size,
+                                plist[pindex]->pages[i].size - size);
+                    plist[pindex]->pages[i].size = size; // shrink page
+                    // NOTE: we don't have to check for overlap since we only shrunk the page
+                }
 
                 pageindex = i;
                 if (plist[pindex]->pages[i].size == size)
@@ -698,7 +883,7 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
     // make new or reuse old lock?
     if (pageindex == -1)
     {
-        if (pinfo->freeIndex == -1) // no space left in chosen page size?
+        if (pinfo->freeIndex == -1 && oldlockindex == -1) // no space left in chosen page size?
         {
             // space left in bigger page?
             if (pinfo->size < mediumPages.size && mediumPages.freeIndex != -1)
@@ -707,15 +892,23 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
                 pinfo = &bigPages;
         }
 
+        TVirtPageSize copyoffset = 0;
+
         if (pinfo->freeIndex != -1)
         {
-            pageindex = pinfo->freeIndex;
-            pinfo->freeIndex = pinfo->pages[pinfo->freeIndex].next;
-            if (pinfo->usedIndex == -1)
-                pinfo->pages[pageindex].next = -1;
+            if (pinfo == &bigPages)
+            {
+                // read in data and lock the page that was used
+                pullRawData(ptr, size, ro, true);
+                pageindex = findFreePage(pinfo, ptr, size, true);
+                copyoffset = size; // no need to copy
+                if (size < pinfo->size)
+                    syncBigPage(&bigPages.pages[pageindex]); // synchronize if there is data outside lock range
+            }
             else
-                pinfo->pages[pageindex].next = pinfo->usedIndex;
-            pinfo->usedIndex = pageindex;
+                pageindex = pinfo->freeIndex;
+
+            lockPage(pinfo, pageindex);
         }
         else
         {
@@ -728,14 +921,13 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
 
             if (oldlockindex != -1)
             {
-                syncPartialPage(&pinfo->pages[oldlockindex]);
+                syncLockedPage(&pinfo->pages[oldlockindex]);
                 pageindex = oldlockindex;
             }
             else
                 return 0; // no space left
         }
 
-        TVirtPtrSize copyoffset = 0;
         bool fixed = false; // UNDONE
         if (fixbeginningoverlap)
         {
@@ -743,7 +935,7 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
             // NOTE: we couldn't do this earlier since it was unknown which data is going to be used
             for (uint8_t pindex=0; pindex<3; ++pindex)
             {
-                for (int8_t i=plist[pindex]->usedIndex; i!=-1; i=plist[pindex]->pages[i].next)
+                for (int8_t i=plist[pindex]->lockedIndex; i!=-1; i=plist[pindex]->pages[i].next)
                 {
                     if ((i != pageindex || plist[pindex] != pinfo) && ptr > plist[pindex]->pages[i].start &&
                         ptr < (plist[pindex]->pages[i].start + plist[pindex]->pages[i].size))
@@ -754,7 +946,7 @@ void *CBaseVirtMemAlloc::makePartialLock(TVirtPointer ptr, TVirtPageSize size, b
                         const TVirtPtrSize offsetold = ptr - plist[pindex]->pages[i].start;
                         const TVirtPageSize copysize = private_utils::min((TVirtPageSize)(plist[pindex]->pages[i].size - offsetold), size);
                         memcpy(pinfo->pages[pageindex].pool, (char *)plist[pindex]->pages[i].pool + offsetold, copysize);
-                        copyoffset = copysize;
+                        copyoffset = private_utils::max(copyoffset, copysize); // NOTE: take max, copyoffset might have been set earlier
                         plist[pindex]->pages[i].size = offsetold; // shrink other so this one fits
                         fixed = true;
                     }
@@ -805,6 +997,13 @@ void CBaseVirtMemAlloc::releasePartialLock(TVirtPointer ptr)
     SPartialLockPage *page = findPartialLockPage(ptr);
     assert(page && page->locks);
     --page->locks;
+    if (!page->locks)
+    {
+        // was it a big page? free it so that it can be re-used for non locked IO
+        const int8_t index = findPartialLockPage(&bigPages, ptr);
+        if (index != -1)
+            freePartialPage(&bigPages, index);
+    }
 }
 
 void CBaseVirtMemAlloc::printStats()

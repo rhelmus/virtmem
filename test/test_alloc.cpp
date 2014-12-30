@@ -40,21 +40,21 @@ TEST_F(CAllocFixture, ReadOnlyTest)
 TEST_F(CAllocFixture, MultiAllocTest)
 {
     std::vector<TVirtPointer> ptrlist;
-    for (int i=0; i<(int)valloc.getPageCount(); ++i)
+    for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
-        ptrlist.push_back(valloc.alloc(valloc.getPageSize()));
+        ptrlist.push_back(valloc.alloc(valloc.getBigPageSize()));
         valloc.write(ptrlist[i], &i, sizeof(int));
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
 
-    for (int i=0; i<(int)valloc.getPageCount(); ++i)
+    for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
 
     valloc.clearPages();
 
-    for (int i=0; i<(int)valloc.getPageCount(); ++i)
+    for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
@@ -62,12 +62,12 @@ TEST_F(CAllocFixture, MultiAllocTest)
 
 TEST_F(CAllocFixture, SimplePageTest)
 {
-    EXPECT_EQ(valloc.getFreePages(), valloc.getPageCount());
+    EXPECT_EQ(valloc.getFreePages(), valloc.getBigPageCount());
 
     std::vector<TVirtPointer> ptrlist;
-    for (int i=0; i<(int)valloc.getPageCount(); ++i)
+    for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
-        ptrlist.push_back(valloc.alloc(valloc.getPageSize()));
+        ptrlist.push_back(valloc.alloc(valloc.getBigPageSize()));
         valloc.write(ptrlist[i], &i, sizeof(int));
     }
 
@@ -75,15 +75,15 @@ TEST_F(CAllocFixture, SimplePageTest)
 
     valloc.flush();
 
-    for (int i=0; i<(int)valloc.getPageCount(); ++i)
+    for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
 
     valloc.clearPages();
-    EXPECT_EQ(valloc.getFreePages(), valloc.getPageCount());
+    EXPECT_EQ(valloc.getFreePages(), valloc.getBigPageCount());
 
-    for (int i=0; i<(int)valloc.getPageCount(); ++i)
+    for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
@@ -91,26 +91,27 @@ TEST_F(CAllocFixture, SimplePageTest)
 
 TEST_F(CAllocFixture, PageLockTest)
 {
-    EXPECT_EQ(valloc.getUnlockedPages(), valloc.getPageCount());
+    EXPECT_EQ(valloc.getUnlockedBigPages(), valloc.getBigPageCount());
 
     // Lock all pages
-    for (uint8_t p=0; p<valloc.getPageCount(); ++p)
+    for (uint8_t p=0; p<valloc.getBigPageCount(); ++p)
     {
-        // 10 is an arbitrary number, just make sure that numbers are unique and don't start at the beginning
-        const TVirtPointer ptr = p * 10 + 10;
+        // 10 is an arbitrary number, just make sure that numbers are unique, don't start at the beginning
+        // and don't overlap
+        const TVirtPointer ptr = p * valloc.getBigPageSize() + 10;
         valloc.lock(ptr);
-        EXPECT_EQ(valloc.getUnlockedPages(), (valloc.getPageCount() - (p+1)));
+        EXPECT_EQ(valloc.getUnlockedBigPages(), (valloc.getBigPageCount() - (p+1)));
     }
 
-    EXPECT_EQ(valloc.getUnlockedPages(), 0);
+    EXPECT_EQ(valloc.getUnlockedBigPages(), 0);
 
     // Unlock all pages
-    for (uint8_t p=0; p<valloc.getPageCount(); ++p)
+    for (uint8_t p=0; p<valloc.getBigPageCount(); ++p)
     {
         // 10 is an arbitrary number, just make sure that numbers are unique and don't start at the beginning
-        const TVirtPointer ptr = p * 10 + 10;
+        const TVirtPointer ptr = p * valloc.getBigPageSize() + 10;
         valloc.unlock(ptr);
-        EXPECT_EQ(valloc.getUnlockedPages(), (p+1));
+        EXPECT_EQ(valloc.getUnlockedBigPages(), (p+1));
     }
 }
 

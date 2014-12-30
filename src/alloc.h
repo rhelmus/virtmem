@@ -12,22 +12,16 @@ class CVirtMemAlloc : public CBaseVirtMemAlloc
     // UNDONE
     enum { SMALL_PAGECOUNT = 1, SMALL_PAGESIZE = 32, MEDIUM_PAGECOUNT = 4, MEDIUM_PAGESIZE = 128, BIG_PAGECOUNT = 4, BIG_PAGESIZE = 512 };
 
-    SMemPage memPages[PAGE_COUNT];
-    uint8_t memPagePools[PAGE_COUNT][PAGE_SIZE];
     SPartialLockPage smallPagesData[SMALL_PAGECOUNT], mediumPagesData[MEDIUM_PAGECOUNT], bigPagesData[BIG_PAGECOUNT];
     uint8_t smallPagePool[SMALL_PAGECOUNT * SMALL_PAGESIZE], mediumPagePool[MEDIUM_PAGECOUNT * MEDIUM_PAGESIZE], bigPagePool[BIG_PAGECOUNT * BIG_PAGESIZE];
     static CVirtMemAlloc *instance;
 
 protected:
-    CVirtMemAlloc(void) : CBaseVirtMemAlloc(memPages, PAGE_COUNT, POOL_SIZE, PAGE_SIZE)
+    CVirtMemAlloc(void) : CBaseVirtMemAlloc(POOL_SIZE)
 
     {
         assert(!instance);
         instance = this;
-
-        for (uint8_t i=0; i<PAGE_COUNT; ++i)
-            memPages[i].pool = &memPagePools[i][0];
-
         initSmallPages(smallPagesData, &smallPagePool[0], SMALL_PAGECOUNT, SMALL_PAGESIZE);
         initMediumPages(mediumPagesData, &mediumPagePool[0], MEDIUM_PAGECOUNT, MEDIUM_PAGESIZE);
         initBigPages(bigPagesData, &bigPagePool[0], BIG_PAGECOUNT, BIG_PAGESIZE);
