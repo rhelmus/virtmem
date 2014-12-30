@@ -30,4 +30,4 @@ unix {
     INSTALLS += target
 }
 
-QMAKE_CXXFLAGS += -g3 -m32
+QMAKE_CXXFLAGS += -g3 -m32 -std=gnu++11

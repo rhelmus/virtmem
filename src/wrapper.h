@@ -25,14 +25,13 @@ public:
 private:
     typedef CVirtPtr<T, TAllocator> TVirtPtr;
 
-    static T *read(TPtrNum p, bool ro=true)
+    static T *read(TPtrNum p)
     {
         if (isWrapped(p))
             return static_cast<T *>(CVirtPtrBase::unwrap(p));
-        return static_cast<T *>(getAlloc()->read(p, sizeof(T), ro));
+        return static_cast<T *>(getAlloc()->read(p, sizeof(T)));
     }
-    T *read(bool ro=true) const { return read(ptr, ro); }
-    const T *readConst(void) const { return read(ptr, true); }
+    T *read(void) const { return read(ptr); }
 
     static void write(TPtrNum p, const T *d)
     {
@@ -103,7 +102,6 @@ public:
     class CMemberWrapper
     {
         const TPtrNum ptr;
-        char buffer[sizeof(T)]; // UNDONE: perhaps some dynamic allocation strategy would be nice as we don't always need this buffer
 
         template <typename, typename> friend class CVirtPtr;
 
@@ -120,14 +118,14 @@ public:
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
 
-            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T), buffer));
+            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T)));
         }
         const T *operator->(void) const
         {
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
 
-            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T), buffer, true));
+            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T), true));
         }
     };
 
@@ -149,7 +147,7 @@ public:
     static TVirtPtr newClass(TVirtPtrSize size=sizeof(T))
     {
         TVirtPtr ret = alloc(size);
-        new (read(ret.ptr, false)) T; // UNDONE: can this be ro?
+        new (read(ret.ptr)) T; // UNDONE: can this be ro?
         return ret;
     }
 
@@ -168,7 +166,7 @@ public:
         getAlloc()->write(ret.ptr, &elements, sizeof(TVirtPtrSize));
         ret.ptr += sizeof(TVirtPtrSize);
         for (TVirtPtrSize s=0; s<elements; ++s)
-            new (getAlloc()->read(ret.ptr + (s * sizeof(T)), sizeof(T), false)) T; // UNDONE: can this be ro?
+            new (getAlloc()->read(ret.ptr + (s * sizeof(T)), sizeof(T))) T; // UNDONE: can this be ro?
         return ret;
     }
     static void deleteArray(TVirtPtr &p)

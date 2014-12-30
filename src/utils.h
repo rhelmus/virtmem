@@ -38,7 +38,7 @@ public:
         if (!ptrWrap.isWrapped())
             TV::getAlloc()->unlock(ptrWrap.ptr);
     }
-    typename TV::TPtr operator *(void) { return ptrWrap.read(readOnly); }
+    typename TV::TPtr operator *(void) { return ptrWrap.read(); }
 };
 
 // Shortcut

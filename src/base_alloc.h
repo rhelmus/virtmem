@@ -5,6 +5,7 @@
 
 typedef uint32_t TVirtPointer;
 typedef uint32_t TVirtPtrSize;
+typedef uint16_t TVirtPageSize;
 
 class CBaseVirtMemAlloc
 {
@@ -12,7 +13,6 @@ class CBaseVirtMemAlloc
 
     enum
     {
-        MAX_PARTIAL_LOCK_PAGES = 16, // UNDONE: make amount configurable
         PAGE_MAX_CLEAN_SKIPS = 5, // if page is dirty: max tries for finding another clean page when swapping
         START_OFFSET = sizeof(TAlign), // don't start at zero so we can have NULL pointers
         BASE_INDEX = 1, // Special pointer to baseFreeList, not actually stored in file
@@ -44,42 +44,54 @@ protected:
     struct SPartialLockPage
     {
         TVirtPointer start;
-        TVirtPtrSize size;
-        uint8_t data[128]; // UNDONE
+        TVirtPageSize size;
+        uint8_t *pool;
         uint8_t locks;
-        bool readOnly;
+        bool dirty;
         int8_t next;
 
-        SPartialLockPage(void) : start(0), size(0), locks(0), readOnly(false), next(-1) { }
+        SPartialLockPage(void) : start(0), size(0), pool(0), locks(0), dirty(false), next(-1) { }
     };
 
 private:
+    struct SPageInfo
+    {
+        SPartialLockPage *pages;
+        TVirtPageSize size;
+        uint8_t count;
+        int8_t freeIndex, usedIndex;
+    };
+
     // Stuff configured from CVirtMemAlloc
     SMemPage *memPageList;
     const uint8_t pageCount;
     const TVirtPtrSize poolSize, pageSize;
-    int8_t freePageIndex, usedPageIndex;
-
-    SPartialLockPage partialLockPages[MAX_PARTIAL_LOCK_PAGES];
+    SPageInfo smallPages, mediumPages, bigPages;
 
     UMemHeader baseFreeList;
     TVirtPointer freePointer;
     TVirtPointer poolFreePos;
     uint8_t nextPageToSwap;
 
+    void initPages(SPageInfo *info, SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
     TVirtPointer getMem(TVirtPtrSize size);
     void syncPage(SMemPage *page);
     void *pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
     void pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size);
-    UMemHeader *getHeader(TVirtPointer p);
     const UMemHeader *getHeaderConst(TVirtPointer p);
     void updateHeader(TVirtPointer p, UMemHeader *h);
-    void syncPartialPage(int8_t index);
-    int8_t freePartialPage(int8_t index);
-    int8_t findPartialLockPage(TVirtPointer p);
+    void syncPartialPage(SPartialLockPage *page);
+    int8_t freePartialPage(SPageInfo *pinfo, int8_t index);
+    int8_t findPartialLockPage(SPageInfo *pinfo, TVirtPointer p);
+    SPartialLockPage *findPartialLockPage(TVirtPointer p);
+    void removePartialLockFrom(SPageInfo *pinfo, TVirtPointer p);
 
 protected:
     CBaseVirtMemAlloc(SMemPage *mp, const uint8_t pc, const TVirtPtrSize ps, const TVirtPtrSize pgs);
+
+    void initSmallPages(SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
+    void initMediumPages(SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
+    void initBigPages(SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;
@@ -94,7 +106,7 @@ public:
     TVirtPointer alloc(TVirtPtrSize size);
     void free(TVirtPointer ptr);
 
-    void *read(TVirtPointer p, TVirtPtrSize size, bool readonly=true);
+    void *read(TVirtPointer p, TVirtPtrSize size);
     void write(TVirtPointer p, const void *d, TVirtPtrSize size);
     void flush(void);
     void clearPages(void);
@@ -105,7 +117,7 @@ public:
     uint8_t getUnlockedPages(void) const;
     TVirtPtrSize getMaxLockSize(TVirtPointer p, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize) const;
 
-    void *makePartialLock(TVirtPointer ptr, TVirtPtrSize size, void *data, bool ro=false);
+    void *makePartialLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
     void releasePartialLock(TVirtPointer ptr);
 
     uint8_t getPageCount(void) const { return pageCount; }
