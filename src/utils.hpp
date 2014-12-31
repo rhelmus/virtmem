@@ -2,9 +2,12 @@
 #define UTILS_HPP
 
 #include "config.h"
+#include "utils.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+// UNDONE : change locking
 
 namespace private_utils {
 
@@ -111,7 +114,7 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
             const TVirtPtrSize locksize2 = TVirtPtrTraits<T2>::getMaxLockSize(p2, sizeleft, &blockedsize2);
             cpsize = min(locksize1, locksize2);
 
-            assert(cpsize <= sizeleft);
+            ASSERT(cpsize <= sizeleft);
 
             if ((cpsize && !copier(*TVirtPtrTraits<T1>::makeLock(p1),
                                    *TVirtPtrTraits<T2>::makeLock(p2, true), cpsize)) || (cpsize == sizeleft))
@@ -127,7 +130,7 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
 
         sizeleft -= cpsize;
 
-        assert(sizeleft <= size);
+        ASSERT(sizeleft <= size);
 
         // slow fallback for overlapping data in partial locks or when no locks can be used
         for (; cpsize; ++p1, ++p2, --cpsize)

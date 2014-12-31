@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "alloc.h"
+#include "utils.h"
 
 #if __cplusplus > 199711L
 #define EXPLICIT explicit
@@ -59,7 +60,7 @@ protected:
     static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
     TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
 
-    static void *unwrap(TPtrNum p) { assert(isWrapped(p)); return reinterpret_cast<void *>(getPtrNum(p)); }
+    static void *unwrap(TPtrNum p) { ASSERT(isWrapped(p)); return reinterpret_cast<void *>(getPtrNum(p)); }
 
 public:
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }

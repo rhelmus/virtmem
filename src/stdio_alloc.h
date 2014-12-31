@@ -1,5 +1,5 @@
-#ifndef STDIOALLOC_H
-#define STDIOALLOC_H
+#ifndef STDIO_ALLOC_H
+#define STDIO_ALLOC_H
 
 #include "alloc.h"
 
@@ -53,4 +53,4 @@ public:
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TStdioVirtPtr { typedef CVirtPtr<T, CStdioVirtMemAlloc<> > type; };
 
-#endif // DISKALLOC_H
+#endif // STDIO_ALLOC_H

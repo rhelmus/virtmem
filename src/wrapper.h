@@ -13,8 +13,7 @@ template <typename T> struct TAntiConst<const T> { typedef T type; };
 
 }
 
-#include <assert.h>
-#include <stdio.h> // UNDONE
+//#include <stdio.h> // UNDONE
 
 template <typename T, typename TA> class CVirtPtr : public CVirtPtrBase
 {
@@ -143,6 +142,8 @@ public:
         p.ptr = 0;
     }
 
+    // UNDONE
+#ifndef ARDUINO
     // C++ style new/delete --> call constructors (by placement new) and destructors
     static TVirtPtr newClass(TVirtPtrSize size=sizeof(T))
     {
@@ -177,6 +178,7 @@ public:
             (read(p.ptr + (s * sizeof(T))))->~T();
         getAlloc()->free(soffset); // soffset points at beginning of actual block
     }
+#endif
 
     static TVirtPtr wrap(const void *p)
     {

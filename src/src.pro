@@ -20,14 +20,19 @@ HEADERS += \
     base_wrapper.h \
     wrapper.h \
     utils.h \
-    alloc.h \
     base_alloc.h \
-    stdioalloc.h \
     config.h \
-    utils.hpp
+    utils.hpp \
+    stdio_alloc.h \
+    sdfatlib_alloc.h \
+    alloc.h \
+    wrapper_utils.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
 
 QMAKE_CXXFLAGS += -g3 -m32 -std=gnu++11
+
+OTHER_FILES += \
+    arduinofy.sh

@@ -1,3 +1,3 @@
-#include "utils.h"
+#include "wrapper_utils.h"
 
-const CNILL NILL;
+const CNILL NILL = CNILL(); // need cempty constructor to prevent compiler error on arduino

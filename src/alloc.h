@@ -3,8 +3,6 @@
 
 #include "base_alloc.h"
 
-#include <assert.h>
-
 // TDerived is necessary to ensure unique instance variables
 template <TVirtPtrSize POOL_SIZE, TVirtPtrSize PAGE_SIZE, uint8_t PAGE_COUNT, typename TDerived>
 class CVirtMemAlloc : public CBaseVirtMemAlloc
@@ -20,7 +18,7 @@ protected:
     CVirtMemAlloc(void) : CBaseVirtMemAlloc(POOL_SIZE)
 
     {
-        assert(!instance);
+        ASSERT(!instance);
         instance = this;
         initSmallPages(smallPagesData, &smallPagePool[0], SMALL_PAGECOUNT, SMALL_PAGESIZE);
         initMediumPages(mediumPagesData, &mediumPagePool[0], MEDIUM_PAGECOUNT, MEDIUM_PAGESIZE);

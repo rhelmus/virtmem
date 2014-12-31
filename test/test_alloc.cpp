@@ -1,5 +1,5 @@
 #include "virtmem.h"
-#include "stdioalloc.h"
+#include "stdio_alloc.h"
 #include "test.h"
 
 #include <vector>
