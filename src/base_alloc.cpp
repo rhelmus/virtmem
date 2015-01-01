@@ -794,7 +794,8 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
             }
             // end overlaps with another lock?
             else if (ptr < plist[pindex]->pages[i].start && (ptr + size) > plist[pindex]->pages[i].start)
-                size = plist[pindex]->pages[i].size - (ptr - plist[pindex]->pages[i].start);
+                size = private_utils::min(static_cast<TVirtPointer>(size),
+                                          plist[pindex]->pages[i].size - (ptr - plist[pindex]->pages[i].start));
         }
     }
 

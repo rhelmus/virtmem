@@ -2,6 +2,8 @@
 #include "stdio_alloc.h"
 #include "test.h"
 
+using namespace virtmem;
+
 typedef CAllocFixture CUtilsFixture;
 
 // Clamp between -1 - +1

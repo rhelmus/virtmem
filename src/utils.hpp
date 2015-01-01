@@ -26,7 +26,7 @@ template <typename T, typename A> struct TVirtPtrTraits<CVirtPtr<T, A> >
     static bool isVirtPtr(void) { return true; }
     static TLock makeLock(CVirtPtr<T, A> w, TVirtPageSize &s, bool f, bool ro=false)
     { return makeVirtPtrLock(w, s, f, ro); }
-    static uint8_t getUnlockedBigPages(CVirtPtr<T, A>)
+    static uint8_t getUnlockedBigPages(void)
     { return A::getInstance()->getUnlockedBigPages(); }
     static TVirtPageSize getPageSize(void)
     { return A::getInstance()->getBigPageSize(); }
@@ -42,13 +42,45 @@ template <typename T> struct TVirtPtrTraits<T *>
     static T *unwrap(T *p) { return p; }
     static bool isVirtPtr(void) { return false; }
     static TLock makeLock(T *&p, TVirtPageSize &, bool, __attribute__ ((unused)) bool ro=false) { return &p; }
-    static uint8_t getUnlockedBigPages(const T *) { return 0; }
+    static uint8_t getUnlockedBigPages(void) { return 0; }
     static TVirtPageSize getPageSize(void) { return (TVirtPageSize)-1; }
 };
 
-// dummy, not used
-template <typename T1, typename T2> int ptrDiff(T1, T2) { return 0; }
-template <typename T, typename A> int ptrDiff(CVirtPtr<T, A> p1, CVirtPtr<T, A> p2) { return p2 - p1; }
+template <typename T1, typename T2, typename A> int ptrDiff(CVirtPtr<T1, A> p1, CVirtPtr<T2, A> p2) { return p2 - p1; }
+template <typename T1, typename T2> int ptrDiff(T1 *p1, T2 *p2) { return p2 - p1; }
+template <typename T1, typename T2> int ptrDiff(T1, T2) { return 0; } // dummy, not used (for mix of regular and virt pointers)
+template <typename T1, typename T2, typename A> bool ptrEqual(CVirtPtr<T1, A> p1, CVirtPtr<T2, A> p2) { return p1 == p2; }
+template <typename T1, typename T2> bool ptrEqual(T1 *p1, T2 *p2) { return p1 == p2; }
+template <typename T1, typename T2> bool ptrEqual(T1, T2) { return false; } // mix of virt and regular pointers
+
+template <typename T1, typename T2> bool canUseLocks(T1 p1, T2 p2, TVirtPageSize &size)
+{
+    // UNDONE: also try smaller locks if no free big pages are available?
+
+    bool ret = false;
+    size = min(TVirtPtrTraits<T1>::getPageSize(), TVirtPtrTraits<T2>::getPageSize());
+
+    /* if both are virtual pointers and are same type: both must be locked, check for two
+     * if both are virtual pointers and are inequal type: lock both, check both allocators if one slot available
+     * if one is virtual pointer, check if it can be locked */
+
+    if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
+    {
+        ret = (TVirtPtrTraits<T1>::getUnlockedBigPages() >= 2);
+        // make sure we don't overlap locks
+        if (ret)
+            size = min(size, static_cast<TVirtPageSize>(abs(ptrDiff(p1, p2))));
+    }
+    else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
+        ret = (TVirtPtrTraits<T1>::getUnlockedBigPages() >= 1) &&
+                (TVirtPtrTraits<T2>::getUnlockedBigPages() >= 1);
+    else if (TVirtPtrTraits<T1>::isVirtPtr())
+        ret = (TVirtPtrTraits<T1>::getUnlockedBigPages() >= 1);
+    else if (TVirtPtrTraits<T2>::isVirtPtr())
+        ret = (TVirtPtrTraits<T2>::getUnlockedBigPages() >= 1);
+
+    return ret && size > 0;
+}
 
 // copier function that works with raw pointers for rawCopy, returns false if copying should be aborted
 typedef bool (*TRawCopier)(char *, const char *, TVirtPtrSize);
@@ -57,18 +89,17 @@ typedef bool (*TRawCopier)(char *, const char *, TVirtPtrSize);
 template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize size,
                                                TRawCopier copier, bool checknull)
 {
-    if (size == 0)
+    if (size == 0 || ptrEqual(dest, src))
         return dest;
 
+#ifdef VIRTMEM_WRAP_CPOINTERS
     if (!TVirtPtrTraits<T1>::isVirtPtr() && !TVirtPtrTraits<T2>::isVirtPtr())
     {
         // Even though both are pointers, we must unwrap to avoid compile errors with other types
         copier(TVirtPtrTraits<T1>::unwrap(dest), TVirtPtrTraits<T2>::unwrap(src), size);
         return dest;
     }
-
-#ifdef VIRTMEM_WRAP_CPOINTERS
-    if (TVirtPtrTraits<T1>::isWrapped(dest) && TVirtPtrTraits<T2>::isWrapped(src))
+    else if (TVirtPtrTraits<T1>::isWrapped(dest) && TVirtPtrTraits<T2>::isWrapped(src))
     {
         copier(TVirtPtrTraits<T1>::unwrap(dest), TVirtPtrTraits<T2>::unwrap(src), size);
         return dest;
@@ -82,35 +113,12 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
         return rawCopy(dest, TVirtPtrTraits<T2>::unwrap(src), size, copier, checknull);
 #endif
 
-    /* if both are virtual pointers and are same type: both must be locked, check for two
-     * if both are virtual pointers and are inequal type: lock both, check both allocators if one slot available
-     * if one is virtual pointer, check if it can be locked */
-
-    // UNDONE: also try smaller locks if no free big pages are available?
-
-    bool uselock = false;
-    TVirtPageSize locksize = min(TVirtPtrTraits<T1>::getPageSize(), TVirtPtrTraits<T2>::getPageSize());
-
-    if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
-    {
-        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 2);
-        // make sure we don't overlap locks
-        if (uselock)
-            locksize = min(locksize, static_cast<TVirtPageSize>(abs(ptrDiff(dest, src))));
-    }
-    else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 1) &&
-                  (TVirtPtrTraits<T2>::getUnlockedBigPages(src) >= 1);
-    else if (TVirtPtrTraits<T1>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 1);
-    else if (TVirtPtrTraits<T2>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T2>::getUnlockedBigPages(src) >= 1);
-
     TVirtPtrSize sizeleft = size;
+    TVirtPageSize locksize; // filled in by canUseLocks()
     T1 p1 = dest;
     T2 p2 = src;
 
-    if (uselock)
+    if (canUseLocks(dest, src, locksize))
     {
         while (sizeleft)
         {
@@ -140,23 +148,66 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
     return dest;
 }
 
+// comparison function for rawCompare
+typedef int (*TRawComparator)(const char *, const char *, TVirtPtrSize, bool &);
+
 // Generalized compare for memcmp/strncmp
-template <typename T1, typename T2> int rawCompare(T1 s1, T2 s2, TVirtPtrSize n, bool checknull)
+template <typename T1, typename T2> int rawCompare(T1 p1, T2 p2, TVirtPtrSize n, TRawComparator comparator,
+                                                   bool checknull)
 {
-    if (n == 0)
+    if (n == 0 || ptrEqual(p1, p2))
         return 0;
 
-    typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T1>::TValue>::type v1;
-    typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T2>::TValue>::type v2;
-    for (TVirtPtrSize i=0; i<n; ++i, ++s1, ++s2)
+    bool done = false;
+
+#ifdef VIRTMEM_WRAP_CPOINTERS
+    if (!TVirtPtrTraits<T1>::isVirtPtr() && !TVirtPtrTraits<T2>::isVirtPtr())
     {
-        v1 = *s1; v2 = *s2; // having local copies makes things much faster for virt pointers
-        if (v1 < v2)
-            return -1;
-        if (v1 > v2)
-            return 1;
-        if (checknull && v1 == 0 /*|| *s2 == 0*/) // if we are here, both must be the same
-            break;
+        // Even though both are pointers, we must unwrap to avoid compile errors with other types
+        return comparator(TVirtPtrTraits<T1>::unwrap(p1), TVirtPtrTraits<T2>::unwrap(p2), n, done);
+    }
+    else if (TVirtPtrTraits<T1>::isWrapped(p1) && TVirtPtrTraits<T2>::isWrapped(p2))
+        return comparator(TVirtPtrTraits<T1>::unwrap(p1), TVirtPtrTraits<T2>::unwrap(p2), n, done);
+    else if (TVirtPtrTraits<T1>::isWrapped(p1))
+        return rawCompare(TVirtPtrTraits<T1>::unwrap(p1), p2, n, comparator, checknull);
+    else if (TVirtPtrTraits<T2>::isWrapped(p2))
+        return rawCompare(p1, TVirtPtrTraits<T2>::unwrap(p2), n, comparator, checknull);
+#endif
+
+    TVirtPageSize locksize; // filled in by canUseLocks()
+    if (canUseLocks(p1, p2, locksize))
+    {
+        TVirtPtrSize sizeleft = n;
+        while (sizeleft)
+        {
+            TVirtPageSize cmpsize = min(static_cast<TVirtPtrSize>(locksize), sizeleft);
+            // NOTE: cpsize might be reduced after lock is constructed
+            typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cmpsize, true);
+            typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cmpsize, true, true);
+
+            int cmp = comparator(*l1, *l2, cmpsize, done);
+            if (cmp != 0 || done)
+                return cmp;
+
+            p1 += cmpsize; p2 += cmpsize;
+            sizeleft -= cmpsize;
+            ASSERT(sizeleft <= n);
+        }
+    }
+    else
+    {
+        typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T1>::TValue>::type v1;
+        typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T2>::TValue>::type v2;
+        for (TVirtPtrSize i=0; i<n; ++i, ++p1, ++p2)
+        {
+            v1 = *p1; v2 = *p2; // having local copies makes things much faster for virt pointers
+            if (v1 < v2)
+                return -1;
+            if (v1 > v2)
+                return 1;
+            if (checknull && v1 == 0 /*|| *s2 == 0*/) // if we are here, both must be the same
+                break;
+        }
     }
 
     return 0;
@@ -194,8 +245,26 @@ inline bool strCopier(char *dest, const char *src, TVirtPtrSize n)
     return true;
 }
 
+inline int memComparator(const char *p1, const char *p2, TVirtPtrSize n, bool &)
+{ return ::memcmp(p1, p2, n); }
+inline int strnComparator(const char *p1, const char *p2, TVirtPtrSize n, bool &)
+{ return ::strncmp(p1, p2, n); }
+inline int strComparator(const char *p1, const char *p2, TVirtPtrSize n, bool &done)
+{
+    const int ret = ::strncmp(p1, p2, n);
+    if (ret == 0)
+    {
+        // did we encounter a zero?
+        for (; n && *p1; --n, ++p1)
+            ;
+        done = (n != 0); // we're done if there was a string terminator
+    }
+    return  ret;
 }
 
+}
+
+namespace virtmem {
 
 // Specialize memcpy/memset/memcmp for char types: we may have to convert to this type anyway,
 // and this saves some template code duplication for other types. A general template function will just
@@ -233,7 +302,7 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
 #ifdef VIRTMEM_WRAP_CPOINTERS
     if (dest.isWrapped())
     {
-        memset(dest.unwrap(), c, size);
+        ::memset(dest.unwrap(), c, size);
         return dest;
     }
 #endif
@@ -246,7 +315,7 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
         while (sizeleft)
         {
             TVirtPageSize setsize = private_utils::min(A::getInstance()->getBigPageSize(), sizeleft);
-            memset(*makeVirtPtrLock(p, setsize, true), c, setsize);
+            ::memset(*makeVirtPtrLock(p, setsize, true), c, setsize);
             p += setsize; sizeleft -= setsize;
         }
     }
@@ -270,23 +339,23 @@ template <typename T1, typename A1, typename T2, typename A2> int memcmp(CVirtPt
 {
 #ifdef VIRTMEM_WRAP_CPOINTERS
     if (s1.isWrapped() && s2.isWrapped())
-        return memcmp(s1.unwrap(), s2.unwrap(), n);
+        return ::memcmp(s1.unwrap(), s2.unwrap(), n);
 #endif
 
     return private_utils::rawCompare(static_cast<CVirtPtr<const char, A1> >(s1),
-                                     static_cast<CVirtPtr<const char, A2> >(s2), n, false);
+                                     static_cast<CVirtPtr<const char, A2> >(s2), n, private_utils::memComparator, false);
 }
 
 template <typename T, typename A> int memcmp(CVirtPtr<T, A> s1, const void *s2, TVirtPtrSize n)
 {
     return private_utils::rawCompare(static_cast<CVirtPtr<const char, A> >(s1),
-                                     static_cast<const char *>(s2), n, false);
+                                     static_cast<const char *>(s2), n, private_utils::memComparator, false);
 }
 
 template <typename T, typename A> int memcmp(const void *s1, const CVirtPtr<T, A> s2, TVirtPtrSize n)
 {
     return private_utils::rawCompare(static_cast<const char *>(s1),
-                                     static_cast<CVirtPtr<const char, A> >(s2), n, false);
+                                     static_cast<CVirtPtr<const char, A> >(s2), n, private_utils::memComparator, false);
 }
 
 template <typename A1, typename A2> CVirtPtr<char, A1> strncpy(CVirtPtr<char, A1> dest, const CVirtPtr<const char, A2> src,
@@ -321,31 +390,24 @@ template <typename A> char *strcpy(char *dest, const CVirtPtr<const char, A> src
 }
 
 template <typename A1, typename A2> int strncmp(CVirtPtr<const char, A1> dest, CVirtPtr<const char, A2> src, TVirtPtrSize n)
-{
-#ifdef VIRTMEM_WRAP_CPOINTERS
-    if (dest.isWrapped() && src.isWrapped())
-        return strncmp(dest.unwrap(), src.unwrap(), n);
-#endif
-    return private_utils::rawCompare(dest, src, n, true);
-}
-
+{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator, true);}
 template <typename A> int strncmp(CVirtPtr<const char, A> dest, const char *src, TVirtPtrSize n)
-{ return private_utils::rawCompare(dest, src, n, true); }
+{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator, true); }
 template <typename A> int strncmp(const char *dest, CVirtPtr<const char, A> src, TVirtPtrSize n)
-{ return private_utils::rawCompare(dest, src, n, true); }
+{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator, true); }
 
 template <typename A1, typename A2> int strcmp(CVirtPtr<const char, A1> dest, CVirtPtr<const char, A2> src)
-{ return strncmp(dest, src, (TVirtPtrSize)-1); }
+{ return private_utils::rawCompare(dest, src, (TVirtPtrSize)-1, private_utils::strComparator, true); }
 template <typename A> int strcmp(const char *dest, CVirtPtr<const char, A> src)
-{ return strncmp(dest, src, (TVirtPtrSize)-1); }
+{ return private_utils::rawCompare(dest, src, (TVirtPtrSize)-1, private_utils::strComparator, true); }
 template <typename A> int strcmp(CVirtPtr<const char, A> dest, const char *src)
-{ return strncmp(dest, src, (TVirtPtrSize)-1); }
+{ return private_utils::rawCompare(dest, src, (TVirtPtrSize)-1, private_utils::strComparator, true); }
 
 template <typename A> int strlen(CVirtPtr<const char, A> str)
 {
 #ifdef VIRTMEM_WRAP_CPOINTERS
     if (str.isWrapped())
-        return strlen(str.unwrap());
+        return ::strlen(str.unwrap());
 #endif
 
     int ret = 0;
@@ -391,5 +453,7 @@ template <typename A> int strcmp(CVirtPtr<char, A> dest, const char *src)
 { return strcmp(static_cast<CVirtPtr<const char, A> >(dest), src); }
 
 template <typename A> int strlen(CVirtPtr<char, A> str) { return strlen(static_cast<CVirtPtr<const char, A> >(str)); }
+
+}
 
 #endif // UTILS_HPP

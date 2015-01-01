@@ -6,6 +6,8 @@
 
 #include <stddef.h>
 
+using namespace virtmem;
+
 // helper function, can't use assertions directly
 template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const CVirtPtr<T, A> &p)
 {
