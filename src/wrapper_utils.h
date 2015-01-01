@@ -5,6 +5,8 @@
 
 #include <string.h>
 
+//#include <stdio.h> // UNDONE
+
 // Generic NULL type
 class CNILL
 {
@@ -18,31 +20,43 @@ public:
 
 template <typename TV> class CPtrWrapLock
 {
+    typedef typename TV::TPtr TPtr;
+
     TV ptrWrap;
-    bool readOnly;
+    TPtr data;
+    TVirtPageSize &size;
+    bool readOnly, fit;
 
 public:
-    CPtrWrapLock(const TV &w, bool ro=false) : ptrWrap(w) { lock(ro); }
+    CPtrWrapLock(const TV &w, TVirtPageSize &s, bool f, bool ro=false)
+        : ptrWrap(w), size(s), readOnly(ro), fit(f) { lock(); }
     ~CPtrWrapLock(void) { unlock(); }
     // add extra lock on copying
-    CPtrWrapLock(const CPtrWrapLock &other) : ptrWrap(other.ptrWrap), readOnly(other.readOnly) { lock(readOnly); }
+    CPtrWrapLock(const CPtrWrapLock &other) :
+        ptrWrap(other.ptrWrap), size(other.size), readOnly(other.readOnly), fit(other.fit) { lock(); }
 
-    void lock(bool ro=false)
+    void lock(void)
     {
         if (!ptrWrap.isWrapped())
-            TV::getAlloc()->lock(ptrWrap.ptr, ro);
-        readOnly = ro;
+        {
+            if (fit)
+                data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(ptrWrap.ptr, size, readOnly));
+            else
+                data = static_cast<TPtr>(TV::getAlloc()->makePartialLock(ptrWrap.ptr, size, readOnly));
+        }
     }
     void unlock(void)
     {
         if (!ptrWrap.isWrapped())
-            TV::getAlloc()->unlock(ptrWrap.ptr);
+            TV::getAlloc()->releasePartialLock(ptrWrap.ptr);
+        data = 0;
     }
-    typename TV::TPtr operator *(void) { return ptrWrap.read(); }
+    TPtr operator *(void) { return data; }
 };
 
 // Shortcut
-template <typename T> CPtrWrapLock<T> makeVirtPtrLock(const T &w, bool ro=false) { return CPtrWrapLock<T>(w, ro); }
+template <typename T> CPtrWrapLock<T> makeVirtPtrLock(const T &w, TVirtPageSize &s, bool f, bool ro=false)
+{ return CPtrWrapLock<T>(w, s, f, ro); }
 
 namespace private_utils {
 // Ugly hack from http://stackoverflow.com/a/12141673

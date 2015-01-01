@@ -99,7 +99,7 @@ TEST_F(CAllocFixture, PageLockTest)
         // 10 is an arbitrary number, just make sure that numbers are unique, don't start at the beginning
         // and don't overlap
         const TVirtPointer ptr = p * valloc.getBigPageSize() + 10;
-        valloc.lock(ptr);
+        valloc.makePartialLock(ptr, valloc.getBigPageSize());
         EXPECT_EQ(valloc.getUnlockedBigPages(), (valloc.getBigPageCount() - (p+1)));
     }
 
@@ -110,7 +110,7 @@ TEST_F(CAllocFixture, PageLockTest)
     {
         // 10 is an arbitrary number, just make sure that numbers are unique and don't start at the beginning
         const TVirtPointer ptr = p * valloc.getBigPageSize() + 10;
-        valloc.unlock(ptr);
+        valloc.releasePartialLock(ptr);
         EXPECT_EQ(valloc.getUnlockedBigPages(), (p+1));
     }
 }

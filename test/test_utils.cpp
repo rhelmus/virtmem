@@ -85,7 +85,7 @@ TEST_F(CUtilsFixture, memcpyLargeTest)
     TUCharVirtPtr vbuf = vbuf.alloc(bufsize);
     memcpy(vbuf, &buf[0], bufsize);
     valloc.clearPages();
-    EXPECT_EQ(memcmp(&buf[0], vbuf, bufsize), 0);
+    ASSERT_EQ(memcmp(&buf[0], vbuf, bufsize), 0);
 
     TUCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
     memcpy(vbuf2, vbuf, bufsize);

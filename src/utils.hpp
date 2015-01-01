@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// UNDONE : change locking
+//#include <stdio.h> // UNDONE
 
 namespace private_utils {
 
@@ -18,40 +18,39 @@ template <typename T> struct TVirtPtrTraits { };
 
 template <typename T, typename A> struct TVirtPtrTraits<CVirtPtr<T, A> >
 {
+    typedef T TValue;
+    typedef CPtrWrapLock<CVirtPtr<T, A> > TLock;
+
     static bool isWrapped(CVirtPtr<T, A> p) { return p.isWrapped(); }
     static T *unwrap(CVirtPtr<T, A> p) { return p.unwrap(); }
     static bool isVirtPtr(void) { return true; }
-    static CPtrWrapLock<CVirtPtr<T, A> > makeLock(const CVirtPtr<T, A> &w, bool ro=false)
-    { return makeVirtPtrLock(w, ro); }
+    static TLock makeLock(CVirtPtr<T, A> w, TVirtPageSize &s, bool f, bool ro=false)
+    { return makeVirtPtrLock(w, s, f, ro); }
     static uint8_t getUnlockedBigPages(CVirtPtr<T, A>)
     { return A::getInstance()->getUnlockedBigPages(); }
-    static TVirtPtrSize getPageSize(CVirtPtr<T, A>)
+    static TVirtPageSize getPageSize(void)
     { return A::getInstance()->getBigPageSize(); }
-    static TVirtPtrSize getMaxLockSize(CVirtPtr<T, A> p, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize)
-    { return A::getInstance()->getMaxLockSize(p.getRawNum(), reqsize, blockedsize); }
-    typedef T TValue;
+
 };
 
 template <typename T> struct TVirtPtrTraits<T *>
 {
-    static bool isWrapped(T *) { return false; }
-    static T *unwrap(T *p) { return (T *)p; }
-    static bool isVirtPtr(void) { return false; }
-    static T **makeLock(T *&p, __attribute__ ((unused)) bool ro=false) { return &p; }
-    static uint8_t getUnlockedBigPages(const T *) { return 0; }
-    static TVirtPtrSize getPageSize(const T *) { return (TVirtPtrSize)-1; }
-    static TVirtPtrSize getMaxLockSize(T *, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize)
-    { if (blockedsize) *blockedsize = 0; return reqsize; }
     typedef T TValue;
+    typedef T** TLock;
+
+    static bool isWrapped(T *) { return false; }
+    static T *unwrap(T *p) { return p; }
+    static bool isVirtPtr(void) { return false; }
+    static TLock makeLock(T *&p, TVirtPageSize &, bool, __attribute__ ((unused)) bool ro=false) { return &p; }
+    static uint8_t getUnlockedBigPages(const T *) { return 0; }
+    static TVirtPageSize getPageSize(void) { return (TVirtPageSize)-1; }
 };
 
-template <typename T1, typename A1, typename T2, typename A2>
-bool canLockBoth(CVirtPtr<T1, A1> p1, CVirtPtr<T2, A2> p2)
-{ return (!TSameType<A1, A2>::flag || abs(p1 - (CVirtPtr<T1, A1>)p2) > (int)A1::getInstance()->getBigPageSize()); }
-template <typename T1, typename T2> bool canLockBoth(T1, T2) { return true; }
+// dummy, not used
+template <typename T1, typename T2> int ptrDiff(T1, T2) { return 0; }
+template <typename T, typename A> int ptrDiff(CVirtPtr<T, A> p1, CVirtPtr<T, A> p2) { return p2 - p1; }
 
-
-// copier function that works with raw pointers for rawCopy, return false if copying should be aborted
+// copier function that works with raw pointers for rawCopy, returns false if copying should be aborted
 typedef bool (*TRawCopier)(char *, const char *, TVirtPtrSize);
 
 // Generalized copy for memcpy and strncpy
@@ -87,13 +86,21 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
      * if both are virtual pointers and are inequal type: lock both, check both allocators if one slot available
      * if one is virtual pointer, check if it can be locked */
 
+    // UNDONE: also try smaller locks if no free big pages are available?
+
     bool uselock = false;
+    TVirtPageSize locksize = min(TVirtPtrTraits<T1>::getPageSize(), TVirtPtrTraits<T2>::getPageSize());
 
     if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
-        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 2 && canLockBoth(dest, src));
+    {
+        uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 2);
+        // make sure we don't overlap locks
+        if (uselock)
+            locksize = min(locksize, static_cast<TVirtPageSize>(abs(ptrDiff(dest, src))));
+    }
     else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
         uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 1) &&
-                  (TVirtPtrTraits<T2>::getUnlockedBigPages(src) >= 1) && canLockBoth(dest, src);
+                  (TVirtPtrTraits<T2>::getUnlockedBigPages(src) >= 1);
     else if (TVirtPtrTraits<T1>::isVirtPtr())
         uselock = (TVirtPtrTraits<T1>::getUnlockedBigPages(dest) >= 1);
     else if (TVirtPtrTraits<T2>::isVirtPtr())
@@ -103,41 +110,30 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
     T1 p1 = dest;
     T2 p2 = src;
 
-    while (sizeleft)
+    if (uselock)
     {
-        TVirtPtrSize cpsize;
-
-        if (uselock)
+        while (sizeleft)
         {
-            TVirtPtrSize blockedsize1, blockedsize2;
-            const TVirtPtrSize locksize1 = TVirtPtrTraits<T1>::getMaxLockSize(p1, sizeleft, &blockedsize1);
-            const TVirtPtrSize locksize2 = TVirtPtrTraits<T2>::getMaxLockSize(p2, sizeleft, &blockedsize2);
-            cpsize = min(locksize1, locksize2);
-
-            ASSERT(cpsize <= sizeleft);
-
-            if ((cpsize && !copier(*TVirtPtrTraits<T1>::makeLock(p1),
-                                   *TVirtPtrTraits<T2>::makeLock(p2, true), cpsize)) || (cpsize == sizeleft))
+            TVirtPageSize cpsize = min(static_cast<TVirtPtrSize>(locksize), sizeleft);
+            // NOTE: cpsize might be reduced after lock is constructed
+            typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cpsize, true);
+            typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cpsize, true, true);
+            if (!copier(*l1, *l2, cpsize))
                 break;
 
             p1 += cpsize; p2 += cpsize;
             sizeleft -= cpsize;
-
-            cpsize = min(max(blockedsize1, blockedsize2), sizeleft);
+            ASSERT(sizeleft <= size);
         }
-        else
-            cpsize = sizeleft;
-
-        sizeleft -= cpsize;
-
-        ASSERT(sizeleft <= size);
-
-        // slow fallback for overlapping data in partial locks or when no locks can be used
-        for (; cpsize; ++p1, ++p2, --cpsize)
+    }
+    else
+    {
+        // slow fallback for when no locks can be used
+        for (; sizeleft; ++p1, ++p2, --sizeleft)
         {
             *p1 = (typename TVirtPtrTraits<T2>::TValue)(*p2);
             if (checknull && *p1 == 0)
-                return dest;
+                break;
         }
     }
 
@@ -150,13 +146,16 @@ template <typename T1, typename T2> int rawCompare(T1 s1, T2 s2, TVirtPtrSize n,
     if (n == 0)
         return 0;
 
+    typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T1>::TValue>::type v1;
+    typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T2>::TValue>::type v2;
     for (TVirtPtrSize i=0; i<n; ++i, ++s1, ++s2)
     {
-        if (*s1 < *s2)
+        v1 = *s1; v2 = *s2; // having local copies makes things much faster for virt pointers
+        if (v1 < v2)
             return -1;
-        if (*s1 > *s2)
+        if (v1 > v2)
             return 1;
-        if (checknull && *s1 == 0 /*|| *s2 == 0*/) // if we are here, both must be the same
+        if (checknull && v1 == 0 /*|| *s2 == 0*/) // if we are here, both must be the same
             break;
     }
 
@@ -176,13 +175,23 @@ inline bool strnCopier(char *dest, const char *src, TVirtPtrSize n)
 
 inline bool strCopier(char *dest, const char *src, TVirtPtrSize n)
 {
-    strcpy(dest, src);
+    // can't use strcpy since it doesn't take into account specified size, cannot take
+    // strncpy either since it pads and since we don't actually know size of dest
+    // it could pad too much... well could you just use something else then strcpy?
 
-    // check if we have a zero
-    for (; *dest && n; ++dest, --n)
-        ;
+    if (n == 0)
+        return false;
 
-    return n == 0;
+    char *d = dest;
+    const char *s = src;
+    for (; n; --n, ++d, ++s)
+    {
+        *d = *s;
+        if (*d == 0)
+            return false; // abort if 0 found
+    }
+
+    return true;
 }
 
 }
@@ -231,34 +240,20 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
 
     CVirtPtr<char, A> p = dest;
     TVirtPtrSize sizeleft = size;
-    const bool uselock = (A::getInstance()->getUnlockedBigPages() >= 1);
-    while (sizeleft)
+
+    if (A::getInstance()->getUnlockedBigPages() >= 1)
     {
-        TVirtPtrSize setsize;
-
-        // If dest can be locked, use regular memset
-        if (uselock)
+        while (sizeleft)
         {
-            TVirtPtrSize blockedsize;
-            const TVirtPtrSize locksize = A::getInstance()->getMaxLockSize(p.getRawNum(), sizeleft, &blockedsize);
-            if (locksize > 0)
-            {
-                memset(*makeVirtPtrLock(p), c, locksize);
-
-                if (locksize == sizeleft)
-                    break;
-
-                p += locksize; sizeleft -= locksize;
-                setsize = private_utils::min(blockedsize, sizeleft);
-            }
+            TVirtPageSize setsize = private_utils::min(A::getInstance()->getBigPageSize(), sizeleft);
+            memset(*makeVirtPtrLock(p, setsize, true), c, setsize);
+            p += setsize; sizeleft -= setsize;
         }
-        else
-            setsize = sizeleft;
-
-        sizeleft -= setsize;
-
-        // slow fallback for overlapping data in partial locks or when no locks can be used
-        for (; setsize; ++p, --setsize)
+    }
+    else
+    {
+        // slow fallback for when no locks can be used
+        for (; sizeleft; ++p, --sizeleft)
             *p = c;
     }
 

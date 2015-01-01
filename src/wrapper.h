@@ -3,15 +3,9 @@
 
 #include "alloc.h"
 #include "base_wrapper.h"
+#include "utils.h"
 
 #include <stddef.h>
-
-namespace private_utils {
-
-template <typename T> struct TAntiConst { typedef T type; };
-template <typename T> struct TAntiConst<const T> { typedef T type; };
-
-}
 
 //#include <stdio.h> // UNDONE
 

@@ -101,13 +101,10 @@ public:
     void flush(void);
     void clearPages(void);
     uint8_t getFreePages(void) const;
-
-    void *lock(TVirtPointer p, bool ro=false);
-    void unlock(TVirtPointer p);
     uint8_t getUnlockedBigPages(void) const;
-    TVirtPtrSize getMaxLockSize(TVirtPointer p, TVirtPtrSize reqsize, TVirtPtrSize *blockedsize) const;
 
     void *makePartialLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
+    void *makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro=false);
     void releasePartialLock(TVirtPointer ptr);
 
     uint8_t getBigPageCount(void) const { return bigPages.count; }
