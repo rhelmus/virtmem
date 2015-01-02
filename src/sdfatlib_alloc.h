@@ -16,7 +16,10 @@ class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<POOL_SIZE, PAGE_SIZE, PAGE_CO
 
     void doStart(void)
     {
-        if (!sfile.open("ramfile", O_RDWR))
+        if (!sd.begin(9, SPI_HALF_SPEED))
+            sd.initErrorHalt();
+
+        if (!sfile.open("ramfile", O_CREAT | O_RDWR))
             sd.errorHalt("opening ram file failed");
     }
 
