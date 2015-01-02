@@ -32,7 +32,9 @@ unix {
     INSTALLS += target
 }
 
-QMAKE_CXXFLAGS += -g3 -m32 -std=gnu++11
+QMAKE_CXXFLAGS_RELEASE += -Os
+QMAKE_CXXFLAGS += -m32 -std=gnu++11 -ffunction-sections -fdata-sections
+QMAKE_LFLAGS += -Wl,--gc-sections
 
 OTHER_FILES += \
     arduinofy.sh
