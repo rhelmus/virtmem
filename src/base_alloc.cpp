@@ -65,7 +65,7 @@ TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
 
 void CBaseVirtMemAlloc::syncBigPage(SPartialLockPage *page)
 {
-    assert(page->start != 0);
+    ASSERT(page->start != 0);
 
     if (page->dirty)
     {
@@ -204,7 +204,7 @@ int8_t CBaseVirtMemAlloc::findFreePage(CBaseVirtMemAlloc::SPageInfo *pinfo, TVir
 
 void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SPartialLockPage *page)
 {
-    assert(page->start != 0);
+    ASSERT(page->start != 0);
     if (page->dirty)
     {
         pushRawData(page->start, page->pool, page->size); // UNDONE: make this more efficient

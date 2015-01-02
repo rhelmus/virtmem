@@ -9,6 +9,18 @@
 
 //#include <stdio.h> // UNDONE
 
+// Arduino define min/max macros, temporarily get rid of them.
+// They are restored at the end of this file
+#ifdef min
+#pragma push_macro("min")
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#pragma push_macro("max")
+#endif
+
 namespace private_utils {
 
 template <typename T, typename T2> struct TSameType { static const bool flag = false; };
@@ -455,5 +467,8 @@ template <typename A> int strcmp(CVirtPtr<char, A> dest, const char *src)
 template <typename A> int strlen(CVirtPtr<char, A> str) { return strlen(static_cast<CVirtPtr<const char, A> >(str)); }
 
 }
+
+#pragma pop_macro("min")
+#pragma pop_macro("max")
 
 #endif // UTILS_HPP
