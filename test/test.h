@@ -27,6 +27,11 @@ public:
     CWrapFixture(void) : wrapper() { } // UNDONE: we need this for proper construction, problem?
 };
 
+struct STestAllocProperties : public SStdioMemAllocProperties
+{
+    static const TVirtPtrSize poolSize = 1024 * 1024;
+};
+
 #if 0
 // From http://stackoverflow.com/a/17236988
 inline void print128int(__uint128_t x)

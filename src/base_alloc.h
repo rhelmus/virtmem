@@ -1,6 +1,12 @@
 #ifndef BASE_ALLOC_H
 #define BASE_ALLOC_H
 
+#define NVALGRIND
+
+#ifndef NVALGRIND
+# include <valgrind/memcheck.h>
+#endif
+
 #include <stdint.h>
 
 typedef uint32_t TVirtPointer;
@@ -9,7 +15,7 @@ typedef uint16_t TVirtPageSize;
 
 class CBaseVirtMemAlloc
 {
-    typedef uint32_t TAlign;
+    typedef void * TAlign;
 
     enum
     {
@@ -31,7 +37,11 @@ class CBaseVirtMemAlloc
     };
 
 protected:
-    struct SPartialLockPage
+#ifndef NVALGRIND
+    static const int valgrindPad = 12;
+#endif
+
+    struct SLockPage
     {
         TVirtPointer start;
         TVirtPageSize size;
@@ -40,13 +50,13 @@ protected:
         bool dirty;
         int8_t next;
 
-        SPartialLockPage(void) : start(0), size(0), pool(0), locks(0), cleanSkips(0), dirty(false), next(-1) { }
+        SLockPage(void) : start(0), size(0), pool(0), locks(0), cleanSkips(0), dirty(false), next(-1) { }
     };
 
 private:
     struct SPageInfo
     {
-        SPartialLockPage *pages;
+        SLockPage *pages;
         TVirtPageSize size;
         uint8_t count;
         int8_t freeIndex, lockedIndex;
@@ -61,27 +71,27 @@ private:
     TVirtPointer poolFreePos;
     int8_t nextPageToSwap;
 
-    void initPages(SPageInfo *info, SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
+    void initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
     TVirtPointer getMem(TVirtPtrSize size);
-    void syncBigPage(SPartialLockPage *page);
+    void syncBigPage(SLockPage *page);
     void *pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
     void pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size);
     const UMemHeader *getHeaderConst(TVirtPointer p);
     void updateHeader(TVirtPointer p, UMemHeader *h);
     int8_t findFreePage(SPageInfo *pinfo, TVirtPointer p, TVirtPtrSize size, bool atstart);
-    void syncLockedPage(SPartialLockPage *page);
+    int8_t findUnusedLockedPage(SPageInfo *pinfo);
+    void syncLockedPage(SLockPage *page);
     void lockPage(SPageInfo *pinfo, int8_t index);
-    int8_t freePartialPage(SPageInfo *pinfo, int8_t index);
-    int8_t findPartialLockPage(SPageInfo *pinfo, TVirtPointer p);
-    SPartialLockPage *findPartialLockPage(TVirtPointer p);
-    void removePartialLockFrom(SPageInfo *pinfo, TVirtPointer p);
+    int8_t freeLockedPage(SPageInfo *pinfo, int8_t index);
+    int8_t findLockedPage(SPageInfo *pinfo, TVirtPointer p);
+    SLockPage *findLockedPage(TVirtPointer p);
 
 protected:
     CBaseVirtMemAlloc(const TVirtPtrSize ps);
 
-    void initSmallPages(SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
-    void initMediumPages(SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
-    void initBigPages(SPartialLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
+    void initSmallPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
+    void initMediumPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
+    void initBigPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;
@@ -103,9 +113,9 @@ public:
     uint8_t getFreePages(void) const;
     uint8_t getUnlockedBigPages(void) const;
 
-    void *makePartialLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
+    void *makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
     void *makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro=false);
-    void releasePartialLock(TVirtPointer ptr);
+    void releaseLock(TVirtPointer ptr);
 
     uint8_t getBigPageCount(void) const { return bigPages.count; }
     TVirtPtrSize getBigPageSize(void) const { return bigPages.size; }

@@ -26,14 +26,16 @@ HEADERS += \
     stdio_alloc.h \
     sdfatlib_alloc.h \
     alloc.h \
-    wrapper_utils.h
+    wrapper_utils.h \
+    spiram_alloc.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
 
 QMAKE_CXXFLAGS_RELEASE += -Os
-QMAKE_CXXFLAGS += -m32 -std=gnu++11 -ffunction-sections -fdata-sections
+#QMAKE_CXXFLAGS_DEBUG += -Og
+QMAKE_CXXFLAGS += -std=gnu++11 -ffunction-sections -fdata-sections
 QMAKE_LFLAGS += -Wl,--gc-sections
 
 OTHER_FILES += \

@@ -42,13 +42,13 @@ public:
             if (fit)
                 data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(ptrWrap.ptr, size, readOnly));
             else
-                data = static_cast<TPtr>(TV::getAlloc()->makePartialLock(ptrWrap.ptr, size, readOnly));
+                data = static_cast<TPtr>(TV::getAlloc()->makeLock(ptrWrap.ptr, size, readOnly));
         }
     }
     void unlock(void)
     {
         if (!ptrWrap.isWrapped())
-            TV::getAlloc()->releasePartialLock(ptrWrap.ptr);
+            TV::getAlloc()->releaseLock(ptrWrap.ptr);
         data = 0;
     }
     TPtr operator *(void) { return data; }

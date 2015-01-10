@@ -327,7 +327,8 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
         while (sizeleft)
         {
             TVirtPageSize setsize = private_utils::min(A::getInstance()->getBigPageSize(), sizeleft);
-            ::memset(*makeVirtPtrLock(p, setsize, true), c, setsize);
+            CPtrWrapLock<CVirtPtr<char, A> > l = makeVirtPtrLock(p, setsize, true);
+            ::memset(*l, c, setsize);
             p += setsize; sizeleft -= setsize;
         }
     }

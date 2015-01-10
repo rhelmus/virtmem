@@ -2,16 +2,25 @@
 #define STDIO_ALLOC_H
 
 #include "alloc.h"
+#include "config.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
-template <TVirtPtrSize, TVirtPtrSize, uint8_t> class CStdioVirtMemAlloc;
+struct SStdioMemAllocProperties
+{
+    static const uint8_t smallPageCount = 4, smallPageSize = 32;
+    static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
+    static const uint8_t bigPageCount = 4;
+    static const uint16_t bigPageSize = 1024;
+    static const uint32_t poolSize = DEFAULT_POOLSIZE;
+};
 
-template <TVirtPtrSize POOL_SIZE = 1024*1024*10, TVirtPtrSize PAGE_SIZE=512, uint8_t PAGE_COUNT=4>
-class CStdioVirtMemAlloc : public CVirtMemAlloc<POOL_SIZE, PAGE_SIZE, PAGE_COUNT,
-        CStdioVirtMemAlloc<POOL_SIZE, PAGE_SIZE, PAGE_COUNT> >
+template <typename TProperties> class CStdioVirtMemAlloc;
+
+template <typename TProperties = SStdioMemAllocProperties>
+class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<TProperties> >
 {
     FILE *ramFile;
 

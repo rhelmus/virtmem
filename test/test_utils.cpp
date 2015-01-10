@@ -112,7 +112,7 @@ TEST_F(CUtilsFixture, memsetTest)
 TEST_F(CUtilsFixture, memcpyLargeMultiAllocTest)
 {
     // Second allocator. NOTE: the type is slightly different (different poolsize), so should give no singleton problems
-    typedef CStdioVirtMemAlloc<1024*1024, 512, 4> TAlloc2;
+    typedef CStdioVirtMemAlloc<STestAllocProperties> TAlloc2;
     TAlloc2 valloc2;
     valloc2.start();
 

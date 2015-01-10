@@ -9,6 +9,19 @@
 
 //#include <stdio.h> // UNDONE
 
+template <typename T, typename TA> class CVirtPtr;
+
+namespace private_utils {
+
+template <typename T> struct TDereferenced { typedef T type; }; // dummy for non pointers
+template <typename T> struct TDereferenced<T *(*)()> { typedef T *type; }; // dummy for function pointers. // UNDONE: only handles 1 arg
+template <typename T> struct TDereferenced<T *> { typedef T type; };
+template <typename T, typename A> struct TDereferenced<CVirtPtr<T, A> > { typedef T type; };
+
+// get pointer to variable, use char & cast to override any operator & overload
+template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
+}
+
 template <typename T, typename TA> class CVirtPtr : public CVirtPtrBase
 {
 public:
@@ -20,6 +33,8 @@ private:
 
     static T *read(TPtrNum p)
     {
+        if (!p)
+            return 0;
         if (isWrapped(p))
             return static_cast<T *>(CVirtPtrBase::unwrap(p));
         return static_cast<T *>(getAlloc()->read(p, sizeof(T)));
@@ -57,6 +72,7 @@ public:
         // the assignment operator twice for const types (where T == const T)
         CValueWrapper &operator=(const typename CVirtPtr<typename private_utils::TAntiConst<T>::type, TA>::CValueWrapper &v)
         {
+            ASSERT(ptr != 0);
             if (ptr != v.ptr)
             {
                 const T val = *read(v.ptr);
@@ -67,6 +83,7 @@ public:
         // const conversion
         CValueWrapper &operator=(const typename CVirtPtr<const T, TA>::CValueWrapper &v)
         {
+            ASSERT(ptr != 0);
             if (ptr != v.ptr)
             {
                 const T val = *read(v.ptr);
@@ -79,16 +96,26 @@ public:
         inline TVirtPtr operator&(void) { TVirtPtr ret; ret.ptr = ptr; return ret; }
 
         // allow pointer to pointer access
+        // UNDONE: use member wrapper here?
         inline T operator->(void) { return operator T(); }
         inline const T operator->(void) const { return operator T(); }
+        inline typename CVirtPtr<typename private_utils::TDereferenced<T>::type, TA>::CValueWrapper operator*(void) { return *operator T(); }
+        inline const typename CVirtPtr<typename private_utils::TDereferenced<T>::type, TA>::CValueWrapper operator*(void) const { return *operator T(); }
+
+        typename CVirtPtr<typename private_utils::TDereferenced<T>::type, TA>::CValueWrapper operator[](int i)
+        { return operator T()[i]; }
+        const typename CVirtPtr<typename private_utils::TDereferenced<T>::type, TA>::CValueWrapper operator[](int i) const
+        { return operator T()[i]; }
 
         template <typename T2> inline bool operator==(const T2 &v) const { return operator T() == v; }
         template <typename T2> inline bool operator!=(const T2 &v) const { return operator T() != v; }
 
-        CValueWrapper &operator+=(int n) { T newv = operator T() + n; write(ptr, &newv); return *this; }
+        CValueWrapper &operator+=(int n) { T newv = operator T() + n; write(ptr, private_utils::pointerTo(newv)); return *this; }
         CValueWrapper &operator-=(int n) { return operator+=(-n); }
-        CValueWrapper &operator*=(int n) { T newv = operator T() * n; write(ptr, &newv); return *this; }
-        CValueWrapper &operator/=(int n) { T newv = operator T() / n; write(ptr, &newv); return *this; }
+        CValueWrapper &operator*=(int n) { T newv = operator T() * n; write(ptr, private_utils::pointerTo(newv)); return *this; }
+        CValueWrapper &operator/=(int n) { T newv = operator T() / n; write(ptr, private_utils::pointerTo(newv)); return *this; }
+        CValueWrapper &operator++(void) { return operator +=(1); }
+        T operator++(int) { T ret = operator T(); operator++(); return ret; }
     };
 
     // Based on Strousstrup's general wrapper paper (http://www.stroustrup.com/wrapper.pdf)
@@ -104,21 +131,21 @@ public:
         CMemberWrapper &operator=(const CMemberWrapper &); // No assignment
 
     public:
-        ~CMemberWrapper(void) { if (!isWrapped(ptr)) getAlloc()->releasePartialLock(ptr); }
+        ~CMemberWrapper(void) { if (!isWrapped(ptr)) getAlloc()->releaseLock(ptr); }
 
         T *operator->(void)
         {
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
 
-            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T)));
+            return static_cast<T *>(getAlloc()->makeLock(getPtrNum(ptr), sizeof(T)));
         }
         const T *operator->(void) const
         {
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
 
-            return static_cast<T *>(getAlloc()->makePartialLock(getPtrNum(ptr), sizeof(T), true));
+            return static_cast<T *>(getAlloc()->makeLock(getPtrNum(ptr), sizeof(T), true));
         }
     };
 

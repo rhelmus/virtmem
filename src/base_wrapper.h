@@ -53,12 +53,21 @@ private:
     enum { WRAP_BIT = sizeof(TPtrNum) * 8 - 1 }; // Last bit is used to check if wrapping real pointer
 
 protected:
-    TPtrNum ptr;
+    // UNDONE
+//    TPtrNum ptr;
+    union
+    {
+        TPtrNum ptr;
+        struct
+        {
+            TVirtPointer addr, wrapped;
+        } ugh;
+    };
 
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
-    static TPtrNum getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
-    TPtrNum getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
+    static intptr_t getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
+    intptr_t getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
 
     static void *unwrap(TPtrNum p) { ASSERT(isWrapped(p)); return reinterpret_cast<void *>(getPtrNum(p)); }
 
@@ -98,12 +107,23 @@ public:
     friend inline bool operator!=(const CNILL &, const CVirtPtrBase &pw) { return pw.getPtrNum() != 0; }
     inline operator TSafeBool (void) const { return getPtrNum() == 0 ? 0 : &SDummy::nonNull; }
 
+    // UNDONE: _int128_t comparison sometimes fails??? Perhaps only check for ptrnums/iswrapped when on x86-64? Test this!
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+    inline bool operator==(const CVirtPtrBase &pb) const { return getPtrNum() == pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
+    inline bool operator!=(const CVirtPtrBase &pb) const { return getPtrNum() != pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
+    inline bool operator<(const CVirtPtrBase &pb) const { return getPtrNum() < pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
+    inline bool operator<=(const CVirtPtrBase &pb) const { return getPtrNum() <= pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
+    inline bool operator>=(const CVirtPtrBase &pb) const { return getPtrNum() >= pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
+    inline bool operator>(const CVirtPtrBase &pb) const { return getPtrNum() > pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
+#else
     inline bool operator==(const CVirtPtrBase &pb) const { return ptr == pb.ptr; }
     inline bool operator!=(const CVirtPtrBase &pb) const { return ptr != pb.ptr; }
     inline bool operator<(const CVirtPtrBase &pb) const { return ptr < pb.ptr; }
     inline bool operator<=(const CVirtPtrBase &pb) const { return ptr <= pb.ptr; }
     inline bool operator>=(const CVirtPtrBase &pb) const { return ptr >= pb.ptr; }
     inline bool operator>(const CVirtPtrBase &pb) const { return ptr > pb.ptr; }
+#endif
+
 };
 
 #endif // BASE_WRAPPER_H
