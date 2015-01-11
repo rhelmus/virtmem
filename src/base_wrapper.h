@@ -54,7 +54,8 @@ private:
 
 protected:
     // UNDONE
-//    TPtrNum ptr;
+    // For debug
+#if defined(__x86_64__) || defined(_M_X64)
     union
     {
         TPtrNum ptr;
@@ -63,7 +64,9 @@ protected:
             TVirtPointer addr, wrapped;
         } ugh;
     };
-
+#else
+    TPtrNum ptr;
+#endif
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
     static intptr_t getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }

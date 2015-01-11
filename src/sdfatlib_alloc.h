@@ -20,43 +20,42 @@ template <typename> class CSdfatlibVirtMemAlloc;
 template <typename TProperties=SSdfatlibMemAllocProperties>
 class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMemAlloc<TProperties> >
 {
-    SdFat sd;
-    SdFile sfile;
-    uint8_t pin;
+    SdFile sdFile;
 
     void doStart(void)
     {
-        if (!sd.begin(pin, SPI_FULL_SPEED))
-            sd.initErrorHalt();
-
-        if (!sfile.open("ramfile", O_CREAT | O_RDWR))
-            sd.errorHalt("opening ram file failed");
+        if (!sdFile.open("ramfile", O_CREAT | O_RDWR))
+        {
+            Serial.println("opening ram file failed");
+            while (true)
+                ;
+        }
     }
 
     void doSuspend(void) { } // UNDONE
     void doStop(void)
     {
-        sfile.close();
-        sfile.remove();
+        sdFile.close();
+        sdFile.remove();
     }
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
         const uint32_t t = micros();
-        sfile.seekSet(offset);
-        sfile.read(data, size);
+        sdFile.seekSet(offset);
+        sdFile.read(data, size);
         Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
         const uint32_t t = micros();
-        sfile.seekSet(offset);
-        sfile.write(data, size);
+        sdFile.seekSet(offset);
+        sdFile.write(data, size);
         Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:
-    CSdfatlibVirtMemAlloc(uint8_t p) : pin(p) { }
+    CSdfatlibVirtMemAlloc(void) { }
     ~CSdfatlibVirtMemAlloc(void) { doStop(); }
 };
 

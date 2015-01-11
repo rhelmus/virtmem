@@ -71,10 +71,6 @@ template <typename C, typename M, typename A> inline CVirtPtr<M, A> getMembrPtr(
 // for nested member
 template <typename C, typename M, typename NC, typename NM, typename A> inline CVirtPtr<NM, A> getMembrPtr(const CVirtPtr<C, A> &c, const M C::*m, const NM NC::*nm)
 { CVirtPtr<NM, A> ret = static_cast<CVirtPtr<NM, A> >(static_cast<CVirtPtr<char, A> >(getMembrPtr(c, m)) + private_utils::getMembrOffset(nm)); return ret; }
-// for regular pointers
-template <typename C, typename M> inline M *getMembrPtr(const C *c, const M C::*m) { return (M *)((char *)c + private_utils::getMembrOffset(m)); }
-template <typename C, typename M, typename NC, typename NM> inline NM *getMembrPtr(const C *c, M const C::*m, const NM NC::*m2)
-{ return (M *)((char *)c + private_utils::getMembrOffset(m) + private_utils::getMembrOffset(m2)); }
 
 #include "utils.hpp"
 
