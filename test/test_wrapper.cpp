@@ -393,14 +393,6 @@ TEST_F(CStructWrapFixture, MembrDiffTest)
     EXPECT_EQ(vptr_buf - base, offset_buf);
     EXPECT_EQ(vptr_vbuf - base, offset_vbuf);
 
-    // Regular pointers
-    STestStruct dummy;
-    const uint8_t *dbase = reinterpret_cast<uint8_t *>(&dummy);
-    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::x)) - dbase, offset_x);
-    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::y)) - dbase, offset_y);
-    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::buf)) - dbase, offset_buf);
-    EXPECT_EQ(reinterpret_cast<uint8_t *>(getMembrPtr(&dummy, &STestStruct::vbuf)) - dbase, offset_vbuf);
-
     // Sub structure
     const size_t offset_sub = offsetof(STestStruct, sub);
     const size_t offset_sub_x = offset_sub + offsetof(STestStruct::SSubStruct, x);

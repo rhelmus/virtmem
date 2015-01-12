@@ -224,7 +224,20 @@ void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SLockPage *page)
     ASSERT(page->start != 0);
     if (page->dirty)
     {
+#if 0
         pushRawData(page->start, page->pool, page->size); // UNDONE: make this more efficient
+#else
+        void *data = pullRawData(page->start, page->size, true, false);
+        const int8_t pageindex = findFreePage(&bigPages, page->start, page->size, false);
+        ASSERT(pageindex != -1);
+
+        // only copy data if regular page is already dirty or data changed
+        if (bigPages.pages[pageindex].dirty || memcmp(data, page->pool, page->size) != 0)
+        {
+            memcpy(data, page->pool, page->size);
+            bigPages.pages[pageindex].dirty = true;
+        }
+#endif
         // UNDONE: unset dirty?
     }
 }
