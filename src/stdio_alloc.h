@@ -29,6 +29,7 @@ class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<
         ramFile = tmpfile();
         if (!ramFile)
             fprintf(stderr, "Unable to open ram file!");
+        this->writeZeros(0, this->getPoolSize()); // make sure it gets the right size
     }
 
     void doSuspend(void) { }

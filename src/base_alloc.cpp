@@ -3,7 +3,7 @@
  * https://github.com/eliben/code-for-blog/tree/master/2008/memmgr
  */
 
-#include "alloc.h"
+#include "base_alloc.h"
 #include "utils.h"
 
 //#include <algorithm>
@@ -15,13 +15,6 @@
 #ifdef PRINTF_STATS
 #include <stdio.h>
 #endif
-
-CBaseVirtMemAlloc::CBaseVirtMemAlloc(const TVirtPtrSize ps) : poolSize(ps), freePointer(0), nextPageToSwap(0)
-{
-    baseFreeList.s.next = 0;
-    baseFreeList.s.size = 0;
-    poolFreePos = START_OFFSET + sizeof(UMemHeader);
-}
 
 void CBaseVirtMemAlloc::initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize)
 {
@@ -40,10 +33,6 @@ void CBaseVirtMemAlloc::initPages(SPageInfo *info, SLockPage *pages, uint8_t *po
 #else
         info->pages[i].pool = &pool[i * psize];
 #endif
-        if (i == (pcount - 1))
-            info->pages[i].next = -1;
-        else
-            info->pages[i].next = i + 1;
     }
 }
 
@@ -327,17 +316,46 @@ CBaseVirtMemAlloc::SLockPage *CBaseVirtMemAlloc::findLockedPage(TVirtPointer p)
     return 0;
 }
 
+void CBaseVirtMemAlloc::writeZeros(uint32_t start, uint32_t n)
+{
+    ASSERT(bigPages.pages[0].start == 0);
+
+    // Use zeroed page as buffer
+    memset(bigPages.pages[0].pool, 0, bigPages.size);
+    for (TVirtPtrSize i=0; i<n; i+=bigPages.size)
+        doWrite(bigPages.pages[0].pool, start + i, private_utils::min(n - i, (TVirtPtrSize)bigPages.size));
+}
+
 void CBaseVirtMemAlloc::start()
 {
-    doStart();
+    freePointer = 0;
+    nextPageToSwap = 0;
+    baseFreeList.s.next = 0;
+    baseFreeList.s.size = 0;
+    poolFreePos = START_OFFSET + sizeof(UMemHeader);
+    memUsed = maxMemUsed = 0;
 
-    // Initialize ram file with zeros. Use zeroed page as buffer.
-    memset(bigPages.pages[0].pool, 0, bigPages.size);
-    for (TVirtPtrSize i=0; i<poolSize; i+=bigPages.size)
+    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    for (uint8_t pindex=0; pindex<3; ++pindex)
     {
-        const TVirtPtrSize s = (i + bigPages.size) < poolSize ? (bigPages.size) : (poolSize - i);
-        doWrite(bigPages.pages[0].pool, i, s);
+        plist[pindex]->freeIndex = 0;
+        plist[pindex]->lockedIndex = -1;
+
+        for (uint8_t i=0; i<plist[pindex]->count; ++i)
+        {
+            if (i == (plist[pindex]->count - 1))
+                plist[pindex]->pages[i].next = -1;
+            else
+                plist[pindex]->pages[i].next = i + 1;
+        }
     }
+
+    doStart();
+}
+
+void CBaseVirtMemAlloc::stop()
+{
+    doStop();
 }
 
 TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
@@ -363,6 +381,11 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
         // big enough ?
         if (consth->s.size >= quantity)
         {
+#ifdef VIRTMEM_TRACE_MEMUSAGE
+            memUsed += (consth->s.size * sizeof(UMemHeader));
+            maxMemUsed = private_utils::max(maxMemUsed, memUsed);
+#endif
+
             // exactly ?
             if (consth->s.size == quantity)
             {
@@ -426,6 +449,10 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
     const TVirtPointer hdrptr = ptr - sizeof(UMemHeader);
     UMemHeader statheader;
     memcpy(&statheader, getHeaderConst(hdrptr), sizeof(UMemHeader));
+
+#ifdef VIRTMEM_TRACE_MEMUSAGE
+            memUsed -= (statheader.s.size * sizeof(UMemHeader));
+#endif
 
     // Find the correct place to place the block in (the free list is sorted by
     // address, increasing order)

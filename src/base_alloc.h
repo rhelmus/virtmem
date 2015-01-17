@@ -7,6 +7,8 @@
 # include <valgrind/memcheck.h>
 #endif
 
+#include "config.h"
+
 #include <stdint.h>
 
 typedef uint32_t TVirtPointer;
@@ -71,6 +73,10 @@ private:
     TVirtPointer poolFreePos;
     int8_t nextPageToSwap;
 
+#ifdef VIRTMEM_TRACE_MEMUSAGE
+    TVirtPtrSize memUsed, maxMemUsed;
+#endif
+
     void initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
     TVirtPointer getMem(TVirtPtrSize size);
     void syncBigPage(SLockPage *page);
@@ -87,11 +93,13 @@ private:
     SLockPage *findLockedPage(TVirtPointer p);
 
 protected:
-    CBaseVirtMemAlloc(const TVirtPtrSize ps);
+    CBaseVirtMemAlloc(const TVirtPtrSize ps) : poolSize(ps) { }
 
     void initSmallPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
     void initMediumPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
     void initBigPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
+
+    void writeZeros(uint32_t start, uint32_t n); // NOTE: only call this in doStart()
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;
@@ -101,7 +109,7 @@ protected:
 
 public:
     void start(void);
-    void stop(void) { doStop(); }
+    void stop(void);
 
     TVirtPointer alloc(TVirtPtrSize size);
     void free(TVirtPointer ptr);
@@ -122,6 +130,11 @@ public:
     TVirtPtrSize getPoolSize(void) const { return poolSize; }
 
     void printStats(void);
+
+#ifdef VIRTMEM_TRACE_MEMUSAGE
+    TVirtPtrSize getMemUsed(void) const { return memUsed; }
+    TVirtPtrSize getMaxMemUsed(void) const { return maxMemUsed; }
+#endif
 };
 
 #endif // BASE_ALLOC_H
