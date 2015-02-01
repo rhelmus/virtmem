@@ -11,9 +11,9 @@ class CVirtMemAlloc : public CBaseVirtMemAlloc
     SLockPage mediumPagesData[TProperties::mediumPageCount];
     SLockPage bigPagesData[TProperties::bigPageCount];
 #ifdef NVALGRIND
-    uint8_t smallPagePool[TProperties::smallPageCount * TProperties::smallPageSize];
-    uint8_t mediumPagePool[TProperties::mediumPageCount * TProperties::mediumPageSize];
-    uint8_t bigPagePool[TProperties::bigPageCount * TProperties::bigPageSize];
+    uint8_t smallPagePool[TProperties::smallPageCount * TProperties::smallPageSize] __attribute__ ((aligned (sizeof(TAlign))));
+    uint8_t mediumPagePool[TProperties::mediumPageCount * TProperties::mediumPageSize] __attribute__ ((aligned (sizeof(TAlign))));
+    uint8_t bigPagePool[TProperties::bigPageCount * TProperties::bigPageSize] __attribute__ ((aligned (sizeof(TAlign))));
 #else
     uint8_t smallPagePool[TProperties::smallPageCount * (TProperties::smallPageSize + valgrindPad * 2)];
     uint8_t mediumPagePool[TProperties::mediumPageCount * (TProperties::mediumPageSize + valgrindPad * 2)];

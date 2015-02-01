@@ -17,8 +17,10 @@ typedef uint16_t TVirtPageSize;
 
 class CBaseVirtMemAlloc
 {
-    typedef void * TAlign;
+protected:
+    typedef double TAlign;
 
+private:
     enum
     {
         PAGE_MAX_CLEAN_SKIPS = 5, // if page is dirty: max tries for finding another clean page when swapping
@@ -73,8 +75,9 @@ private:
     TVirtPointer poolFreePos;
     int8_t nextPageToSwap;
 
-#ifdef VIRTMEM_TRACE_MEMUSAGE
+#ifdef VIRTMEM_TRACE_STATS
     TVirtPtrSize memUsed, maxMemUsed;
+    uint32_t bigPageReads, bigPageWrites;
 #endif
 
     void initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
@@ -131,9 +134,11 @@ public:
 
     void printStats(void);
 
-#ifdef VIRTMEM_TRACE_MEMUSAGE
+#ifdef VIRTMEM_TRACE_STATS
     TVirtPtrSize getMemUsed(void) const { return memUsed; }
     TVirtPtrSize getMaxMemUsed(void) const { return maxMemUsed; }
+    uint32_t getBigPageReads(void) const { return bigPageReads; }
+    uint32_t getBigPageWrites(void) const { return bigPageWrites; }
 #endif
 };
 

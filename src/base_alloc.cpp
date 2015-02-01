@@ -49,6 +49,10 @@ TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
         h.s.size = size;
         h.s.next = 0;
         write(poolFreePos, &h, sizeof(UMemHeader));
+#ifdef VIRTMEM_TRACE_STATS
+        // HACK: increase here to balance the subtraction by free()
+        memUsed += totalsize;
+#endif
         free(poolFreePos + sizeof(UMemHeader));
         poolFreePos += totalsize;
     }
@@ -68,6 +72,9 @@ void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
         doWrite(page->pool, page->start, bigPages.size);
         page->dirty = false;
         page->cleanSkips = 0;
+#ifdef VIRTMEM_TRACE_STATS
+        ++bigPageWrites;
+#endif
     }
 }
 
@@ -88,8 +95,26 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
 
     // Start by looking for fitting pages, the ideal situation
     if ((pageindex = findFreePage(&bigPages, p, size, forcestart)) != -1)
+    {
         pagefindstate = STATE_GOTFULL;
-    else if (pagefindstate != STATE_GOTFULL)
+
+#if 0
+        // check alignment
+        if (!forcestart)
+        {
+            if ((p - bigPages.pages[pageindex].start) & (sizeof(TAlign)-1))
+            {
+//                std::cout << "discard " << p << "/" << bigPages.pages[pageindex].start << std::endl;
+                // unaligned, discard
+                syncBigPage(&bigPages.pages[pageindex]);
+                bigPages.pages[pageindex].start = 0; // invalidate
+                pagefindstate = STATE_GOTPARTIAL;
+            }
+        }
+#endif
+    }
+
+    if (pagefindstate != STATE_GOTFULL)
     {
         for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
         {
@@ -99,10 +124,9 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
                 if ((p >= bigPages.pages[i].start && p < pageend) ||
                     (newpageend >= bigPages.pages[i].start && newpageend <= pageend))
                 {
-                    // partial overlap. Clean page and use it later.
+                    // partial overlap. Clean page and possibly use it later.
                     pageindex = i;
                     syncBigPage(&bigPages.pages[pageindex]);
-//                    std::cout << "invalidate page " << page->start << std::endl;
                     bigPages.pages[i].start = 0; // invalidate
                     pagefindstate = STATE_GOTPARTIAL;
                 }
@@ -150,15 +174,25 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
             nextPageToSwap = bigPages.freeIndex;
 
         // Load in page
-        doRead(bigPages.pages[pageindex].pool, p, bigPages.size);
+        if (!forcestart) // check alignment
+            bigPages.pages[pageindex].start = p - (p & (sizeof(TAlign) - 1));
+        else
+            bigPages.pages[pageindex].start = p;
 
-        bigPages.pages[pageindex].start = p;
+        doRead(bigPages.pages[pageindex].pool, bigPages.pages[pageindex].start, bigPages.size);
+
+#ifdef VIRTMEM_TRACE_STATS
+        ++bigPageReads;
+#endif
     }
 
     if (!readonly)
         bigPages.pages[pageindex].dirty = true;
 
     ASSERT(p >= bigPages.pages[pageindex].start);
+
+    /*if (size >= sizeof(TAlign) && (bigPages.pages[pageindex].start & (sizeof(TAlign)-1)))
+        std::cout << "unaligned pull: " << p << "/" << (p - bigPages.pages[pageindex].start) << std::endl;*/
 
     return &((uint8_t *)bigPages.pages[pageindex].pool)[p - bigPages.pages[pageindex].start];
 }
@@ -256,9 +290,9 @@ int8_t CBaseVirtMemAlloc::freeLockedPage(CBaseVirtMemAlloc::SPageInfo *pinfo, in
 {
     if (pinfo != &bigPages)
         syncLockedPage(&pinfo->pages[index]);
-    else if (pinfo->pages[index].size < pinfo->size)
+    else if (pinfo->pages[index].size < pinfo->size || (pinfo->pages[index].start & (sizeof(TAlign)-1)) != 0)
     {
-        // only synchronize shrunk big pages as they cannot be used for regular IO
+        // only synchronize shrunk big pages as they cannot be used for regular IO or unaligned pages
         syncLockedPage(&pinfo->pages[index]);
         // restore as regular unused free page
         pinfo->pages[index].start = 0;
@@ -333,7 +367,10 @@ void CBaseVirtMemAlloc::start()
     baseFreeList.s.next = 0;
     baseFreeList.s.size = 0;
     poolFreePos = START_OFFSET + sizeof(UMemHeader);
+#ifdef VIRTMEM_TRACE_STATS
     memUsed = maxMemUsed = 0;
+    bigPageReads = bigPageWrites = 0;
+#endif
 
     SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
     for (uint8_t pindex=0; pindex<3; ++pindex)
@@ -381,8 +418,8 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
         // big enough ?
         if (consth->s.size >= quantity)
         {
-#ifdef VIRTMEM_TRACE_MEMUSAGE
-            memUsed += (consth->s.size * sizeof(UMemHeader));
+#ifdef VIRTMEM_TRACE_STATS
+            memUsed += (quantity * sizeof(UMemHeader));
             maxMemUsed = private_utils::max(maxMemUsed, memUsed);
 #endif
 
@@ -450,7 +487,7 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
     UMemHeader statheader;
     memcpy(&statheader, getHeaderConst(hdrptr), sizeof(UMemHeader));
 
-#ifdef VIRTMEM_TRACE_MEMUSAGE
+#ifdef VIRTMEM_TRACE_STATS
             memUsed -= (statheader.s.size * sizeof(UMemHeader));
 #endif
 
