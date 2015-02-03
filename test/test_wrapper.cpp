@@ -236,6 +236,25 @@ TYPED_TEST(CLimitedWrapFixture, WrappedArithmeticTest)
     delete [] buf;
 }
 
+TEST_F(CIntWrapFixture, AlignmentTest)
+{
+    const int bufsize = 17;
+
+    this->wrapper = this->wrapper.alloc();
+    TCharVirtPtr buf = buf.alloc(bufsize);
+    TCharVirtPtr unalignedbuf = &buf[1];
+    valloc.clearPages();
+    volatile char c = *unalignedbuf; // force load of unaligned address
+    ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->wrapper.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);
+
+    // check if int is still aligned after locking a big page
+    valloc.clearPages();
+    valloc.makeLock(unalignedbuf.getRawNum(), valloc.getBigPageSize(), true);
+    valloc.releaseLock(unalignedbuf.getRawNum());
+
+    ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->wrapper.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);
+}
+
 TEST_F(CClassWrapFixture, ClassAllocTest)
 {
     ASSERT_EQ(CTestClass::constructedClasses, 0);

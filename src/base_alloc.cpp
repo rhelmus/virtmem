@@ -179,6 +179,8 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
         else
             bigPages.pages[pageindex].start = p;
 
+//        std::cout << "start: " << bigPages.pages[pageindex].start <<"/" << p << std::endl;
+
         doRead(bigPages.pages[pageindex].pool, bigPages.pages[pageindex].start, bigPages.size);
 
 #ifdef VIRTMEM_TRACE_STATS
@@ -679,7 +681,12 @@ void *CBaseVirtMemAlloc::makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
                     }
                     else // still locked, using a different, presumably larger, page size
                     {
-                        ASSERT(plist[pindex]->size > pinfo->size);
+//                        ASSERT(plist[pindex]->size > pinfo->size);
+                        // size smaller than asked?
+                        // this may happen if lock was resized and put in smaller page
+                        if (plist[pindex]->size < pinfo->size)
+                            size = private_utils::min(size, plist[pindex]->size);
+
                         pinfo = plist[pindex];
 //                        std::cout << "use secondary locked page\n";
 

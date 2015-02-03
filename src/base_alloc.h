@@ -18,7 +18,11 @@ typedef uint16_t TVirtPageSize;
 class CBaseVirtMemAlloc
 {
 protected:
+#if defined(__x86_64__) || defined(_M_X64)
+    typedef __uint128_t TAlign;
+#else
     typedef double TAlign;
+#endif
 
 private:
     enum

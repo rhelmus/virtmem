@@ -137,7 +137,6 @@ public:
         {
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
-
             return static_cast<T *>(getAlloc()->makeLock(getPtrNum(ptr), sizeof(T)));
         }
         const T *operator->(void) const
