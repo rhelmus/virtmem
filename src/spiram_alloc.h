@@ -17,8 +17,6 @@ struct SSPIRAMMemAllocProperties
     static const uint32_t poolSize = 1024 * 128; // 128 kB
 };
 
-template <typename> class CSdfatlibVirtMemAlloc;
-
 template <typename TProperties=SSPIRAMMemAllocProperties>
 class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAlloc<TProperties> >
 {

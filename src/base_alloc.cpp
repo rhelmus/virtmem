@@ -90,7 +90,6 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
      * Otherwise look for dirty pages in a FIFO way. */
 
     int8_t pageindex = -1;
-    const TVirtPointer newpageend = p + bigPages.size;
     enum { STATE_GOTFULL, STATE_GOTPARTIAL, STATE_GOTEMPTY, STATE_GOTCLEAN, STATE_GOTDIRTY, STATE_GOTNONE } pagefindstate = STATE_GOTNONE;
 
     // Start by looking for fitting pages, the ideal situation
@@ -98,6 +97,8 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
         pagefindstate = STATE_GOTFULL;
     else if (pagefindstate != STATE_GOTFULL)
     {
+        const TVirtPointer newpageend = p + bigPages.size;
+
         for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
         {
             if (bigPages.pages[i].start != 0)
@@ -156,7 +157,13 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
 
         // Load in page
         if (!forcestart) // check alignment
-            bigPages.pages[pageindex].start = p - (p & (sizeof(TAlign) - 1));
+        {
+            const TVirtPointer alignp = p - (p & (sizeof(TAlign) - 1));
+            if ((alignp + bigPages.size) >= (p + size))
+                bigPages.pages[pageindex].start = alignp;
+            else
+                bigPages.pages[pageindex].start = p;
+        }
         else
             bigPages.pages[pageindex].start = p;
 
@@ -207,7 +214,7 @@ int8_t CBaseVirtMemAlloc::findFreePage(CBaseVirtMemAlloc::SPageInfo *pinfo, TVir
     for (int8_t i=pinfo->freeIndex; i!=-1; i=pinfo->pages[i].next)
     {
         if (pinfo->pages[i].start != 0 && ((atstart && pinfo->pages[i].start == p) ||
-            (!atstart && p >= pinfo->pages[i].start && pend <= (pinfo->pages[i].start + pinfo->size))))
+            (!atstart && p >= pinfo->pages[i].start && pend <= (pinfo->pages[i].start + pinfo->pages[i].size))))
             return i;
     }
 
@@ -367,8 +374,11 @@ void CBaseVirtMemAlloc::start()
                 plist[pindex]->pages[i].next = -1;
             else
                 plist[pindex]->pages[i].next = i + 1;
+
+            if (plist[pindex] == &bigPages)
+                plist[pindex]->pages[i].size = plist[pindex]->size;
         }
-    }
+    }    
 
     doStart();
 }

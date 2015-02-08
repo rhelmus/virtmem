@@ -27,7 +27,8 @@ HEADERS += \
     sdfatlib_alloc.h \
     alloc.h \
     wrapper_utils.h \
-    spiram_alloc.h
+    spiram_alloc.h \
+    static_alloc.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
