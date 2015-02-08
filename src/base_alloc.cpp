@@ -95,26 +95,8 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
 
     // Start by looking for fitting pages, the ideal situation
     if ((pageindex = findFreePage(&bigPages, p, size, forcestart)) != -1)
-    {
         pagefindstate = STATE_GOTFULL;
-
-#if 0
-        // check alignment
-        if (!forcestart)
-        {
-            if ((p - bigPages.pages[pageindex].start) & (sizeof(TAlign)-1))
-            {
-//                std::cout << "discard " << p << "/" << bigPages.pages[pageindex].start << std::endl;
-                // unaligned, discard
-                syncBigPage(&bigPages.pages[pageindex]);
-                bigPages.pages[pageindex].start = 0; // invalidate
-                pagefindstate = STATE_GOTPARTIAL;
-            }
-        }
-#endif
-    }
-
-    if (pagefindstate != STATE_GOTFULL)
+    else if (pagefindstate != STATE_GOTFULL)
     {
         for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
         {
@@ -124,7 +106,6 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
                 if ((p >= bigPages.pages[i].start && p < pageend) ||
                     (newpageend >= bigPages.pages[i].start && newpageend <= pageend))
                 {
-                    // partial overlap. Clean page and possibly use it later.
                     pageindex = i;
                     syncBigPage(&bigPages.pages[pageindex]);
                     bigPages.pages[i].start = 0; // invalidate
