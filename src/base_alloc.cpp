@@ -8,13 +8,16 @@
 
 //#include <algorithm>
 //#include <iomanip>
-//#include <iostream>
+#include <iostream>
 
 #include <string.h>
 
 #ifdef PRINTF_STATS
 #include <stdio.h>
 #endif
+
+#undef min
+#undef max
 
 void CBaseVirtMemAlloc::initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize)
 {
@@ -80,6 +83,9 @@ void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
 
 void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
 {
+    if (!p || p>= poolSize)
+        std::cout << "p: " << p << "/" << poolSize << "\n";
+
     ASSERT(p && p < poolSize);
 
     /* If a page is found which fits within the pointer: take that and abort search; no overlap can occur
@@ -481,7 +487,7 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
     memcpy(&statheader, getHeaderConst(hdrptr), sizeof(UMemHeader));
 
 #ifdef VIRTMEM_TRACE_STATS
-            memUsed -= (statheader.s.size * sizeof(UMemHeader));
+    memUsed -= (statheader.s.size * sizeof(UMemHeader));
 #endif
 
     // Find the correct place to place the block in (the free list is sorted by
