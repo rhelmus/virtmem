@@ -23,6 +23,6 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/../src/libvirtmem.a
 LIBS += -lgtest -lgtest_main
 DEFINES += __STDC_FORMAT_MACROS
 QMAKE_CXXFLAGS_RELEASE += -Os
-QMAKE_CXXFLAGS += -std=gnu++11 -pthread
-QMAKE_LFLAGS += -pthread
+QMAKE_CXXFLAGS += -m32 -std=gnu++11 -pthread
+QMAKE_LFLAGS += -m32 -pthread
 QMAKE += thread

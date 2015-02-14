@@ -8,9 +8,11 @@
 
 //#include <algorithm>
 //#include <iomanip>
-#include <iostream>
+//#include <iostream>
 
 #include <string.h>
+
+//#define PRINTF_STATS
 
 #ifdef PRINTF_STATS
 #include <stdio.h>
@@ -83,9 +85,6 @@ void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
 
 void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
 {
-    if (!p || p>= poolSize)
-        std::cout << "p: " << p << "/" << poolSize << "\n";
-
     ASSERT(p && p < poolSize);
 
     /* If a page is found which fits within the pointer: take that and abort search; no overlap can occur
@@ -162,7 +161,7 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
             nextPageToSwap = bigPages.freeIndex;
 
         // Load in page
-        if (!forcestart) // check alignment
+        if (/*!forcestart*/false) // check alignment UNDONE
         {
             const TVirtPointer alignp = p - (p & (sizeof(TAlign) - 1));
             if ((alignp + bigPages.size) >= (p + size))
@@ -189,6 +188,8 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
 
     /*if (size >= sizeof(TAlign) && (bigPages.pages[pageindex].start & (sizeof(TAlign)-1)))
         std::cout << "unaligned pull: " << p << "/" << (p - bigPages.pages[pageindex].start) << std::endl;*/
+
+//    std::cout << "pullRawData returning: " << p << "/" << (int)pageindex << "/" << bigPages.pages[pageindex].start << "/" << (void *)&((uint8_t *)bigPages.pages[pageindex].pool)[p - bigPages.pages[pageindex].start] << std::endl;
 
     return &((uint8_t *)bigPages.pages[pageindex].pool)[p - bigPages.pages[pageindex].start];
 }
@@ -286,7 +287,7 @@ int8_t CBaseVirtMemAlloc::freeLockedPage(CBaseVirtMemAlloc::SPageInfo *pinfo, in
 {
     if (pinfo != &bigPages)
         syncLockedPage(&pinfo->pages[index]);
-    else if (pinfo->pages[index].size < pinfo->size || (pinfo->pages[index].start & (sizeof(TAlign)-1)) != 0)
+    else if (pinfo->pages[index].size < pinfo->size /*|| (pinfo->pages[index].start & (sizeof(TAlign)-1)) != 0*/)
     {
         // only synchronize shrunk big pages as they cannot be used for regular IO or unaligned pages
         syncLockedPage(&pinfo->pages[index]);
@@ -541,6 +542,63 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 
 void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
 {
+    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    const TVirtPointer pend = p + size;
+
+    for (uint8_t pindex=0; pindex<3; ++pindex)
+    {
+        for (int8_t i=plist[pindex]->lockedIndex; i!=-1; i=plist[pindex]->pages[i].next)
+        {
+            const bool beginoverlaps = (p >= plist[pindex]->pages[i].start &&
+                                      p < (plist[pindex]->pages[i].start + plist[pindex]->pages[i].size));
+            const bool endoverlaps = (p < plist[pindex]->pages[i].start && pend > plist[pindex]->pages[i].start);
+
+            if (beginoverlaps)
+            {
+                const TVirtPointer offset = p - plist[pindex]->pages[i].start;
+                // data fits in this page?
+                if ((offset + size) <= plist[pindex]->pages[i].size)
+                {
+        //            std::cout << "using temp lock page " << (int)(pageindex) << ", " << p << std::endl;
+                    return (char *)plist[pindex]->pages[i].pool + offset;
+                }
+            }
+
+            if (beginoverlaps || endoverlaps)
+            {
+                // only fits partially... mirror data to normal page so a continuous block can be returned
+                pushRawData(plist[pindex]->pages[i].start, plist[pindex]->pages[i].pool,
+                            plist[pindex]->pages[i].size); // UNDONE: partial copy, check dirty?
+
+//                std::cout << "mirrored partial page: " << (int)pindex << "/" << (int)(i) << std::endl;
+//                syncLockedPage(plist[pindex]->pages[i]); // UNDONE
+            }
+
+#if 0
+            // lock within requested memory range?
+            if ((p >= plist[pindex]->pages[i].start &&
+                 p < (plist[pindex]->pages[i].start + plist[pindex]->pages[i].size)) ||
+                (p < plist[pindex]->pages[i].start && pend > plist[pindex]->pages[i].start))
+            {
+                const TVirtPointer offset = p - plist[pindex]->pages[i].start;
+                // data fits in this page?
+                if ((offset + size) <= plist[pindex]->pages[i].size)
+                {
+        //            std::cout << "using temp lock page " << (int)(pageindex) << ", " << p << std::endl;
+                    return (char *)plist[pindex]->pages[i].pool + offset;
+                }
+
+                // only fits partially... mirror data to normal page so a continuous block can be returned
+                pushRawData(plist[pindex]->pages[i].start, plist[pindex]->pages[i].pool,
+                            plist[pindex]->pages[i].size); // UNDONE: partial copy, check dirty?
+
+                std::cout << "mirrored partial page: " << (int)pindex << "/" << (int)(i) << std::endl;
+//                syncLockedPage(plist[pindex]->pages[i]); // UNDONE
+            }
+#endif
+        }
+    }
+#if 0
     // check if data is in a locked page first
     SLockPage *page = findLockedPage(p);
     if (page)
@@ -559,6 +617,7 @@ void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
 //        std::cout << "mirrored partial page " << (int)(page) << std::endl;
     }
 //    std::cout << "read in regular page " << p << "/" << size << std::endl;
+#endif
 
     // not in or too big for partial page, use regular paged memory
     return pullRawData(p, size, true, false);
@@ -566,6 +625,70 @@ void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
 
 void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
 {
+    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    const TVirtPointer pend = p + size;
+
+    for (uint8_t pindex=0; pindex<3; ++pindex)
+    {
+        for (int8_t i=plist[pindex]->lockedIndex; i!=-1; i=plist[pindex]->pages[i].next)
+        {
+            const bool beginoverlaps = (p >= plist[pindex]->pages[i].start &&
+                                      p < (plist[pindex]->pages[i].start + plist[pindex]->pages[i].size));
+            const bool endoverlaps = (p < plist[pindex]->pages[i].start && pend > plist[pindex]->pages[i].start);
+
+            if (!plist[pindex]->pages[i].dirty && (beginoverlaps || endoverlaps))
+                plist[pindex]->pages[i].dirty = true;
+
+            if (beginoverlaps)
+            {
+                const TVirtPointer offset = p - plist[pindex]->pages[i].start;
+                // data fits in this page?
+                if ((offset + size) <= plist[pindex]->pages[i].size)
+                {
+                    memcpy((char *)plist[pindex]->pages[i].pool + offset, d, size);
+                    return;
+                }
+                else
+                {
+                    // partial fit (data too large), copy stuff that fits in page
+                    memcpy((char *)plist[pindex]->pages[i].pool + offset, d, plist[pindex]->pages[i].size - offset);
+                }
+            }
+            else if (endoverlaps)
+            {
+                // partial fit (data starts before), copy stuff that fits in page
+                const TVirtPointer offset = plist[pindex]->pages[i].start - p;
+                memcpy((char *)plist[pindex]->pages[i].pool, (uint8_t *)d + offset, size - offset);
+            }
+
+#if 0
+            // lock within requested address?
+            if ((p >= plist[pindex]->pages[i].start &&
+                 p < (plist[pindex]->pages[i].start + plist[pindex]->pages[i].size)) ||
+                (p < plist[pindex]->pages[i].start && pend > plist[pindex]->pages[i].start))
+            {
+                const TVirtPointer offset = p - plist[pindex]->pages[i].start;
+                // data fits in this page?
+                if ((offset + size) <= plist[pindex]->pages[i].size)
+                {
+                    memcpy((char *)plist[pindex]->pages[i].pool + offset, d, size);
+                    return;
+                }
+                else
+                {
+                    // partial fit, copy stuff that fits in page
+                    memcpy((char *)plist[pindex]->pages[i].pool + offset, d, plist[pindex]->pages[i].size - offset);
+                }
+            }
+#endif
+        }
+    }
+
+    // data was either not or partially in a lock if we are here
+    // UNDONE: partial copy if data was partially in locks?
+    pushRawData(p, d, size);
+
+#if 0
     // check if data is in a locked page first
     SLockPage *page = findLockedPage(p);
     if (page)
@@ -595,6 +718,7 @@ void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
         pushRawData(p, d, size);
 //        std::cout << "write in regular page " << p << "/" << size << ": " << (int)*(char *)d << std::endl;
     }
+#endif
 }
 
 void CBaseVirtMemAlloc::flush()
@@ -1019,5 +1143,6 @@ void CBaseVirtMemAlloc::printStats()
         printf("Empty\n");
 
     printf("\n");
+    fflush(stdout);
 #endif
 }
