@@ -384,6 +384,10 @@ void CBaseVirtMemAlloc::start()
 
             if (plist[pindex] == &bigPages)
                 plist[pindex]->pages[i].size = plist[pindex]->size;
+            plist[pindex]->pages[i].start = 0;
+            plist[pindex]->pages[i].locks = 0;
+            plist[pindex]->pages[i].cleanSkips = 0;
+            plist[pindex]->pages[i].dirty = false;
         }
     }    
 
@@ -428,20 +432,24 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
             {
                 // just eliminate this block from the free list by pointing
                 // its prev's next to its next
-
                 TVirtPointer next = consth->s.next;
-                UMemHeader prevh = *getHeaderConst(prevp);
+//                UMemHeader prevh = *getHeaderConst(prevp); // UNDONE: this seems to sometimes crash while memcpy doesn't?!?
+                UMemHeader prevh;
+                memcpy(&prevh, getHeaderConst(prevp), sizeof(UMemHeader));
                 prevh.s.next = next;
                 updateHeader(prevp, &prevh);
                 // NOTE: getHeaderConst might invalidate h from here ----
             }
             else // too big
             {
-                UMemHeader h = *consth;
+                //UMemHeader h = *consth;
+                UMemHeader h;
+                memcpy(&h, consth, sizeof(UMemHeader));
                 h.s.size -= quantity;
                 updateHeader(p, &h);
                 p += (h.s.size * sizeof(UMemHeader));
-                h = *getHeaderConst(p);
+//                h = *getHeaderConst(p);
+                memcpy(&h, getHeaderConst(p), sizeof(UMemHeader));
                 h.s.size = quantity;
                 updateHeader(p, &h);
             }
@@ -871,7 +879,7 @@ void *CBaseVirtMemAlloc::makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
     }
 
     ASSERT(pageindex == -1 || size >= pinfo->pages[pageindex].size);
-    ASSERT(pageindex == -1 || size == pinfo->pages[pageindex].size || !pinfo->pages[pageindex].locks);
+//    ASSERT(pageindex == -1 || size == pinfo->pages[pageindex].size || !pinfo->pages[pageindex].locks); // UNDONE
     ASSERT(pageindex == -1 || !fixbeginningoverlap);
 
     // does it fit in a smaller page now?

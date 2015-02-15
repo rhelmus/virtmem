@@ -14,7 +14,7 @@
         if ((x)) ; else \
         { \
             Serial.print("Assertion failed!: "); Serial.print(#x); Serial.print(" @ "); Serial.print(__FILE__); Serial.print(":"); Serial.println(__LINE__); \
-            /*while (true)*/ \
+            while (true) \
                 ; \
         } \
     } \

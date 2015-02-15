@@ -40,14 +40,14 @@ class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAllo
     {
         const uint32_t t = micros();
         serialRAM.read((char *)data, offset, size);
-        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
+//        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
         const uint32_t t = micros();
         serialRAM.write((const char *)data, offset, size);
-        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
+//        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:
