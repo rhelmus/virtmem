@@ -8,8 +8,8 @@
 // UNDONE: settings below
 struct SStaticAllocProperties
 {
-    static const uint8_t smallPageCount = 4, smallPageSize = 128;
-    static const uint8_t mediumPageCount = 4, mediumPageSize = 255;
+    static const uint8_t smallPageCount = 4, smallPageSize = 32;
+    static const uint8_t mediumPageCount = 4, mediumPageSize = 64;
     static const uint8_t bigPageCount = 4;
     static const uint16_t bigPageSize = 1024;
     static const uint32_t poolSize = 1024 * 32;
