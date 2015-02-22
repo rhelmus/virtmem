@@ -13,7 +13,7 @@ struct SSPIRAMMemAllocProperties
     static const uint8_t smallPageCount = 4, smallPageSize = 32;
     static const uint8_t mediumPageCount = 4, mediumPageSize = 64;
     static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024;
+    static const uint16_t bigPageSize = 512;
     static const uint32_t poolSize = 1024 * 128; // 128 kB
 };
 

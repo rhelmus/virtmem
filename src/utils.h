@@ -7,6 +7,26 @@
 #else
 #include <Arduino.h>
 
+// From https://forum.pjrc.com/threads/23256-Get-Free-Memory-for-Teensy-3-0?p=34242&viewfull=1#post34242
+inline void freeRam(const char *msg)
+{
+    uint32_t stacktop;
+    uint32_t heaptop;
+
+    // current position of the stack.
+    stacktop = (uint32_t)&stacktop;
+
+    // current position of heap.
+    void *top = malloc(1);
+    heaptop = (uint32_t)top;
+    free(top);
+
+    // The difference is the free, available ram.
+    Serial.print(msg); Serial.println(stacktop - heaptop);
+
+//    return stacktop - heaptop;
+}
+
 #if 1
 #define ASSERT(x) \
     do \
