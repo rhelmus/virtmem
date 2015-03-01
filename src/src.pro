@@ -13,7 +13,8 @@ CONFIG += staticlib
 SOURCES += \
     wrapper.cpp \
     base_alloc.cpp \
-    utils.cpp
+    utils.cpp \
+    serram_utils.cpp
 
 HEADERS += \
     virtmem.h \
@@ -28,7 +29,9 @@ HEADERS += \
     alloc.h \
     wrapper_utils.h \
     spiram_alloc.h \
-    static_alloc.h
+    static_alloc.h \
+    serram_utils.h \
+    serram_alloc.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
@@ -40,4 +43,6 @@ QMAKE_CXXFLAGS +=  -std=gnu++11 -ffunction-sections -fdata-sections
 QMAKE_LFLAGS += -Wl,--gc-sections
 
 OTHER_FILES += \
-    arduinofy.sh
+    arduinofy.sh \
+    ../script/serial_host.py \
+    ../script/serialiohandler.py
