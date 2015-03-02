@@ -46,6 +46,7 @@ def init():
 def main():
     init()
     monitorInput()
+    global doQuit
     doQuit = True
     serIOThread.join()
 

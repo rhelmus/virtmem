@@ -55,7 +55,10 @@ uint8_t readUInt8()
 void readBlock(char *data, uint32_t size)
 {
     while (size)
+    {
+        Serial.print("readBlock: "); Serial.println(size);
         size -= Serial.readBytes(data, size);
+    }
 }
 
 void sendWriteCommand(uint8_t cmd)
