@@ -1,5 +1,5 @@
-#ifndef SERRAM_UTILS_H
-#define SERRAM_UTILS_H
+#ifndef VIRTMEM_SERRAM_UTILS_H
+#define VIRTMEM_SERRAM_UTILS_H
 
 namespace SerramUtils {
 
@@ -17,4 +17,4 @@ void init(uint32_t baud, uint32_t poolsize);
 
 }
 
-#endif // SERRAM_UTILS_H
+#endif // VIRTMEM_SERRAM_UTILS_H

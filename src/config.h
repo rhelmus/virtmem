@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef VIRTMEM_CONFIG_H
+#define VIRTMEM_CONFIG_H
 
 #define VIRTMEM_WRAP_CPOINTERS
 #define VIRTMEM_TRACE_STATS

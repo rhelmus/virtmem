@@ -389,7 +389,7 @@ void CBaseVirtMemAlloc::start()
             plist[pindex]->pages[i].cleanSkips = 0;
             plist[pindex]->pages[i].dirty = false;
         }
-    }    
+    }
 
     doStart();
 }

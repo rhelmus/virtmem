@@ -1,5 +1,5 @@
-#ifndef BASE_ALLOC_H
-#define BASE_ALLOC_H
+#ifndef VIRTMEM_BASE_ALLOC_H
+#define VIRTMEM_BASE_ALLOC_H
 
 #define NVALGRIND
 
@@ -146,4 +146,4 @@ public:
 #endif
 };
 
-#endif // BASE_ALLOC_H
+#endif // VIRTMEM_BASE_ALLOC_H

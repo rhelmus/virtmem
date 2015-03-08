@@ -58,6 +58,7 @@ void readBlock(char *data, uint32_t size)
     {
         Serial.print("readBlock: "); Serial.println(size);
         size -= Serial.readBytes(data, size);
+        Serial.print("readBlock post: "); Serial.println(size);
     }
 }
 

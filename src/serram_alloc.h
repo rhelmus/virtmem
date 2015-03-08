@@ -1,5 +1,5 @@
-#ifndef SERRAM_ALLOC_H
-#define SERRAM_ALLOC_H
+#ifndef VIRTMEM_SERRAM_ALLOC_H
+#define VIRTMEM_SERRAM_ALLOC_H
 
 #include <Arduino.h>
 #include "alloc.h"
@@ -60,4 +60,4 @@ template <typename, typename> class CVirtPtr;
 template <typename T> struct TSerRAMVirtPtr { typedef CVirtPtr<T, CSerRAMVirtMemAlloc<> > type; };
 
 
-#endif // SERRAM_ALLOC_H
+#endif // VIRTMEM_SERRAM_ALLOC_H

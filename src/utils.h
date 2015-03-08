@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef VIRTMEM_UTILS_H
+#define VIRTMEM_UTILS_H
 
 #ifndef ARDUINO
 #include <assert.h>
@@ -69,4 +69,4 @@ template <typename T> struct TAntiConst<const T> { typedef T type; };
 #pragma pop_macro("min")
 #pragma pop_macro("max")
 
-#endif // UTILS_H
+#endif // VIRTMEM_UTILS_H

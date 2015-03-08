@@ -1,5 +1,5 @@
-#ifndef SDFATLIB_ALLOC_H
-#define SDFATLIB_ALLOC_H
+#ifndef VIRTMEM_SDFATLIB_ALLOC_H
+#define VIRTMEM_SDFATLIB_ALLOC_H
 
 #include "alloc.h"
 
@@ -72,4 +72,4 @@ public:
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TSdfatlibVirtPtr { typedef CVirtPtr<T, CSdfatlibVirtMemAlloc<> > type; };
 
-#endif // SDFATLIB_ALLOC_H
+#endif // VIRTMEM_SDFATLIB_ALLOC_H

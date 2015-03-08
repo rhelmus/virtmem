@@ -1,5 +1,5 @@
-#ifndef WRAPPER_UTILS_H
-#define WRAPPER_UTILS_H
+#ifndef VIRTMEM_WRAPPER_UTILS_H
+#define VIRTMEM_WRAPPER_UTILS_H
 
 #include "wrapper.h"
 
@@ -74,4 +74,4 @@ template <typename C, typename M, typename NC, typename NM, typename A> inline C
 
 #include "utils.hpp"
 
-#endif // WRAPPER_UTILS_H
+#endif // VIRTMEM_WRAPPER_UTILS_H

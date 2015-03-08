@@ -1,5 +1,5 @@
-#ifndef SPIRAM_ALLOC_H
-#define SPIRAM_ALLOC_H
+#ifndef VIRTMEM_SPIRAM_ALLOC_H
+#define VIRTMEM_SPIRAM_ALLOC_H
 
 #include <Arduino.h>
 #include "alloc.h"
@@ -58,4 +58,4 @@ public:
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TSPIRAMVirtPtr { typedef CVirtPtr<T, CSPIRAMVirtMemAlloc<> > type; };
 
-#endif // SPIRAM_ALLOC_H
+#endif // VIRTMEM_SPIRAM_ALLOC_H

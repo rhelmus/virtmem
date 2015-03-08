@@ -1,5 +1,5 @@
-#ifndef STATIC_ALLOC_H
-#define STATIC_ALLOC_H
+#ifndef VIRTMEM_STATIC_ALLOC_H
+#define VIRTMEM_STATIC_ALLOC_H
 
 // allocator using static array; for testing
 
@@ -41,4 +41,4 @@ template <typename, typename> class CVirtPtr;
 template <typename T> struct TStaticVirtPtr { typedef CVirtPtr<T, CStaticVirtMemAlloc<> > type; };
 
 
-#endif // STATIC_ALLOC_H
+#endif // VIRTMEM_STATIC_ALLOC_H

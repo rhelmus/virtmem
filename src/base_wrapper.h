@@ -1,5 +1,5 @@
-#ifndef BASE_WRAPPER_H
-#define BASE_WRAPPER_H
+#ifndef VIRTMEM_BASE_WRAPPER_H
+#define VIRTMEM_BASE_WRAPPER_H
 
 #include "config.h"
 #include "alloc.h"
@@ -129,4 +129,4 @@ public:
 
 };
 
-#endif // BASE_WRAPPER_H
+#endif // VIRTMEM_BASE_WRAPPER_H

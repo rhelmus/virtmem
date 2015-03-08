@@ -1,5 +1,5 @@
-#ifndef ALLOC_H
-#define ALLOC_H
+#ifndef VIRTMEM_ALLOC_H
+#define VIRTMEM_ALLOC_H
 
 #include "base_alloc.h"
 
@@ -23,7 +23,6 @@ class CVirtMemAlloc : public CBaseVirtMemAlloc
 
 protected:
     CVirtMemAlloc(void) : CBaseVirtMemAlloc(TProperties::poolSize)
-
     {
         ASSERT(!instance);
         instance = this;
@@ -50,4 +49,4 @@ template <typename TProperties, typename TDerived>
 CVirtMemAlloc<TProperties, TDerived> *CVirtMemAlloc<TProperties, TDerived>::instance = 0;
 
 
-#endif // ALLOC_H
+#endif // VIRTMEM_ALLOC_H

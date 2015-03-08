@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef VIRTMEM_UTILS_HPP
+#define VIRTMEM_UTILS_HPP
 
 #include "config.h"
 #include "utils.h"
@@ -472,4 +472,4 @@ template <typename A> int strlen(CVirtPtr<char, A> str) { return strlen(static_c
 #pragma pop_macro("min")
 #pragma pop_macro("max")
 
-#endif // UTILS_HPP
+#endif // VIRTMEM_UTILS_HPP

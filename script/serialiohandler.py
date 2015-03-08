@@ -1,15 +1,17 @@
 import datetime
+from collections import deque
 import serial
 import struct
 import time
 
 class Commands:
-    init, initPool, read, write = range(0, 4)
+    init, initPool, read, write, requestInput = range(0, 5)
 
 class State:
     initialized = False
     processState = 'idle'
     initValue, memoryPool = None, None
+    inputQueue = deque()
 
 serInterface = serial.Serial()
 
@@ -48,6 +50,10 @@ def handleCommand(command):
     elif command == Commands.initPool:
         State.memoryPool = bytearray(readInt())
         print("init pool:", len(State.memoryPool))
+    elif command == Commands.requestInput:
+        sendCommand(Commands.requestInput)
+        while State.inputQueue:
+            serInterface.write(State.inputQueue.pop())
     elif State.memoryPool == None:
         print("WARNING: tried to read/write unitialized memory pool")
     elif command == Commands.read:
@@ -74,8 +80,8 @@ def ensureConnection():
         while (datetime.datetime.now() - curtime).total_seconds() < 0.5:
             byte = serInterface.read(1)
             while byte:
-                print("byte: ", byte)
-                processByte(byte, False)
+#                print("byte: ", byte)
+                processByte(byte, True)
                 if State.initialized:
                     return
                 byte = serInterface.read(1)
@@ -110,3 +116,4 @@ def update():
 
 def processInput(line):
     print("Processing input line:", line, end='')
+    State.inputQueue.appendleft(line)
