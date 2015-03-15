@@ -45,6 +45,15 @@ uint32_t readUInt32()
     return ret;
 }
 
+uint16_t readUInt16()
+{
+    while (true)
+    {
+        if (Serial.available() >= 2)
+            return Serial.read() | (Serial.read() << 8);
+    }
+}
+
 uint8_t readUInt8()
 {
     while (!Serial.available())
@@ -112,5 +121,59 @@ void init(uint32_t baud, uint32_t poolsize)
     sendWriteCommand(CMD_INITPOOL);
     writeUInt32(poolsize);
 }
+
+
+uint32_t CSerialInput::available()
+{
+    sendReadCommand(CMD_INPUTAVAILABLE);
+    waitForCommand(CMD_INPUTAVAILABLE);
+    return readUInt32();
+}
+
+uint32_t CSerialInput::availableAtLeast()
+{
+    if (availableMin == 0)
+        availableMin = available();
+    return availableMin;
+}
+
+int16_t CSerialInput::read()
+{
+    sendReadCommand(CMD_INPUTREQUEST);
+    writeUInt32(1);
+    waitForCommand(CMD_INPUTREQUEST);
+
+    if (readUInt32() == 0)
+        return -1; // no data
+
+    if (availableMin)
+        --availableMin;
+    return readUInt8();
+}
+
+uint32_t CSerialInput::readBytes(char *buffer, uint32_t count)
+{
+    sendReadCommand(CMD_INPUTREQUEST);
+    writeUInt32(count);
+    waitForCommand(CMD_INPUTREQUEST);
+    count = readUInt32();
+    for (; count; --count, ++buffer)
+        *buffer = readUInt8();
+    if (availableMin > count)
+        availableMin -= count;
+    else
+        availableMin = 0;
+    return count;
+}
+
+int16_t CSerialInput::peek()
+{
+    sendReadCommand(CMD_INPUTPEEK);
+    waitForCommand(CMD_INPUTPEEK);
+    if (readUInt8() == 0)
+        return -1; // nothing there
+    return readUInt8();
+}
+
 
 }

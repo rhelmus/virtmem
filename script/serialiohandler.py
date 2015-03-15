@@ -1,22 +1,24 @@
 import datetime
-from collections import deque
 import serial
 import struct
 import time
 
 class Commands:
-    init, initPool, read, write, requestInput = range(0, 5)
+    init, initPool, read, write, inputAvailable, inputRequest, inputPeek = range(0, 7)
 
 class State:
     initialized = False
     processState = 'idle'
     initValue, memoryPool = None, None
-    inputQueue = deque()
+    inputData = bytearray()
 
 serInterface = serial.Serial()
 
 def readInt():
     return struct.unpack('i', serInterface.read(4))[0]
+
+def writeInt(i):
+    serInterface.write(struct.pack('i', i))
 
 def sendCommand(cmd):
     serInterface.write(bytes([State.initValue]))
@@ -50,10 +52,22 @@ def handleCommand(command):
     elif command == Commands.initPool:
         State.memoryPool = bytearray(readInt())
         print("init pool:", len(State.memoryPool))
-    elif command == Commands.requestInput:
-        sendCommand(Commands.requestInput)
-        while State.inputQueue:
-            serInterface.write(State.inputQueue.pop())
+    elif command == Commands.inputAvailable:
+        sendCommand(Commands.inputAvailable)
+        writeInt(len(State.inputData))
+    elif command == Commands.inputRequest:
+        count = min(readInt(), len(State.inputData))
+        sendCommand(Commands.inputRequest)
+        writeInt(count)
+        serInterface.write(State.inputData[:count])
+        del State.inputData[:count]
+    elif command == Commands.inputPeek:
+        sendCommand(Commands.inputRequest)
+        if len(State.inputData) == 0:
+            serInterface.write(0)
+        else:
+            serInterface.write(1)
+            serInterface.write(State.inputData[0])
     elif State.memoryPool == None:
         print("WARNING: tried to read/write unitialized memory pool")
     elif command == Commands.read:
@@ -116,4 +130,4 @@ def update():
 
 def processInput(line):
     print("Processing input line:", line, end='')
-    State.inputQueue.appendleft(line)
+    State.inputData += bytearray(line, 'ascii')

@@ -50,6 +50,8 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
     }
 
 public:
+    SerramUtils::CSerialInput input;
+
     CSerRAMVirtMemAlloc(uint32_t baud=115200) : baudRate(baud) { }
 
     // only works before start() is called
