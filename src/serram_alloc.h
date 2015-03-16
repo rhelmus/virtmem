@@ -15,10 +15,11 @@ struct SSerRAMMemAllocProperties
     static const uint32_t poolSize = 1024 * 1024; // 1024 kB
 };
 
-template <typename TProperties=SSerRAMMemAllocProperties>
-class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAlloc<TProperties> >
+template <typename IOStream, typename TProperties=SSerRAMMemAllocProperties>
+class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAlloc<IOStream, TProperties> >
 {
     uint32_t baudRate;
+    IOStream *stream;
 
     void doStart(void)
     {
@@ -52,14 +53,14 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 public:
     SerramUtils::CSerialInput input;
 
-    CSerRAMVirtMemAlloc(uint32_t baud=115200) : baudRate(baud) { }
+    CSerRAMVirtMemAlloc(uint32_t baud=115200) : stream(0), baudRate(baud) { }
 
     // only works before start() is called
     void setBaudRate(uint32_t baud) { baudRate = baud; }
 };
 
 template <typename, typename> class CVirtPtr;
-template <typename T> struct TSerRAMVirtPtr { typedef CVirtPtr<T, CSerRAMVirtMemAlloc<> > type; };
+template <typename T> struct TSerRAMVirtPtr { typedef CVirtPtr<T, CSerRAMVirtMemAlloc<typeof(Serial)> > type; };
 
 
 #endif // VIRTMEM_SERRAM_ALLOC_H
