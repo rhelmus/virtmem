@@ -8,8 +8,12 @@ enum { CMD_START = 0xFF };
 
 void purgeSerial(void)
 {
-    while (Serial.available())
-        Serial.read();
+    uint32_t n;
+    while (n = Serial.available())
+    {
+        for (; n; --n)
+            Serial.read();
+    }
 }
 
 
@@ -56,19 +60,18 @@ uint16_t readUInt16()
 
 uint8_t readUInt8()
 {
+    uint32_t time = micros();
     while (!Serial.available())
         ;
+    time = micros() - time;
+    Serial.print("readUInt8: "); Serial.println(time);
     return Serial.read();
 }
 
 void readBlock(char *data, uint32_t size)
 {
     while (size)
-    {
-        Serial.print("readBlock: "); Serial.println(size);
         size -= Serial.readBytes(data, size);
-        Serial.print("readBlock post: "); Serial.println(size);
-    }
 }
 
 void sendWriteCommand(uint8_t cmd)
@@ -86,6 +89,10 @@ void sendReadCommand(uint8_t cmd)
 
 void waitForCommand(uint8_t cmd)
 {
+    Serial.flush();
+    /*while (readUInt8() != CMD_START)
+        ;*/
+#if 0
     bool gotinit = false;
     while (true)
     {
@@ -95,6 +102,7 @@ void waitForCommand(uint8_t cmd)
         else if (gotinit && b == cmd)
             break;
     }
+#endif
 }
 
 void init(uint32_t baud, uint32_t poolsize)
@@ -102,6 +110,9 @@ void init(uint32_t baud, uint32_t poolsize)
     Serial.begin(baud);
 
     // handshake
+    waitForCommand(CMD_INIT);
+    sendWriteCommand(CMD_INIT); // reply
+#if 0
     bool gotcmd = false;
     while (true)
     {
@@ -117,6 +128,7 @@ void init(uint32_t baud, uint32_t poolsize)
             }
         }
     }
+#endif
 
     sendWriteCommand(CMD_INITPOOL);
     writeUInt32(poolsize);

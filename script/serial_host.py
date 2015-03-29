@@ -24,7 +24,7 @@ def updateSerial():
     while not doQuit:
         serialiohandler.update()
         try:
-            serialiohandler.processInput(inputQueue.get(timeout=0.05))
+            serialiohandler.processInput(inputQueue.get(False))
         except queue.Empty:
             pass
 
@@ -51,4 +51,4 @@ def main():
     serIOThread.join()
 
 if __name__ == "__main__":
-   main()
+    main()

@@ -21,9 +21,10 @@ def writeInt(i):
     serInterface.write(struct.pack('i', i))
 
 def sendCommand(cmd):
-    serInterface.write(bytes([State.initValue]))
-    serInterface.write(bytes([cmd]))
-    print("send: ", State.initValue, "/", bytes([cmd]))
+    pass
+#    serInterface.write(bytes([State.initValue]))
+#    serInterface.write(bytes([cmd]))
+#    print("send: ", State.initValue, "/", bytes([cmd]))
 
 def processByte(byte, printunknown=True):
     val = ord(byte)
@@ -32,7 +33,7 @@ def processByte(byte, printunknown=True):
         State.processState = 'idle'
     elif val == State.initValue:
         assert(State.processState == 'idle')
-        print("Got init!")
+#        print("Got init!")
         State.processState = 'gotinit'
     else:
         assert(State.processState == 'idle')
@@ -40,7 +41,7 @@ def processByte(byte, printunknown=True):
             print(chr(val), end='')
 
 def handleCommand(command):
-    print("handleCommand: ", command)
+#    print("handleCommand: ", command)
 
     serInterface.timeout = None # temporarily switch to blocking mode
 
@@ -75,12 +76,12 @@ def handleCommand(command):
         sendCommand(Commands.read)
         serInterface.write(State.memoryPool[index:size+index])
 #        print("read memPool: ", State.memoryPool[index:size+index])
-        print("read memPool: ", index, size)
+#        print("read memPool: ", index, size)
     elif command == Commands.write:
         index, size = readInt(), readInt()
         State.memoryPool[index:size+index] = serInterface.read(size)
 #        print("write memPool: ", State.memoryPool)
-        print("write memPool: ", index, size)
+#        print("write memPool: ", index, size)
 
     serInterface.timeout = 0
 
@@ -129,5 +130,5 @@ def update():
         byte = serInterface.read(1)
 
 def processInput(line):
-    print("Processing input line:", line, end='')
+#    print("Processing input line:", line, end='')
     State.inputData += bytearray(line, 'ascii')
