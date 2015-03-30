@@ -21,10 +21,9 @@ def writeInt(i):
     serInterface.write(struct.pack('i', i))
 
 def sendCommand(cmd):
-    pass
-#    serInterface.write(bytes([State.initValue]))
-#    serInterface.write(bytes([cmd]))
-#    print("send: ", State.initValue, "/", bytes([cmd]))
+    serInterface.write(bytes([State.initValue]))
+    serInterface.write(bytes([cmd]))
+    print("send: ", State.initValue, "/", bytes([cmd]))
 
 def processByte(byte, printunknown=True):
     val = ord(byte)
@@ -54,16 +53,13 @@ def handleCommand(command):
         State.memoryPool = bytearray(readInt())
         print("init pool:", len(State.memoryPool))
     elif command == Commands.inputAvailable:
-        sendCommand(Commands.inputAvailable)
         writeInt(len(State.inputData))
     elif command == Commands.inputRequest:
         count = min(readInt(), len(State.inputData))
-        sendCommand(Commands.inputRequest)
         writeInt(count)
         serInterface.write(State.inputData[:count])
         del State.inputData[:count]
     elif command == Commands.inputPeek:
-        sendCommand(Commands.inputRequest)
         if len(State.inputData) == 0:
             serInterface.write(0)
         else:
@@ -73,7 +69,6 @@ def handleCommand(command):
         print("WARNING: tried to read/write unitialized memory pool")
     elif command == Commands.read:
         index, size = readInt(), readInt()
-        sendCommand(Commands.read)
         serInterface.write(State.memoryPool[index:size+index])
 #        print("read memPool: ", State.memoryPool[index:size+index])
 #        print("read memPool: ", index, size)

@@ -15,7 +15,7 @@ struct SSerRAMMemAllocProperties
     static const uint32_t poolSize = 1024 * 1024; // 1024 kB
 };
 
-template <typename IOStream, typename TProperties=SSerRAMMemAllocProperties>
+template <typename IOStream=typeof(Serial), typename TProperties=SSerRAMMemAllocProperties>
 class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAlloc<IOStream, TProperties> >
 {
     uint32_t baudRate;
@@ -23,7 +23,7 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 
     void doStart(void)
     {
-        SerramUtils::init(baudRate, TProperties::poolSize);
+        SerramUtils::init(stream, baudRate, TProperties::poolSize);
     }
 
     void doSuspend(void) { } // UNDONE
@@ -32,13 +32,13 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
         uint32_t t = micros();
-        SerramUtils::sendReadCommand(SerramUtils::CMD_READ);
-        SerramUtils::writeUInt32(offset);
-        SerramUtils::writeUInt32(size);
-        SerramUtils::waitForCommand(SerramUtils::CMD_READ);
+        SerramUtils::sendReadCommand(stream, SerramUtils::CMD_READ);
+        SerramUtils::writeUInt32(stream, offset);
+        SerramUtils::writeUInt32(stream, size);
+        Serial.flush();
         Serial.print("read(1): "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
         t = micros();
-        SerramUtils::readBlock((char *)data, size);
+        SerramUtils::readBlock(stream, (char *)data, size);
         t = micros() - t;
         Serial.print("read(2): "); Serial.print(size); Serial.print("/"); Serial.println(t);
     }
@@ -46,17 +46,18 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
         const uint32_t t = micros();
-        SerramUtils::sendWriteCommand(SerramUtils::CMD_WRITE);
-        SerramUtils::writeUInt32(offset);
-        SerramUtils::writeUInt32(size);
-        SerramUtils::writeBlock((const char *)data, size);
+        SerramUtils::sendWriteCommand(stream, SerramUtils::CMD_WRITE);
+        SerramUtils::writeUInt32(stream, offset);
+        SerramUtils::writeUInt32(stream, size);
+        SerramUtils::writeBlock(stream, (const uint8_t *)data, size);
         Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:
-    SerramUtils::CSerialInput input;
+    SerramUtils::CSerialInput<IOStream> input;
 
-    CSerRAMVirtMemAlloc(uint32_t baud=115200) : stream(&Serial), baudRate(baud) { }
+    CSerRAMVirtMemAlloc(uint32_t baud=115200, IOStream *s=&Serial) :
+        baudRate(baud), stream(s), input(stream) { }
 
     // only works before start() is called
     void setBaudRate(uint32_t baud) { baudRate = baud; }

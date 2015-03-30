@@ -14,23 +14,13 @@ enum
     CMD_INPUTPEEK
 };
 
-void writeUInt32(uint32_t i);
-void writeBlock(const char *data, uint32_t size);
-uint32_t readUInt32(void);
-uint16_t readUInt16(void);
-uint8_t readUInt8(void);
-void readBlock(char *data, uint32_t size);
-void sendWriteCommand(uint8_t cmd);
-void sendReadCommand(uint8_t cmd);
-void waitForCommand(uint8_t cmd);
-void init(uint32_t baud, uint32_t poolsize);
-
-class CSerialInput
+template <typename IOStream> class CSerialInput
 {
     uint32_t availableMin;
+    IOStream *stream;
 
 public:
-    CSerialInput(void) : availableMin(0) { }
+    CSerialInput(IOStream *s) : availableMin(0), stream(s) { }
 
     uint32_t available(void);
     uint32_t availableAtLeast(void);
@@ -40,5 +30,7 @@ public:
 };
 
 }
+
+#include "serram_utils.hpp"
 
 #endif // VIRTMEM_SERRAM_UTILS_H

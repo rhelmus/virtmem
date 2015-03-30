@@ -13,8 +13,7 @@ CONFIG += staticlib
 SOURCES += \
     wrapper.cpp \
     base_alloc.cpp \
-    utils.cpp \
-    serram_utils.cpp
+    utils.cpp
 
 HEADERS += \
     virtmem.h \
@@ -31,7 +30,8 @@ HEADERS += \
     spiram_alloc.h \
     static_alloc.h \
     serram_utils.h \
-    serram_alloc.h
+    serram_alloc.h \
+    serram_utils.hpp
 unix {
     target.path = /usr/lib
     INSTALLS += target
