@@ -31,26 +31,23 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
-        uint32_t t = micros();
+//        uint32_t t = micros();
         SerramUtils::sendReadCommand(stream, SerramUtils::CMD_READ);
         SerramUtils::writeUInt32(stream, offset);
         SerramUtils::writeUInt32(stream, size);
         Serial.flush();
-        Serial.print("read(1): "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
-        t = micros();
         SerramUtils::readBlock(stream, (char *)data, size);
-        t = micros() - t;
-        Serial.print("read(2): "); Serial.print(size); Serial.print("/"); Serial.println(t);
+//        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
-        const uint32_t t = micros();
+//        const uint32_t t = micros();
         SerramUtils::sendWriteCommand(stream, SerramUtils::CMD_WRITE);
         SerramUtils::writeUInt32(stream, offset);
         SerramUtils::writeUInt32(stream, size);
         SerramUtils::writeBlock(stream, (const uint8_t *)data, size);
-        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
+//        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:

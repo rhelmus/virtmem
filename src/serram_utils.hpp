@@ -55,11 +55,8 @@ template <typename IOStream> uint16_t readUInt16(IOStream *stream)
 
 template <typename IOStream> uint8_t readUInt8(IOStream *stream)
 {
-    uint32_t time = micros();
     while (!stream->available())
         ;
-    time = micros() - time;
-    stream->print("readUInt8: "); stream->println(time);
     return stream->read();
 }
 
@@ -82,21 +79,26 @@ template <typename IOStream> void sendReadCommand(IOStream *stream, uint8_t cmd)
     stream->write(cmd);
 }
 
-template <typename IOStream> void waitForCommand(IOStream *stream, uint8_t cmd)
+template <typename IOStream> bool waitForCommand(IOStream *stream, uint8_t cmd, uint8_t timeout)
 {
     stream->flush();
-    while (readUInt8(stream) != CMD_START)
-        ;
+    const uint32_t endtime = millis() + timeout;
 
     bool gotinit = false;
-    while (true)
+    while (millis() < endtime)
     {
-        const uint8_t b = readUInt8(stream);
-        if (!gotinit && b == CMD_START)
-            gotinit = true;
-        else if (gotinit && b == cmd)
-            break;
+        if (Serial.available())
+        {
+            const uint8_t b = stream->read();
+
+            if (!gotinit && b == CMD_START)
+                gotinit = true;
+            else if (gotinit && b == cmd)
+                return true;
+        }
     }
+
+    return false;
 }
 
 template <typename IOStream> void init(IOStream *stream, uint32_t baud, uint32_t poolsize)
@@ -104,8 +106,16 @@ template <typename IOStream> void init(IOStream *stream, uint32_t baud, uint32_t
     stream->begin(baud);
 
     // handshake
+    while (true)
+    {
+        sendWriteCommand(stream, CMD_INIT);
+        if (waitForCommand(stream, CMD_INIT, 50))
+            break;
+    }
+#if 0
     waitForCommand(stream, CMD_INIT);
     sendWriteCommand(stream, CMD_INIT); // reply
+#endif
 
     sendWriteCommand(stream, CMD_INITPOOL);
     writeUInt32(stream, poolsize);
