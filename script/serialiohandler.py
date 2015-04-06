@@ -18,23 +18,18 @@ class State:
 
 serInterface = serial.Serial()
 
-def readInt():
-#    """
-    s = bytearray()
-#    while len(s) < 4:
-#        s += serInterface.read(4 - len(s))
-    ind = 0
-    while ind < 4:
+def blockedRead(size):
+    ret = bytearray()
+    while size > 0:
         byte = serInterface.read(1)
         if byte:
-            s += byte
-            ind += 1
+            ret += byte
+            size -= 1
 
-    print("readInt(): ", s, struct.unpack('i', s)[0])
-    return struct.unpack('i', s)[0]
-    """
-    return struct.unpack('i', serInterface.read(4))[0]
-    """
+    return ret
+
+def readInt():
+    return struct.unpack('i', blockedRead(4))[0]
 
 def writeInt(i):
     serInterface.write(struct.pack('i', i))
@@ -59,10 +54,6 @@ def processByte(byte, printunknown=True):
             State.outdev.write(byte)
 
 def handleCommand(command):
-#    print("handleCommand: ", command)
-
-    serInterface.timeout = 50 # None # temporarily switch to blocking mode
-
     if command == Commands.init:
         State.initialized = True
         State.memoryPool = None # remove pool
@@ -97,27 +88,9 @@ def handleCommand(command):
 #        print("read memPool: ", index, size)
     elif command == Commands.write:
         index, size = readInt(), readInt()
-        State.memoryPool[index:size+index] = serInterface.read(size)
+        State.memoryPool[index:size+index] = blockedRead(size)
 #        print("write memPool: ", State.memoryPool)
 #        print("write memPool: ", index, size)
-
-    serInterface.timeout = 0
-
-def handshake():
-    # send init command every 0.5 second until we got a response
-    while True:
-        print("Sending handshake command")
-        sendCommand(Commands.init)
-        curtime = datetime.datetime.now()
-
-        while (datetime.datetime.now() - curtime).total_seconds() < 0.5:
-            byte = serInterface.read(1)
-            while byte:
-#                print("byte: ", byte)
-                processByte(byte, True)
-                if State.initialized:
-                    return
-                byte = serInterface.read(1)
 
 def ensureConnection():
     print("Waiting until port {} can be opened...\n".format(serInterface.port))
@@ -133,8 +106,6 @@ def ensureConnection():
 
     time.sleep(1) # wait to settle after open (only needed if board resets)
 
-    print("Waiting for serial handshake...")
-#    handshake()
     print("Connected and initialized!")
 
 def connect(port, baud, initval, outdev):

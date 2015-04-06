@@ -15,7 +15,7 @@ class Config:
     serialPort = '/dev/ttyACM0'
     serialBaud = 115200
     serialInitValue = 0xFF
-    serialPassDev = '/dev/pts/3'
+    serialPassDev = '/dev/pts/9'
     serialPassBaud = 115200
 
 # ---
