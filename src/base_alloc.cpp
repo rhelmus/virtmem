@@ -854,22 +854,25 @@ void *CBaseVirtMemAlloc::makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
                     else if (beginoverlaps)
                         fixbeginningoverlap = true;
                 }
-                else if (endoverlaps || beginoverlaps)
+                else
                 {
-                    // don't bother with unused pages. It is possible that they are never be used again, meaning they will always be in the way
-                    i = freeLockedPage(plist[pindex], i);
-                    continue;
-                }
-
-                if (oldlockindex == -1 && plist[pindex]->pages[i].locks == 0)
-                {
-                    if (pinfo == plist[pindex])
-                        oldlockindex = i;
-                    else if (secoldlockindex == -1 && (pinfo->size < plist[pindex]->size))
+                    if (endoverlaps || beginoverlaps)
                     {
-                        // also keep record of bigger pages in case nothing is available in the preferred list
-                        secoldlockindex = i;
-                        secpinfo = plist[pindex];
+                        // don't bother with unused pages. It is possible that they are never be used again, meaning they will always be in the way
+                        i = freeLockedPage(plist[pindex], i);
+                        continue;
+                    }
+
+                    if (oldlockindex == -1)
+                    {
+                        if (pinfo == plist[pindex])
+                            oldlockindex = i;
+                        else if (secoldlockindex == -1 && (pinfo->size < plist[pindex]->size))
+                        {
+                            // also keep record of bigger pages in case nothing is available in the preferred list
+                            secoldlockindex = i;
+                            secpinfo = plist[pindex];
+                        }
                     }
                 }
             }
