@@ -262,8 +262,22 @@ void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SLockPage *page)
     }
 }
 
-void CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, int8_t index)
+int8_t CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, TVirtPointer ptr, TVirtPageSize size)
 {
+    int8_t index;
+
+    if (pinfo == &bigPages)
+    {
+        // read in data and lock the page that was used
+        // NOTE: set readonly here, the eventual ro flag should be set afterwards
+        pullRawData(ptr, size, true, true);
+        index = findFreePage(pinfo, ptr, size, true);
+        if (size < pinfo->size)
+            syncBigPage(&bigPages.pages[index]); // synchronize if there is data outside lock range
+    }
+    else
+        index = pinfo->freeIndex;
+
     if (index == pinfo->freeIndex)
         pinfo->freeIndex = pinfo->pages[pinfo->freeIndex].next;
     else
@@ -273,7 +287,6 @@ void CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, int8_t index)
         for (; index!=pinfo->pages[previ].next; previ=pinfo->pages[previ].next)
             ;
         pinfo->pages[previ].next = pinfo->pages[index].next;
-
     }
 
     if (pinfo == &bigPages && nextPageToSwap == index)
@@ -281,6 +294,8 @@ void CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, int8_t index)
 
     pinfo->pages[index].next = pinfo->lockedIndex;
     pinfo->lockedIndex = index;
+
+    return index;
 }
 
 int8_t CBaseVirtMemAlloc::freeLockedPage(CBaseVirtMemAlloc::SPageInfo *pinfo, int8_t index)
@@ -950,6 +965,7 @@ void *CBaseVirtMemAlloc::makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
 
         if (pinfo->freeIndex != -1)
         {
+#if 0
             if (pinfo == &bigPages)
             {
                 // read in data and lock the page that was used
@@ -961,8 +977,11 @@ void *CBaseVirtMemAlloc::makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
             }
             else
                 pageindex = pinfo->freeIndex;
+#endif
 
-            lockPage(pinfo, pageindex);
+            if (pinfo == &bigPages)
+                copyoffset = size; // no need to copy big pages as they are already copied in lockPage()
+            pageindex = lockPage(pinfo, ptr, size);
         }
         else
         {
@@ -1059,6 +1078,7 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
     size = private_utils::min(size, bigPages.size);
 
     SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    int8_t unusedlist[3] = { -1, -1, -1 };
     SPageInfo *pinfo;
     int8_t pageindex = -1;
     bool done = false;
@@ -1075,27 +1095,74 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
                 done = true;
                 break;
             }
-            // end overlaps with another lock?
-            else if (ptr < plist[pindex]->pages[i].start && (ptr + size) > plist[pindex]->pages[i].start)
+
+            // end overlaps with this lock?
+            if (ptr < plist[pindex]->pages[i].start && (ptr + size) > plist[pindex]->pages[i].start)
+            {
+                // remove unused locks
+                if (plist[pindex]->pages[i].locks == 0)
+                {
+                    // don't bother with unused pages. It is possible that they are never be used again, meaning they will always be in the way
+                    i = freeLockedPage(plist[pindex], i);
+                    continue;
+                }
+
+                // else shrink to avoid overlap
                 size = private_utils::min(static_cast<TVirtPointer>(size),
                                           plist[pindex]->pages[i].size - (ptr - plist[pindex]->pages[i].start));
+            }
+
+            if (plist[pindex]->pages[i].locks == 0 && unusedlist[pindex] == -1)
+                unusedlist[pindex] = pindex;
         }
     }
 
+#if 0
     // no existing lock found?
     if (pageindex == -1)
         return makeLock(ptr, size, ro); // create new one, with possibly shrunk size
+#endif
+
+    const TVirtPtrSize offset = (ptr - pinfo->pages[pageindex].start);
+    
+    // no existing lock found?
+    if (pageindex == -1)
+    {
+        int8_t pindex = -1;
+        for (uint8_t i=0; i<3; ++i)
+        {
+            if (size <= plist[i]->size && (plist[i]->freeIndex != -1 || unusedlist[i] != -1))
+            {
+                pinfo = plist[pindex];
+                break;
+            }
+        }
+
+        if (pindex == -1)
+            return 0;
+
+        if (plist[pindex]->freeIndex != -1)
+            pageindex = lockPage(plist[pindex], ptr, size);
+        else
+        {
+            pageindex = unusedlist[pindex];
+            syncLockedPage(&plist[pindex]->pages[pageindex]);
+            plist[pindex]->pages[pageindex].dirty = false;
+        }
+
+        pinfo->pages[pageindex].size = size;
+    }
+    else
+    {
+        // fixup size as the starting address may be different than what was requested
+        size = private_utils::min(size, static_cast<TVirtPageSize>(pinfo->pages[pageindex].size - offset));
+    }
 
     // else add to lock count
     ++pinfo->pages[pageindex].locks;
 
     if (!pinfo->pages[pageindex].dirty)
         pinfo->pages[pageindex].dirty = !ro;
-
-    const TVirtPtrSize offset = (ptr - pinfo->pages[pageindex].start);
-
-    // fixup size as the starting address may be different than what was requested
-    size = private_utils::min(size, static_cast<TVirtPageSize>(pinfo->pages[pageindex].size - offset));
 
 //    std::cout << "fitting lock page: " << (int)pageindex << ", " << ptr << "/" << size << std::endl;
 

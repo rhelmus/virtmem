@@ -94,7 +94,7 @@ private:
     int8_t findFreePage(SPageInfo *pinfo, TVirtPointer p, TVirtPtrSize size, bool atstart);
     int8_t findUnusedLockedPage(SPageInfo *pinfo);
     void syncLockedPage(SLockPage *page);
-    void lockPage(SPageInfo *pinfo, int8_t index);
+    int8_t lockPage(SPageInfo *pinfo, TVirtPointer ptr, TVirtPageSize size);
     int8_t freeLockedPage(SPageInfo *pinfo, int8_t index);
     int8_t findLockedPage(SPageInfo *pinfo, TVirtPointer p);
     SLockPage *findLockedPage(TVirtPointer p);
