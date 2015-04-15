@@ -47,9 +47,11 @@ public:
     }
     void unlock(void)
     {
-        if (!ptrWrap.isWrapped())
+        if (!ptrWrap.isWrapped() && data)
+        {
             TV::getAlloc()->releaseLock(ptrWrap.ptr);
-        data = 0;
+            data = 0;
+        }
     }
     TPtr operator *(void) { return data; }
 };
