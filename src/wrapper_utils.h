@@ -25,25 +25,20 @@ template <typename TV> class CPtrWrapLock
     TV ptrWrap;
     TPtr data;
     TVirtPageSize &size;
-    bool readOnly, fit;
+    bool readOnly;
 
 public:
-    CPtrWrapLock(const TV &w, TVirtPageSize &s, bool f, bool ro=false)
-        : ptrWrap(w), size(s), readOnly(ro), fit(f) { lock(); }
+    CPtrWrapLock(const TV &w, TVirtPageSize &s, bool ro=false)
+        : ptrWrap(w), size(s), readOnly(ro) { lock(); }
     ~CPtrWrapLock(void) { unlock(); }
     // add extra lock on copying
     CPtrWrapLock(const CPtrWrapLock &other) :
-        ptrWrap(other.ptrWrap), size(other.size), readOnly(other.readOnly), fit(other.fit) { lock(); }
+        ptrWrap(other.ptrWrap), size(other.size), readOnly(other.readOnly) { lock(); }
 
     void lock(void)
     {
         if (!ptrWrap.isWrapped())
-        {
-            if (fit)
-                data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(ptrWrap.ptr, size, readOnly));
-            else
-                data = static_cast<TPtr>(TV::getAlloc()->makeLock(ptrWrap.ptr, size, readOnly));
-        }
+            data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(ptrWrap.ptr, size, readOnly));
     }
     void unlock(void)
     {
@@ -54,11 +49,12 @@ public:
         }
     }
     TPtr operator *(void) { return data; }
+    operator bool(void) const { return data != 0; }
 };
 
 // Shortcut
-template <typename T> CPtrWrapLock<T> makeVirtPtrLock(const T &w, TVirtPageSize &s, bool f, bool ro=false)
-{ return CPtrWrapLock<T>(w, s, f, ro); }
+template <typename T> CPtrWrapLock<T> makeVirtPtrLock(const T &w, TVirtPageSize &s, bool ro=false)
+{ return CPtrWrapLock<T>(w, s, ro); }
 
 namespace private_utils {
 // Ugly hack from http://stackoverflow.com/a/12141673

@@ -249,7 +249,7 @@ TEST_F(CIntWrapFixture, AlignmentTest)
 
     // check if int is still aligned after locking a big page
     valloc.clearPages();
-    valloc.makeLock(unalignedbuf.getRawNum(), valloc.getBigPageSize(), true);
+    valloc.makeDataLock(unalignedbuf.getRawNum(), valloc.getBigPageSize(), true);
     valloc.releaseLock(unalignedbuf.getRawNum());
 
     ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->wrapper.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);

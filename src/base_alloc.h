@@ -128,7 +128,7 @@ public:
     uint8_t getFreePages(void) const;
     uint8_t getUnlockedBigPages(void) const;
 
-    void *makeLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
+    void *makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
     void *makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro=false);
     void releaseLock(TVirtPointer ptr);
 
