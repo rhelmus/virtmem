@@ -100,7 +100,7 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
     // Start by looking for fitting pages, the ideal situation
     if ((pageindex = findFreePage(&bigPages, p, size, forcestart)) != -1)
         pagefindstate = STATE_GOTFULL;
-    else if (pagefindstate != STATE_GOTFULL)
+    else
     {
         const TVirtPointer newpageend = p + bigPages.size;
 

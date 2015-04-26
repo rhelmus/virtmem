@@ -34,7 +34,7 @@ class CVirtPtrBase
     typedef void (SDummy::*TSafeBool)(void);
 
     template <typename, typename> friend class CVirtPtr;
-    template <typename> friend class CPtrWrapLock;
+    template <typename> friend class CVirtPtrLock;
 
 public:
 #ifdef VIRTMEM_WRAP_CPOINTERS
