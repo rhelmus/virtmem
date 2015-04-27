@@ -83,6 +83,96 @@ void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
     }
 }
 
+void CBaseVirtMemAlloc::copyRawData(void *dest, TVirtPointer p, TVirtPtrSize size)
+{
+    // First check if we should copy data from loaded big pages
+    // Note that the size of these pages are never smaller than the copy size,
+    // so it is impossible that more than two pages overlap
+
+    for (int8_t i=bigPages.freeIndex; i!=-1 && size; i=bigPages.pages[i].next)
+    {
+        if (!bigPages.pages[i].start)
+            continue;
+
+        const TVirtPointer pageend = bigPages.pages[i].start + bigPages.size;
+        if (p >= bigPages.pages[i].start && p < pageend) // start address within this page?
+        {
+            const TVirtPtrSize offset = p - bigPages.pages[i].start;
+            const TVirtPtrSize copysize = private_utils::min(size, bigPages.pages[i].size - offset);
+            memcpy(dest, bigPages.pages[i].pool + offset, copysize);
+
+            // move start to end of this page
+            dest = (uint8_t *)dest + copysize;
+            p += copysize;
+            size -= copysize;
+        }
+        // end overlaps?
+        else if (p < bigPages.pages[i].start && (p + size) > bigPages.pages[i].start)
+        {
+            const TVirtPtrSize offset = bigPages.pages[i].start - p;
+            const TVirtPtrSize copysize = private_utils::min(size - offset, (TVirtPtrSize)bigPages.pages[i].size);
+            memcpy((uint8_t *)dest + offset, bigPages.pages[i].pool, copysize);
+            size = offset;
+        }
+    }
+
+    if (size > 0)
+    {
+        // read in rest of the data
+        doRead(dest, p, size);
+    }
+}
+
+// This function is the reverse of copyRawData()
+void CBaseVirtMemAlloc::saveRawData(void *src, TVirtPointer p, TVirtPtrSize size)
+{
+    for (int8_t i=bigPages.freeIndex; i!=-1 && size; i=bigPages.pages[i].next)
+    {
+        if (!bigPages.pages[i].start)
+            continue;
+
+        const TVirtPointer pageend = bigPages.pages[i].start + bigPages.size;
+        if (p >= bigPages.pages[i].start && p < pageend) // start address within this page?
+        {
+            const TVirtPtrSize offset = p - bigPages.pages[i].start;
+            const TVirtPtrSize copysize = private_utils::min(size, bigPages.pages[i].size - offset);
+
+            // only copy data if regular page is already dirty or data changed
+            if (bigPages.pages[i].dirty || memcmp(bigPages.pages[i].pool + offset, src, copysize) != 0)
+            {
+                memcpy(bigPages.pages[i].pool + offset, src, copysize);
+                bigPages.pages[i].dirty = true;
+            }
+
+            // move start to end of this page
+            src = (uint8_t *)src + copysize;
+            p += copysize;
+            size -= copysize;
+        }
+        // end overlaps?
+        else if (p < bigPages.pages[i].start && (p + size) > bigPages.pages[i].start)
+        {
+            const TVirtPtrSize offset = bigPages.pages[i].start - p;
+            const TVirtPtrSize copysize = private_utils::min(size - offset, (TVirtPtrSize)bigPages.pages[i].size);
+
+            // only copy data if regular page is already dirty or data changed
+            if (bigPages.pages[i].dirty || memcmp(bigPages.pages[i].pool, (uint8_t *)src + offset, copysize) != 0)
+            {
+                memcpy(bigPages.pages[i].pool, (uint8_t *)src + offset, copysize);
+                bigPages.pages[i].dirty = true;
+            }
+
+            size = offset;
+        }
+    }
+
+    if (size > 0)
+    {
+        // read in rest of the data
+        doWrite(src, p, size);
+    }
+}
+
 void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
 {
     ASSERT(p && p < poolSize);
@@ -244,6 +334,9 @@ void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SLockPage *page)
     ASSERT(page->start != 0);
     if (page->dirty)
     {
+#if 1
+        saveRawData(page->pool, page->start, page->size);
+#else
         void *data = pullRawData(page->start, page->size, true, false);
         const int8_t pageindex = findFreePage(&bigPages, page->start, page->size, false);
         ASSERT(pageindex != -1);
@@ -256,6 +349,7 @@ void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SLockPage *page)
         }
 
         // UNDONE: unset dirty?
+#endif
     }
 }
 
@@ -357,6 +451,23 @@ CBaseVirtMemAlloc::SLockPage *CBaseVirtMemAlloc::findLockedPage(TVirtPointer p)
         return &bigPages.pages[index];
 
     return 0;
+}
+
+uint8_t CBaseVirtMemAlloc::getUnlockedPages(const SPageInfo *pinfo) const
+{
+    uint8_t ret = 0;
+
+    for (int8_t i=pinfo->freeIndex; i!=-1; i=pinfo->pages[i].next)
+        ++ret;
+
+    // also include unused locked pages
+    for (int8_t i=pinfo->lockedIndex; i!=-1; i=pinfo->pages[i].next)
+    {
+        if (pinfo->pages[i].locks == 0)
+            ++ret;
+    }
+
+    return ret;
 }
 
 void CBaseVirtMemAlloc::writeZeros(uint32_t start, uint32_t n)
@@ -667,7 +778,7 @@ void CBaseVirtMemAlloc::clearPages()
     }
 }
 
-uint8_t CBaseVirtMemAlloc::getFreePages() const
+uint8_t CBaseVirtMemAlloc::getFreeBigPages() const
 {
     uint8_t ret = 0;
 
@@ -676,16 +787,6 @@ uint8_t CBaseVirtMemAlloc::getFreePages() const
         if (bigPages.pages[i].start == 0)
             ++ret;
     }
-
-    return ret;
-}
-
-uint8_t CBaseVirtMemAlloc::getUnlockedBigPages() const
-{
-    uint8_t ret = 0;
-
-    for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
-        ++ret;
 
     return ret;
 }
@@ -741,8 +842,13 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
                 {
                     ASSERT(plist[pindex]->pages[i].locks == 0);
                     // write excess data
+#if 1
+                    saveRawData(plist[pindex]->pages[i].pool + size, plist[pindex]->pages[i].start + size,
+                                plist[pindex]->pages[i].size - size);
+#else
                     pushRawData(plist[pindex]->pages[i].start + size, plist[pindex]->pages[i].pool + size,
                                 plist[pindex]->pages[i].size - size);
+#endif
                     plist[pindex]->pages[i].size = size; // shrink page
                     // NOTE: we don't have to check for overlap since we only shrunk the page
                 }
@@ -920,8 +1026,9 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
         // copy (rest of) data
         if (copyoffset < size)
         {
-            const TVirtPtrSize copysize = size - copyoffset;
-            memcpy(pinfo->pages[pageindex].pool + copyoffset, pullRawData(ptr + copyoffset, copysize, true, false), copysize); // UNDONE: make this more efficient
+//            const TVirtPtrSize copysize = size - copyoffset;
+            //memcpy(pinfo->pages[pageindex].pool + copyoffset, pullRawData(ptr + copyoffset, copysize, true, false), copysize); // UNDONE: make this more efficient
+            copyRawData(pinfo->pages[pageindex].pool + copyoffset, ptr + copyoffset, size - copyoffset);
         }
 
         pinfo->pages[pageindex].start = ptr;
@@ -932,10 +1039,13 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
         if (size > pinfo->pages[pageindex].size)
         {
             const TVirtPtrSize offset = pinfo->pages[pageindex].size;
+#if 0
             const TVirtPtrSize copysize = size - offset;
             // copy excess data to page
             // UNDONE: make this more efficient
             memcpy(pinfo->pages[pageindex].pool + offset, pullRawData(ptr + offset, copysize, true, false), copysize);
+#endif
+            copyRawData(pinfo->pages[pageindex].pool + offset, ptr + offset, size - offset);
         }
     }
 
@@ -1055,8 +1165,12 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
             plist[plistindex]->pages[pageindex].dirty = false;
         }
 
+#if 0
         if (syncpool)
             memcpy(plist[plistindex]->pages[pageindex].pool, pullRawData(ptr, size, true, false), size);
+#endif
+        if (syncpool)
+            copyRawData(plist[plistindex]->pages[pageindex].pool, ptr, size);
 
         plist[plistindex]->pages[pageindex].start = ptr;
         plist[plistindex]->pages[pageindex].size = size;

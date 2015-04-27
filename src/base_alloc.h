@@ -87,6 +87,8 @@ private:
     void initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
     TVirtPointer getMem(TVirtPtrSize size);
     void syncBigPage(SLockPage *page);
+    void copyRawData(void *dest, TVirtPointer p, TVirtPtrSize size);
+    void saveRawData(void *src, TVirtPointer p, TVirtPtrSize size);
     void *pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
     void pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size);
     const UMemHeader *getHeaderConst(TVirtPointer p);
@@ -98,6 +100,8 @@ private:
     int8_t freeLockedPage(SPageInfo *pinfo, int8_t index);
     int8_t findLockedPage(SPageInfo *pinfo, TVirtPointer p);
     SLockPage *findLockedPage(TVirtPointer p);
+    uint8_t getFreePages(const SPageInfo *pinfo) const;
+    uint8_t getUnlockedPages(const SPageInfo *pinfo) const;
 
 protected:
     CBaseVirtMemAlloc(const TVirtPtrSize ps) : poolSize(ps) { }
@@ -125,14 +129,20 @@ public:
     void write(TVirtPointer p, const void *d, TVirtPtrSize size);
     void flush(void);
     void clearPages(void);
-    uint8_t getFreePages(void) const;
-    uint8_t getUnlockedBigPages(void) const;
+    uint8_t getFreeBigPages(void) const;
+    uint8_t getUnlockedSmallPages(void) const { return getUnlockedPages(&smallPages); }
+    uint8_t getUnlockedMediumPages(void) const { return getUnlockedPages(&mediumPages); }
+    uint8_t getUnlockedBigPages(void) const { return getUnlockedPages(&bigPages); }
 
     void *makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
     void *makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro=false);
     void releaseLock(TVirtPointer ptr);
 
+    uint8_t getSmallPageCount(void) const { return smallPages.count; }
+    uint8_t getMediumPageCount(void) const { return mediumPages.count; }
     uint8_t getBigPageCount(void) const { return bigPages.count; }
+    TVirtPtrSize getSmallPageSize(void) const { return smallPages.size; }
+    TVirtPtrSize getMediumPageSize(void) const { return mediumPages.size; }
     TVirtPtrSize getBigPageSize(void) const { return bigPages.size; }
     TVirtPtrSize getPoolSize(void) const { return poolSize; }
 

@@ -62,7 +62,7 @@ TEST_F(CAllocFixture, MultiAllocTest)
 
 TEST_F(CAllocFixture, SimplePageTest)
 {
-    EXPECT_EQ(valloc.getFreePages(), valloc.getBigPageCount());
+    EXPECT_EQ(valloc.getFreeBigPages(), valloc.getBigPageCount());
 
     std::vector<TVirtPointer> ptrlist;
     for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
@@ -71,7 +71,7 @@ TEST_F(CAllocFixture, SimplePageTest)
         valloc.write(ptrlist[i], &i, sizeof(int));
     }
 
-    EXPECT_EQ(valloc.getFreePages(), 0);
+    EXPECT_EQ(valloc.getFreeBigPages(), 0);
 
     valloc.flush();
 
@@ -81,7 +81,7 @@ TEST_F(CAllocFixture, SimplePageTest)
     }
 
     valloc.clearPages();
-    EXPECT_EQ(valloc.getFreePages(), valloc.getBigPageCount());
+    EXPECT_EQ(valloc.getFreeBigPages(), valloc.getBigPageCount());
 
     for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
@@ -91,28 +91,41 @@ TEST_F(CAllocFixture, SimplePageTest)
 
 TEST_F(CAllocFixture, PageLockTest)
 {
+    EXPECT_EQ(valloc.getUnlockedSmallPages(), valloc.getSmallPageCount());
+    EXPECT_EQ(valloc.getUnlockedMediumPages(), valloc.getMediumPageCount());
     EXPECT_EQ(valloc.getUnlockedBigPages(), valloc.getBigPageCount());
 
-    // Lock all pages
+    // 10 is an arbitrary number, just make sure that numbers are unique, don't start at the beginning
+    // and don't overlap
+    auto genptr = [this](uint8_t p) { return p * valloc.getBigPageSize() + 10; };
+
+    // Lock all big pages
     for (uint8_t p=0; p<valloc.getBigPageCount(); ++p)
     {
-        // 10 is an arbitrary number, just make sure that numbers are unique, don't start at the beginning
-        // and don't overlap
-        const TVirtPointer ptr = p * valloc.getBigPageSize() + 10;
-        valloc.makeDataLock(ptr, valloc.getBigPageSize());
+        valloc.makeDataLock(genptr(p), valloc.getBigPageSize());
         EXPECT_EQ(valloc.getUnlockedBigPages(), (valloc.getBigPageCount() - (p+1)));
     }
 
     EXPECT_EQ(valloc.getUnlockedBigPages(), 0);
 
-    // Unlock all pages
+    // lock smaller pages, shouldn't depend on big pages (anymore)
+    valloc.makeDataLock(genptr(valloc.getBigPageCount() + 1), valloc.getSmallPageSize());
+    EXPECT_EQ(valloc.getUnlockedSmallPages(), (valloc.getSmallPageCount()-1));
+    valloc.makeDataLock(genptr(valloc.getBigPageCount() + 2), valloc.getMediumPageSize());
+    EXPECT_EQ(valloc.getUnlockedMediumPages(), (valloc.getMediumPageCount()-1));
+
+
+    // Unlock all big pages
     for (uint8_t p=0; p<valloc.getBigPageCount(); ++p)
     {
-        // 10 is an arbitrary number, just make sure that numbers are unique and don't start at the beginning
-        const TVirtPointer ptr = p * valloc.getBigPageSize() + 10;
-        valloc.releaseLock(ptr);
+        valloc.releaseLock(genptr(p));
         EXPECT_EQ(valloc.getUnlockedBigPages(), (p+1));
     }
+
+    valloc.releaseLock(genptr(valloc.getBigPageCount() + 1));
+    EXPECT_EQ(valloc.getUnlockedSmallPages(), valloc.getSmallPageCount());
+    valloc.releaseLock(genptr(valloc.getBigPageCount() + 2));
+    EXPECT_EQ(valloc.getUnlockedMediumPages(), valloc.getMediumPageCount());
 }
 
 TEST_F(CAllocFixture, LargeDataTest)
