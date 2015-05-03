@@ -36,13 +36,9 @@ template <typename T, typename A> struct TVirtPtrTraits<CVirtPtr<T, A> >
     static bool isWrapped(CVirtPtr<T, A> p) { return p.isWrapped(); }
     static T *unwrap(CVirtPtr<T, A> p) { return p.unwrap(); }
     static bool isVirtPtr(void) { return true; }
-    static TLock makeLock(CVirtPtr<T, A> w, TVirtPageSize &s, bool ro=false)
+    static TLock makeLock(CVirtPtr<T, A> w, TVirtPageSize s, bool ro=false)
     { return makeVirtPtrLock(w, s, ro); }
     static TVirtPageSize getLockSize(TLock &l) { return l.getLockSize(); }
-#if 0
-    static uint8_t getUnlockedBigPages(void)
-    { return A::getInstance()->getUnlockedBigPages(); }
-#endif
     static TVirtPageSize getPageSize(void)
     { return A::getInstance()->getBigPageSize(); }
 
@@ -56,11 +52,8 @@ template <typename T> struct TVirtPtrTraits<T *>
     static bool isWrapped(T *) { return false; }
     static T *unwrap(T *p) { return p; }
     static bool isVirtPtr(void) { return false; }
-    static TLock makeLock(T *&p, TVirtPageSize &, __attribute__ ((unused)) bool ro=false) { return &p; }
+    static TLock makeLock(T *&p, TVirtPageSize, __attribute__ ((unused)) bool ro=false) { return &p; }
     static TVirtPageSize getLockSize(TLock &) { return (TVirtPageSize)-1; }
-#if 0
-    static uint8_t getUnlockedBigPages(void) { return 0; }
-#endif
     static TVirtPageSize getPageSize(void) { return (TVirtPageSize)-1; }
 };
 
@@ -70,37 +63,6 @@ template <typename T1, typename T2> int ptrDiff(T1, T2) { return 0; } // dummy, 
 template <typename T1, typename T2, typename A> bool ptrEqual(CVirtPtr<T1, A> p1, CVirtPtr<T2, A> p2) { return p1 == p2; }
 template <typename T1, typename T2> bool ptrEqual(T1 *p1, T2 *p2) { return p1 == p2; }
 template <typename T1, typename T2> bool ptrEqual(T1, T2) { return false; } // mix of virt and regular pointers
-
-#if 0
-template <typename T1, typename T2> bool canUseLocks(T1 p1, T2 p2, TVirtPageSize &size)
-{
-    // UNDONE: also try smaller locks if no free big pages are available?
-
-    bool ret = false;
-    size = min(TVirtPtrTraits<T1>::getPageSize(), TVirtPtrTraits<T2>::getPageSize());
-
-    /* if both are virtual pointers and are same type: both must be locked, check for two
-     * if both are virtual pointers and are inequal type: lock both, check both allocators if one slot available
-     * if one is virtual pointer, check if it can be locked */
-
-    if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
-    {
-        ret = (TVirtPtrTraits<T1>::getUnlockedBigPages() >= 2);
-        // make sure we don't overlap locks
-        if (ret)
-            size = min(size, static_cast<TVirtPageSize>(abs(ptrDiff(p1, p2))));
-    }
-    else if (TVirtPtrTraits<T1>::isVirtPtr() && TVirtPtrTraits<T2>::isVirtPtr())
-        ret = (TVirtPtrTraits<T1>::getUnlockedBigPages() >= 1) &&
-                (TVirtPtrTraits<T2>::getUnlockedBigPages() >= 1);
-    else if (TVirtPtrTraits<T1>::isVirtPtr())
-        ret = (TVirtPtrTraits<T1>::getUnlockedBigPages() >= 1);
-    else if (TVirtPtrTraits<T2>::isVirtPtr())
-        ret = (TVirtPtrTraits<T2>::getUnlockedBigPages() >= 1);
-
-    return ret && size > 0;
-}
-#endif
 
 template <typename T1, typename T2> TVirtPageSize getMaxLockSize(T1 p1, T2 p2)
 {
@@ -150,87 +112,22 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
     T1 p1 = dest;
     T2 p2 = src;
 
-    /* if both can be locked, copy max maxlocksize bytes with lock
-     * else if maxlocksize < 2 copy everything without locks
-     * else copy maxlocksize bytes without locks */
-
     while (sizeleft)
     {
-        TVirtPtrSize plaincpsize;
+        TVirtPageSize cpsize = min(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
 
-        if (maxlocksize < 2)
-            plaincpsize = sizeleft;
-        else
-        {
-            TVirtPageSize cpsize = min(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
-            plaincpsize = cpsize; // will be reset to zero in case locks can be used
+        typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cpsize);
+        cpsize = min(cpsize, TVirtPtrTraits<T1>::getLockSize(l1));
+        typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cpsize, true);
+        cpsize = min(cpsize, TVirtPtrTraits<T2>::getLockSize(l2));
 
-            typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cpsize);
-            if (l1)
-            {
-                cpsize = min(cpsize, TVirtPtrTraits<T1>::getLockSize(l1));
-                typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cpsize, true);
-                if (l2)
-                {
-                    cpsize = min(cpsize, TVirtPtrTraits<T2>::getLockSize(l2));
+        if (!copier(*l1, *l2, cpsize))
+            return dest;
 
-                    if (!copier(*l1, *l2, cpsize))
-                        return dest;
-
-                    p1 += cpsize; p2 += cpsize;
-                    sizeleft -= cpsize;
-                    ASSERT(sizeleft <= size);
-                    plaincpsize = 0;
-                }
-            }
-        }
-
-        // slow fallback for when no locks can be used
-        if (plaincpsize != 0)
-        {
-            sizeleft -= plaincpsize;
-            for (; plaincpsize; ++p1, ++p2, --plaincpsize)
-            {
-                *p1 = (typename TVirtPtrTraits<T2>::TValue)(*p2);
-                if (checknull && *p1 == 0)
-                    return dest;
-            }
-        }
+        p1 += cpsize; p2 += cpsize;
+        sizeleft -= cpsize;
+        ASSERT(sizeleft <= size);
     }
-
-#if 0
-    TVirtPtrSize sizeleft = size;
-    TVirtPageSize locksize; // filled in by canUseLocks()
-    T1 p1 = dest;
-    T2 p2 = src;
-
-    if (canUseLocks(dest, src, locksize))
-    {
-        while (sizeleft)
-        {
-            TVirtPageSize cpsize = min(static_cast<TVirtPtrSize>(locksize), sizeleft);
-            // NOTE: cpsize might be reduced after lock is constructed
-            typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cpsize);
-            typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cpsize, true);
-            if (!copier(*l1, *l2, cpsize))
-                break;
-
-            p1 += cpsize; p2 += cpsize;
-            sizeleft -= cpsize;
-            ASSERT(sizeleft <= size);
-        }
-    }
-    else
-    {
-        // slow fallback for when no locks can be used
-        for (; sizeleft; ++p1, ++p2, --sizeleft)
-        {
-            *p1 = (typename TVirtPtrTraits<T2>::TValue)(*p2);
-            if (checknull && *p1 == 0)
-                break;
-        }
-    }
-#endif
 
     return dest;
 }
@@ -264,98 +161,22 @@ template <typename T1, typename T2> int rawCompare(T1 p1, T2 p2, TVirtPtrSize n,
     TVirtPtrSize sizeleft = n;
     const TVirtPageSize maxlocksize = getMaxLockSize(p1, p2);
 
-    /* if both can be locked, compare max maxlocksize bytes with lock
-     * else if maxlocksize < 2 compare everything without locks
-     * else compare maxlocksize bytes without locks */
-
     while (sizeleft)
     {
-        TVirtPtrSize plaincmpsize;
+        TVirtPageSize cmpsize = min(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
+        typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cmpsize, true);
+        cmpsize = min(cmpsize, TVirtPtrTraits<T1>::getLockSize(l1));
+        typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cmpsize, true);
+        cmpsize = min(cmpsize, TVirtPtrTraits<T2>::getLockSize(l2));
 
-        if (maxlocksize < 2)
-            plaincmpsize = sizeleft;
-        else
-        {
-            TVirtPageSize cmpsize = min(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
-            plaincmpsize = cmpsize; // will be reset to zero in case locks can be used
+        int cmp = comparator(*l1, *l2, cmpsize, done);
+        if (cmp != 0 || done)
+            return cmp;
 
-            typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cmpsize, true);
-            if (l1)
-            {
-                cmpsize = min(cmpsize, TVirtPtrTraits<T1>::getLockSize(l1));
-                typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cmpsize, true);
-                if (l2)
-                {
-                    cmpsize = min(cmpsize, TVirtPtrTraits<T2>::getLockSize(l2));
-
-                    int cmp = comparator(*l1, *l2, cmpsize, done);
-                    if (cmp != 0 || done)
-                        return cmp;
-
-                    p1 += cmpsize; p2 += cmpsize;
-                    sizeleft -= cmpsize;
-                    ASSERT(sizeleft <= n);
-                    plaincmpsize = 0;
-                }
-            }
-        }
-
-        // slow fallback for when no locks can be used
-        if (plaincmpsize != 0)
-        {
-            sizeleft -= plaincmpsize;
-            typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T1>::TValue>::type v1;
-            typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T2>::TValue>::type v2;
-            for (; plaincmpsize; ++p1, ++p2, --plaincmpsize)
-            {
-                v1 = *p1; v2 = *p2; // having local copies makes things much faster for virt pointers
-                if (v1 < v2)
-                    return -1;
-                if (v1 > v2)
-                    return 1;
-                if (checknull && v1 == 0 /*|| v2 == 0*/) // if we are here, both must be the same
-                    return 0;
-            }
-        }
+        p1 += cmpsize; p2 += cmpsize;
+        sizeleft -= cmpsize;
+        ASSERT(sizeleft <= n);
     }
-
-#if 0
-    TVirtPageSize locksize; // filled in by canUseLocks()
-    if (canUseLocks(p1, p2, locksize))
-    {
-        TVirtPtrSize sizeleft = n;
-        while (sizeleft)
-        {
-            TVirtPageSize cmpsize = min(static_cast<TVirtPtrSize>(locksize), sizeleft);
-            // NOTE: cpsize might be reduced after lock is constructed
-            typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cmpsize, true);
-            typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cmpsize, true);
-
-            int cmp = comparator(*l1, *l2, cmpsize, done);
-            if (cmp != 0 || done)
-                return cmp;
-
-            p1 += cmpsize; p2 += cmpsize;
-            sizeleft -= cmpsize;
-            ASSERT(sizeleft <= n);
-        }
-    }
-    else
-    {
-        typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T1>::TValue>::type v1;
-        typename private_utils::TAntiConst<typename private_utils::TVirtPtrTraits<T2>::TValue>::type v2;
-        for (TVirtPtrSize i=0; i<n; ++i, ++p1, ++p2)
-        {
-            v1 = *p1; v2 = *p2; // having local copies makes things much faster for virt pointers
-            if (v1 < v2)
-                return -1;
-            if (v1 > v2)
-                return 1;
-            if (checknull && v1 == 0 /*|| v2 == 0*/) // if we are here, both must be the same
-                break;
-        }
-    }
-#endif
 
     return 0;
 }
@@ -460,45 +281,11 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
     while (sizeleft)
     {
         TVirtPageSize setsize = private_utils::min(A::getInstance()->getBigPageSize(), sizeleft);
-
-        // NOTE: setsize might be reduced after lock is constructed
         CVirtPtrLock<CVirtPtr<char, A> > l = makeVirtPtrLock(p, setsize);
-        if (l)
-        {
-            setsize = l.getLockSize();
-            ::memset(*l, c, setsize);
-            p += setsize; sizeleft -= setsize;
-        }
-        else
-        {
-            // slow fallback for when no locks can be used
-            sizeleft -= setsize;
-            for (; setsize; ++p, --setsize)
-                *p = c;
-        }
+        setsize = l.getLockSize();
+        ::memset(*l, c, setsize);
+        p += setsize; sizeleft -= setsize;
     }
-
-#if 0
-    CVirtPtr<char, A> p = dest;
-    TVirtPtrSize sizeleft = size;
-
-    if (A::getInstance()->getUnlockedBigPages() >= 1)
-    {
-        while (sizeleft)
-        {
-            TVirtPageSize setsize = private_utils::min(A::getInstance()->getBigPageSize(), sizeleft);
-            CPtrWrapLock<CVirtPtr<char, A> > l = makeVirtPtrLock(p, setsize);
-            ::memset(*l, c, setsize);
-            p += setsize; sizeleft -= setsize;
-        }
-    }
-    else
-    {
-        // slow fallback for when no locks can be used
-        for (; sizeleft; ++p, --sizeleft)
-            *p = c;
-    }
-#endif
 
     return dest;
 }

@@ -60,7 +60,6 @@ public:
     }
 
     TPtr operator *(void) { return data; }
-    operator bool(void) const { return data != 0; }
     TVirtPageSize getLockSize(void) const { return lockSize; }
 };
 

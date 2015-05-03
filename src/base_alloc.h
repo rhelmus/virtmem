@@ -81,7 +81,7 @@ private:
 
 #ifdef VIRTMEM_TRACE_STATS
     TVirtPtrSize memUsed, maxMemUsed;
-    uint32_t bigPageReads, bigPageWrites;
+    uint32_t bigPageReads, bigPageWrites, bytesRead, bytesWritten;
 #endif
 
     void initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
@@ -153,6 +153,8 @@ public:
     TVirtPtrSize getMaxMemUsed(void) const { return maxMemUsed; }
     uint32_t getBigPageReads(void) const { return bigPageReads; }
     uint32_t getBigPageWrites(void) const { return bigPageWrites; }
+    uint32_t getBytesRead(void) const { return bytesRead; }
+    uint32_t getBytesWritten(void) const { return bytesWritten; }
 #endif
 };
 

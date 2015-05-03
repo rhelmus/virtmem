@@ -79,6 +79,7 @@ void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
         page->cleanSkips = 0;
 #ifdef VIRTMEM_TRACE_STATS
         ++bigPageWrites;
+        bytesWritten += bigPages.size;
 #endif
     }
 }
@@ -120,6 +121,9 @@ void CBaseVirtMemAlloc::copyRawData(void *dest, TVirtPointer p, TVirtPtrSize siz
     {
         // read in rest of the data
         doRead(dest, p, size);
+#ifdef VIRTMEM_TRACE_STATS
+        bytesRead += size;
+#endif
     }
 }
 
@@ -170,6 +174,9 @@ void CBaseVirtMemAlloc::saveRawData(void *src, TVirtPointer p, TVirtPtrSize size
     {
         // read in rest of the data
         doWrite(src, p, size);
+#ifdef VIRTMEM_TRACE_STATS
+        bytesWritten += size;
+#endif
     }
 }
 
@@ -268,6 +275,7 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
 
 #ifdef VIRTMEM_TRACE_STATS
         ++bigPageReads;
+        bytesRead += bigPages.size;
 #endif
     }
 
@@ -489,7 +497,7 @@ void CBaseVirtMemAlloc::start()
     poolFreePos = START_OFFSET + sizeof(UMemHeader);
 #ifdef VIRTMEM_TRACE_STATS
     memUsed = maxMemUsed = 0;
-    bigPageReads = bigPageWrites = 0;
+    bigPageReads = bigPageWrites = bytesRead = bytesWritten = 0;
 #endif
 
     SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
@@ -1026,9 +1034,12 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
         // copy (rest of) data
         if (copyoffset < size)
         {
-//            const TVirtPtrSize copysize = size - copyoffset;
-            //memcpy(pinfo->pages[pageindex].pool + copyoffset, pullRawData(ptr + copyoffset, copysize, true, false), copysize); // UNDONE: make this more efficient
+#if 0
+            const TVirtPtrSize copysize = size - copyoffset;
+            memcpy(pinfo->pages[pageindex].pool + copyoffset, pullRawData(ptr + copyoffset, copysize, true, false), copysize); // UNDONE: make this more efficient
+#else
             copyRawData(pinfo->pages[pageindex].pool + copyoffset, ptr + copyoffset, size - copyoffset);
+#endif
         }
 
         pinfo->pages[pageindex].start = ptr;
@@ -1044,8 +1055,9 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
             // copy excess data to page
             // UNDONE: make this more efficient
             memcpy(pinfo->pages[pageindex].pool + offset, pullRawData(ptr + offset, copysize, true, false), copysize);
-#endif
+#else
             copyRawData(pinfo->pages[pageindex].pool + offset, ptr + offset, size - offset);
+#endif
         }
     }
 
@@ -1168,9 +1180,10 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
 #if 0
         if (syncpool)
             memcpy(plist[plistindex]->pages[pageindex].pool, pullRawData(ptr, size, true, false), size);
-#endif
+#else
         if (syncpool)
             copyRawData(plist[plistindex]->pages[pageindex].pool, ptr, size);
+#endif
 
         plist[plistindex]->pages[pageindex].start = ptr;
         plist[plistindex]->pages[pageindex].size = size;
