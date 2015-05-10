@@ -71,7 +71,7 @@ private:
     };
 
     // Stuff configured from CVirtMemAlloc
-    const TVirtPtrSize poolSize;
+    TVirtPtrSize poolSize;
     SPageInfo smallPages, mediumPages, bigPages;
 
     UMemHeader baseFreeList;
@@ -104,7 +104,7 @@ private:
     uint8_t getUnlockedPages(const SPageInfo *pinfo) const;
 
 protected:
-    CBaseVirtMemAlloc(const TVirtPtrSize ps) : poolSize(ps) { }
+    CBaseVirtMemAlloc(void) : poolSize(0) { }
 
     void initSmallPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
     void initMediumPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
@@ -121,6 +121,8 @@ protected:
 public:
     void start(void);
     void stop(void);
+
+    void setPoolSize(TVirtPtrSize ps) { poolSize = ps; }
 
     TVirtPointer alloc(TVirtPtrSize size);
     void free(TVirtPointer ptr);
@@ -141,9 +143,9 @@ public:
     uint8_t getSmallPageCount(void) const { return smallPages.count; }
     uint8_t getMediumPageCount(void) const { return mediumPages.count; }
     uint8_t getBigPageCount(void) const { return bigPages.count; }
-    TVirtPtrSize getSmallPageSize(void) const { return smallPages.size; }
-    TVirtPtrSize getMediumPageSize(void) const { return mediumPages.size; }
-    TVirtPtrSize getBigPageSize(void) const { return bigPages.size; }
+    TVirtPageSize getSmallPageSize(void) const { return smallPages.size; }
+    TVirtPageSize getMediumPageSize(void) const { return mediumPages.size; }
+    TVirtPageSize getBigPageSize(void) const { return bigPages.size; }
     TVirtPtrSize getPoolSize(void) const { return poolSize; }
 
     void printStats(void);

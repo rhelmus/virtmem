@@ -22,7 +22,7 @@ class CVirtMemAlloc : public CBaseVirtMemAlloc
     static CVirtMemAlloc *instance;
 
 protected:
-    CVirtMemAlloc(void) : CBaseVirtMemAlloc(TProperties::poolSize)
+    CVirtMemAlloc(void)
     {
         ASSERT(!instance);
         instance = this;

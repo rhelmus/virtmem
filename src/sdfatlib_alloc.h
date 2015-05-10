@@ -5,19 +5,9 @@
 
 #include <SdFat.h>
 
-// UNDONE: make this dependent upon platform
-struct SSdfatlibMemAllocProperties
-{
-    static const uint8_t smallPageCount = 4, smallPageSize = 32;
-    static const uint8_t mediumPageCount = 4, mediumPageSize = 64;
-    static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024 * 4;
-    static const uint32_t poolSize = DEFAULT_POOLSIZE;
-};
-
 template <typename> class CSdfatlibVirtMemAlloc;
 
-template <typename TProperties=SSdfatlibMemAllocProperties>
+template <typename TProperties=SDefaultAllocProperties>
 class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMemAlloc<TProperties> >
 {
     SdFile sdFile;
@@ -65,7 +55,7 @@ class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMem
     }
 
 public:
-    CSdfatlibVirtMemAlloc(void) { }
+    CSdfatlibVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
     ~CSdfatlibVirtMemAlloc(void) { doStop(); }
 };
 

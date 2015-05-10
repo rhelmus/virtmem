@@ -5,17 +5,7 @@
 #include "alloc.h"
 #include "serram_utils.h"
 
-// UNDONE: settings below
-struct SSerRAMMemAllocProperties
-{
-    static const uint8_t smallPageCount = 4, smallPageSize = 32;
-    static const uint8_t mediumPageCount = 4, mediumPageSize = 64;
-    static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024;
-    static const uint32_t poolSize = 1024 * 1024; // 1024 kB
-};
-
-template <typename IOStream=typeof(Serial), typename TProperties=SSerRAMMemAllocProperties>
+template <typename IOStream=typeof(Serial), typename TProperties=SDefaultAllocProperties>
 class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAlloc<IOStream, TProperties> >
 {
     uint32_t baudRate;
@@ -23,7 +13,7 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 
     void doStart(void)
     {
-        SerramUtils::init(stream, baudRate, TProperties::poolSize);
+        SerramUtils::init(stream, baudRate, this->getPoolSize());
     }
 
     void doSuspend(void) { } // UNDONE
@@ -53,7 +43,9 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 public:
     SerramUtils::CSerialInput<IOStream> input;
 
-    CSerRAMVirtMemAlloc(uint32_t baud=115200, IOStream *s=&Serial) :
+    CSerRAMVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
+        baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
+    CSerRAMVirtMemAlloc(uint32_t baud, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { }
 
     // only works before start() is called

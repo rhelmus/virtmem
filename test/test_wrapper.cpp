@@ -1,4 +1,5 @@
 #include "virtmem.h"
+#include "static_alloc.h"
 #include "stdio_alloc.h"
 #include "test.h"
 
@@ -341,8 +342,8 @@ TEST_F(CIntWrapFixture, OperatorTest)
 
 TEST_F(CIntWrapFixture, MultiAllocTest)
 {
-    // Second allocator. NOTE: the type is slightly different (different poolsize), so should give no singleton problems
-    typedef CStdioVirtMemAlloc<STestAllocProperties> TAlloc2;
+    // Second allocator
+    typedef CStaticVirtMemAlloc<1024*1024> TAlloc2;
     TAlloc2 valloc2;
     valloc2.start();
 

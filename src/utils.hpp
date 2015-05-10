@@ -9,18 +9,6 @@
 
 //#include <stdio.h> // UNDONE
 
-// Arduino define min/max macros, temporarily get rid of them.
-// They are restored at the end of this file
-#ifdef min
-#pragma push_macro("min")
-#undef min
-#endif
-
-#ifdef max
-#undef max
-#pragma push_macro("max")
-#endif
-
 namespace private_utils {
 
 template <typename T, typename T2> struct TSameType { static const bool flag = false; };
@@ -66,11 +54,11 @@ template <typename T1, typename T2> bool ptrEqual(T1, T2) { return false; } // m
 
 template <typename T1, typename T2> TVirtPageSize getMaxLockSize(T1 p1, T2 p2)
 {
-    TVirtPageSize ret = min(TVirtPtrTraits<T1>::getPageSize(), TVirtPtrTraits<T2>::getPageSize());
+    TVirtPageSize ret = minimal(TVirtPtrTraits<T1>::getPageSize(), TVirtPtrTraits<T2>::getPageSize());
 
     // check for overlap in case both p1 and p2 are virtual pointers from the same allocator
     if (TSameType<T1, T2>::flag && TVirtPtrTraits<T1>::isVirtPtr())
-        ret = min(ret, static_cast<TVirtPageSize>(abs(ptrDiff(p1, p2))));
+        ret = minimal(ret, static_cast<TVirtPageSize>(abs(ptrDiff(p1, p2))));
 
     return ret;
 }
@@ -114,12 +102,12 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, TVirtPtrSize siz
 
     while (sizeleft)
     {
-        TVirtPageSize cpsize = min(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
+        TVirtPageSize cpsize = minimal(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
 
         typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cpsize);
-        cpsize = min(cpsize, TVirtPtrTraits<T1>::getLockSize(l1));
+        cpsize = minimal(cpsize, TVirtPtrTraits<T1>::getLockSize(l1));
         typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cpsize, true);
-        cpsize = min(cpsize, TVirtPtrTraits<T2>::getLockSize(l2));
+        cpsize = minimal(cpsize, TVirtPtrTraits<T2>::getLockSize(l2));
 
         if (!copier(*l1, *l2, cpsize))
             return dest;
@@ -163,11 +151,11 @@ template <typename T1, typename T2> int rawCompare(T1 p1, T2 p2, TVirtPtrSize n,
 
     while (sizeleft)
     {
-        TVirtPageSize cmpsize = min(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
+        TVirtPageSize cmpsize = minimal(static_cast<TVirtPtrSize>(maxlocksize), sizeleft);
         typename TVirtPtrTraits<T1>::TLock l1 = TVirtPtrTraits<T1>::makeLock(p1, cmpsize, true);
-        cmpsize = min(cmpsize, TVirtPtrTraits<T1>::getLockSize(l1));
+        cmpsize = minimal(cmpsize, TVirtPtrTraits<T1>::getLockSize(l1));
         typename TVirtPtrTraits<T2>::TLock l2 = TVirtPtrTraits<T2>::makeLock(p2, cmpsize, true);
-        cmpsize = min(cmpsize, TVirtPtrTraits<T2>::getLockSize(l2));
+        cmpsize = minimal(cmpsize, TVirtPtrTraits<T2>::getLockSize(l2));
 
         int cmp = comparator(*l1, *l2, cmpsize, done);
         if (cmp != 0 || done)
@@ -280,7 +268,7 @@ template <typename A> CVirtPtr<char, A> memset(CVirtPtr<char, A> dest, int c, TV
 
     while (sizeleft)
     {
-        TVirtPageSize setsize = private_utils::min(A::getInstance()->getBigPageSize(), sizeleft);
+        TVirtPageSize setsize = private_utils::minimal((TVirtPtrSize)A::getInstance()->getBigPageSize(), sizeleft);
         CVirtPtrLock<CVirtPtr<char, A> > l = makeVirtPtrLock(p, setsize);
         setsize = l.getLockSize();
         ::memset(*l, c, setsize);
@@ -416,8 +404,5 @@ template <typename A> int strcmp(CVirtPtr<char, A> dest, const char *src)
 template <typename A> int strlen(CVirtPtr<char, A> str) { return strlen(static_cast<CVirtPtr<const char, A> >(str)); }
 
 }
-
-#pragma pop_macro("min")
-#pragma pop_macro("max")
 
 #endif // VIRTMEM_UTILS_HPP

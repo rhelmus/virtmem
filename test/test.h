@@ -14,7 +14,7 @@ protected:
     CStdioVirtMemAlloc<> valloc;
 
 public:
-    void SetUp(void) { valloc.start(); }
+    void SetUp(void) { valloc.setPoolSize(1024 * 1024 * 10); valloc.start(); }
     void TearDown(void) { valloc.stop(); }
 };
 
@@ -25,11 +25,6 @@ protected:
 
 public:
     CWrapFixture(void) : wrapper() { } // UNDONE: we need this for proper construction, problem?
-};
-
-struct STestAllocProperties : public SStdioMemAllocProperties
-{
-    static const TVirtPtrSize poolSize = 1024 * 1024;
 };
 
 #if 0

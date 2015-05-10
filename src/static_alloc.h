@@ -5,20 +5,10 @@
 
 #include "alloc.h"
 
-// UNDONE: settings below
-struct SStaticAllocProperties
+template <uint32_t poolSize=DEFAULT_POOLSIZE, typename TProperties=SDefaultAllocProperties>
+class CStaticVirtMemAlloc : public CVirtMemAlloc<TProperties, CStaticVirtMemAlloc<poolSize, TProperties> >
 {
-    static const uint8_t smallPageCount = 4, smallPageSize = 32;
-    static const uint8_t mediumPageCount = 4, mediumPageSize = 64;
-    static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024;
-    static const uint32_t poolSize = 1024 * 32;
-};
-
-template <typename TProperties=SStaticAllocProperties>
-class CStaticVirtMemAlloc : public CVirtMemAlloc<TProperties, CStaticVirtMemAlloc<TProperties> >
-{
-    char staticData[TProperties::poolSize];
+    char staticData[poolSize];
 
     void doStart(void) { }
     void doSuspend(void) { }
@@ -34,7 +24,10 @@ class CStaticVirtMemAlloc : public CVirtMemAlloc<TProperties, CStaticVirtMemAllo
         memcpy(&staticData[offset], data, size);
     }
 
+    using CBaseVirtMemAlloc::setPoolSize;
+
 public:
+    CStaticVirtMemAlloc(void) { this->setPoolSize(poolSize); }
 };
 
 template <typename, typename> class CVirtPtr;

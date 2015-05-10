@@ -8,18 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 
-struct SStdioMemAllocProperties
-{
-    static const uint8_t smallPageCount = 4, smallPageSize = 32;
-    static const uint8_t mediumPageCount = 4, mediumPageSize = 255;
-    static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024 * 32;
-    static const uint32_t poolSize = DEFAULT_POOLSIZE;
-};
-
 template <typename TProperties> class CStdioVirtMemAlloc;
 
-template <typename TProperties = SStdioMemAllocProperties>
+template <typename TProperties = SDefaultAllocProperties>
 class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<TProperties> >
 {
     FILE *ramFile;
@@ -56,7 +47,7 @@ class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<
     }
 
 public:
-    CStdioVirtMemAlloc(void) : ramFile(0) { }
+    CStdioVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
     ~CStdioVirtMemAlloc(void) { doStop(); }
 };
 
