@@ -45,8 +45,6 @@ public:
 
     CSerRAMVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
-    CSerRAMVirtMemAlloc(uint32_t baud, IOStream *s=&Serial) :
-        baudRate(baud), stream(s), input(stream) { }
 
     // only works before start() is called
     void setBaudRate(uint32_t baud) { baudRate = baud; }

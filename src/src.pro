@@ -37,6 +37,10 @@ unix {
     INSTALLS += target
 }
 
+OTHER_FILES += \
+    ../examples/benchmark/benchmark.ino \
+    ../examples/benchmark/benchmark.h
+
 QMAKE_CXXFLAGS_RELEASE += -Os
 #QMAKE_CXXFLAGS_DEBUG += -Og
 QMAKE_CXXFLAGS +=  -std=gnu++11 -ffunction-sections -fdata-sections

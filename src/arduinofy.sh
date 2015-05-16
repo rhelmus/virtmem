@@ -10,7 +10,6 @@ DEST="$1"
 echo "destination: $DEST"
 
 mkdir -p "${DEST}"
-
 $COPY "${PWD}"/alloc.h "${DEST}/"
 $COPY "${PWD}"/base_alloc.h "${DEST}/"
 $COPY "${PWD}"/base_alloc.cpp "${DEST}/"
@@ -29,3 +28,7 @@ $COPY "${PWD}"/virtmem.h "${DEST}/"
 $COPY "${PWD}"/wrapper.cpp "${DEST}/"
 $COPY "${PWD}"/wrapper.h "${DEST}/"
 $COPY "${PWD}"/wrapper_utils.h "${DEST}/"
+
+mkdir -p "${DEST}/examples/benchmark"
+$COPY "${PWD}"/../examples/benchmark/benchmark.ino "${DEST}/examples/benchmark"
+$COPY "${PWD}"/../examples/benchmark/benchmark.h "${DEST}/examples/benchmark"

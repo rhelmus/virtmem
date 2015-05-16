@@ -157,6 +157,7 @@ public:
     uint32_t getBigPageWrites(void) const { return bigPageWrites; }
     uint32_t getBytesRead(void) const { return bytesRead; }
     uint32_t getBytesWritten(void) const { return bytesWritten; }
+    void resetStats(void) { memUsed = maxMemUsed = 0; bigPageReads = bigPageWrites = bytesRead = bytesWritten = 0; }
 #endif
 };
 

@@ -498,8 +498,7 @@ void CBaseVirtMemAlloc::start()
     baseFreeList.s.size = 0;
     poolFreePos = START_OFFSET + sizeof(UMemHeader);
 #ifdef VIRTMEM_TRACE_STATS
-    memUsed = maxMemUsed = 0;
-    bigPageReads = bigPageWrites = bytesRead = bytesWritten = 0;
+    resetStats();
 #endif
 
     SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };

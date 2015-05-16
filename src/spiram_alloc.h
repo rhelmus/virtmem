@@ -27,16 +27,16 @@ class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAllo
 
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
-        const uint32_t t = micros();
+//        const uint32_t t = micros();
         serialRAM.read((char *)data, offset, size);
-        Serial.print("read: "); Serial.print(offset); Serial.print("/"); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
+//        Serial.print("read: "); Serial.print(offset); Serial.print("/"); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
-        const uint32_t t = micros();
+//        const uint32_t t = micros();
         serialRAM.write((const char *)data, offset, size);
-        Serial.print("write: "); Serial.print(offset); Serial.print("/"); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
+//        Serial.print("write: "); Serial.print(offset); Serial.print("/"); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:
@@ -92,7 +92,7 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
             if (offset >= startptr && offset < endptr)
             {
                 const TVirtPointer p = offset - startptr; // address relative in this chip
-                const TVirtPtrSize sz = private_utils::minimal(size, SPIChips[i].size);
+                const TVirtPtrSize sz = private_utils::minimal(size, SPIChips[i].size - p);
                 serialRAM[i].read((char *)data, p, sz);
 
                 if (sz == size)
@@ -117,14 +117,14 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
             if (offset >= startptr && offset < endptr)
             {
                 const TVirtPointer p = offset - startptr; // address relative in this chip
-                const TVirtPtrSize sz = private_utils::minimal(size, SPIChips[i].size);
+                const TVirtPtrSize sz = private_utils::minimal(size, SPIChips[i].size - p);
                 serialRAM[i].write((const char *)data, p, sz);
 
                 if (sz == size)
                     break;
 
                 size -= sz;
-                data = (char *)data + sz;
+                data = (const char *)data + sz;
                 offset += sz;
             }
             startptr = endptr;

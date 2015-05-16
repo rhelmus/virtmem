@@ -51,7 +51,7 @@ def processByte(byte, printunknown=True):
     else:
         assert(State.processState == 'idle')
         if printunknown:
-            State.outdev.write(byte)
+            State.outdev.write(byte.decode('utf-8'))
 
 def handleCommand(command):
     if command == Commands.init:
