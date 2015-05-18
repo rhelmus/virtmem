@@ -21,7 +21,7 @@ struct SDefaultAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 64;
     static const uint8_t mediumPageCount = 4;
-    static const uin16_t mediumPageSize = 256;
+    static const uint16_t mediumPageSize = 256;
     static const uint8_t bigPageCount = 4;
     static const uint16_t bigPageSize = 1024 * 4;
 };

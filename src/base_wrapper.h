@@ -13,6 +13,8 @@
 
 class CNILL;
 
+namespace private_utils {
+
 template <bool, typename T1, typename T2> struct TConditional
 {
     typedef T1 type;
@@ -22,6 +24,8 @@ template <typename T1, typename T2> struct TConditional<false, T1, T2>
 {
     typedef T2 type;
 };
+
+}
 
 template <typename, typename> class CVirtPtr;
 
@@ -43,7 +47,7 @@ public:
 #elif defined(__i386) || defined(_M_IX86)
     typedef uint64_t TPtrNum;
 #else
-    typedef TConditional<(sizeof(intptr_t) > sizeof(TVirtPointer)), intptr_t, TVirtPointer>::type TPtrNum;
+    typedef private_utils::TConditional<(sizeof(intptr_t) > sizeof(TVirtPointer)), intptr_t, TVirtPointer>::type TPtrNum;
 #endif
 #else
     typedef TVirtPointer TPtrNum;
