@@ -6,11 +6,8 @@
 #define VIRTMEM_WRAP_CPOINTERS
 #define VIRTMEM_TRACE_STATS
 
-enum
-{
-    // Used for allocators with variable sized pools (sdfatlib, stdio, serram etc)
-    DEFAULT_POOLSIZE = 1024 * 1024,
-};
+// Used for allocators with variable sized pools (sdfatlib, stdio, serram etc)
+#define DEFAULT_POOLSIZE 1024 * 1024
 
 
 // Default virtual memory page settings

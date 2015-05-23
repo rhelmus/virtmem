@@ -9,24 +9,23 @@ using namespace virtmem;
 //#define RUN_NATIVE
 #define RUN_SERIALALLOC
 
-enum
-{
-    NATIVE_BUFSIZE = 1024 * 4,
-    NATIVE_REPEATS = 100,
 
-    STATICALLOC_POOLSIZE = 1024 * 6 + 128, // plus some size overhead
-    STATICALLOC_BUFSIZE = 1024 * 6,
-    STATICALLOC_REPEATS = 100,
+#define NATIVE_BUFSIZE 1024 * 4
+#define NATIVE_REPEATS 100
 
-    SPIRAM_POOLSIZE = 1024 * 128,
-    SPIRAM_BUFSIZE = 1024 * 127,
-    SPIRAM_REPEATS = 5,
-    SPIRAM_CSPIN = 9,
+#define STATICALLOC_POOLSIZE 1024 * 6 + 128 // plus some size overhead
+#define STATICALLOC_BUFSIZE 1024 * 6
+#define STATICALLOC_REPEATS 100
 
-    SERIALRAM_POOLSIZE = 1024 * 128,
-    SERIALRAM_BUFSIZE = 1024 * 127,
-    SERIALRAM_REPEATS = 5,
-};
+#define SPIRAM_POOLSIZE 1024 * 128
+#define SPIRAM_BUFSIZE 1024 * 127
+#define SPIRAM_REPEATS 5
+#define SPIRAM_CSPIN 9
+
+#define SERIALRAM_POOLSIZE 1024l * 128l
+#define SERIALRAM_BUFSIZE 1024l * 6l
+#define SERIALRAM_REPEATS 5
+
 
 #ifdef RUN_STATICALLOC
 #include <static_alloc.h>
@@ -42,9 +41,10 @@ CSPIRAMVirtMemAlloc<> SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRa
 
 #ifdef RUN_SERIALALLOC
 #include <serram_alloc.h>
-CSerRAMVirtMemAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE);
+CSerRAMVirtMemAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
 #endif
 
+#ifdef RUN_NATIVE
 void runNativeBenchmark(uint32_t bufsize, uint8_t repeats)
 {
     volatile char buf[bufsize];
@@ -60,6 +60,7 @@ void runNativeBenchmark(uint32_t bufsize, uint8_t repeats)
 
     printBenchEnd(millis() - time, bufsize, repeats);
 }
+#endif
 
 
 void setup()

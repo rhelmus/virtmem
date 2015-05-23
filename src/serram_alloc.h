@@ -48,6 +48,15 @@ public:
 
     // only works before start() is called
     void setBaudRate(uint32_t baud) { baudRate = baud; }
+
+    uint32_t ping(void) const
+    {
+        SerramUtils::sendReadCommand(stream, SerramUtils::CMD_PING);
+        const uint32_t starttime = micros();
+        while (!SerramUtils::waitForCommand(stream, SerramUtils::CMD_PING, 1000))
+            ;
+        return micros() - starttime;
+    }
 };
 
 template <typename, typename> class CVirtPtr;

@@ -110,7 +110,7 @@ protected:
     void initMediumPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
     void initBigPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
 
-    void writeZeros(uint32_t start, uint32_t n); // NOTE: only call this in doStart()
+    void writeZeros(TVirtPointer start, TVirtPtrSize n); // NOTE: only call this in doStart()
 
     virtual void doStart(void) = 0;
     virtual void doSuspend(void) = 0;

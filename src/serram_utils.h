@@ -11,7 +11,8 @@ enum
     CMD_WRITE,
     CMD_INPUTAVAILABLE,
     CMD_INPUTREQUEST,
-    CMD_INPUTPEEK
+    CMD_INPUTPEEK,
+    CMD_PING
 };
 
 template <typename IOStream> class CSerialInput

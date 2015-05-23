@@ -27,7 +27,7 @@ inline void freeRam(const char *msg)
 //    return stacktop - heaptop;
 }
 
-#if 1
+#if 0
 #define ASSERT(x) \
     do \
     { \

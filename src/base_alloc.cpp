@@ -480,7 +480,7 @@ uint8_t CBaseVirtMemAlloc::getUnlockedPages(const SPageInfo *pinfo) const
     return ret;
 }
 
-void CBaseVirtMemAlloc::writeZeros(uint32_t start, uint32_t n)
+void CBaseVirtMemAlloc::writeZeros(TVirtPointer start, TVirtPtrSize n)
 {
     ASSERT(bigPages.pages[0].start == 0);
 
@@ -1127,12 +1127,6 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
         }
     }
 
-#if 0
-    // no existing lock found?
-    if (pageindex == -1)
-        return makeLock(ptr, size, ro); // create new one, with possibly shrunk size
-#endif
-
     TVirtPtrSize offset = 0;
 
     // no existing lock found?
@@ -1177,13 +1171,8 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
             plist[plistindex]->pages[pageindex].dirty = false;
         }
 
-#if 0
-        if (syncpool)
-            memcpy(plist[plistindex]->pages[pageindex].pool, pullRawData(ptr, size, true, false), size);
-#else
         if (syncpool)
             copyRawData(plist[plistindex]->pages[pageindex].pool, ptr, size);
-#endif
 
         plist[plistindex]->pages[pageindex].start = ptr;
         plist[plistindex]->pages[pageindex].size = size;

@@ -5,7 +5,7 @@ import threading
 import time
 
 class Commands:
-    init, initPool, read, write, inputAvailable, inputRequest, inputPeek = range(0, 7)
+    init, initPool, read, write, inputAvailable, inputRequest, inputPeek, ping = range(0, 8)
 
 class State:
     initialized = False
@@ -21,11 +21,10 @@ serInterface = serial.Serial()
 def blockedRead(size):
     ret = bytearray()
     while size > 0:
-        byte = serInterface.read(1)
-        if byte:
-            ret += byte
-            size -= 1
-
+        bytes = serInterface.read(size)
+        if bytes:
+            ret += bytes
+            size -= len(bytes)
     return ret
 
 def readInt():
@@ -37,7 +36,7 @@ def writeInt(i):
 def sendCommand(cmd):
     serInterface.write(bytes([State.initValue]))
     serInterface.write(bytes([cmd]))
-    print("send: ", State.initValue, "/", bytes([cmd]))
+#    print("send: ", State.initValue, "/", bytes([cmd]))
 
 def processByte(byte, printunknown=True):
     val = ord(byte)
@@ -51,10 +50,13 @@ def processByte(byte, printunknown=True):
     else:
         assert(State.processState == 'idle')
         if printunknown:
-            State.outdev.write(byte.decode('utf-8'))
+            State.outdev.write(byte.decode('ascii', errors='ignore'))
 
 def handleCommand(command):
-    if command == Commands.init:
+#    print("command: ", command)
+    if command == Commands.ping:
+        sendCommand(Commands.ping)
+    elif command == Commands.init:
         State.initialized = True
         State.memoryPool = None # remove pool
         sendCommand(Commands.init) # reply
