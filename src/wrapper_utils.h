@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-//#include <stdio.h> // UNDONE
+namespace virtmem {
 
 // Generic NULL type
 class CNILL
@@ -38,10 +38,12 @@ public:
 
     void lock(void)
     {
-        if (!virtPtr.isWrapped())
-            data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(virtPtr.ptr, lockSize, readOnly));
-        else
+#ifdef VIRTMEM_WRAP_CPOINTERS
+        if (virtPtr.isWrapped())
             data = virtPtr.unwrap();
+        else
+#endif
+            data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(virtPtr.ptr, lockSize, readOnly));
     }
 
     void lock(const TV &v, TVirtPageSize s, bool ro=false)
@@ -52,7 +54,11 @@ public:
 
     void unlock(void)
     {
+#ifdef VIRTMEM_WRAP_CPOINTERS
         if (!virtPtr.isWrapped() && data)
+#else
+        if (data)
+#endif
         {
             TV::getAlloc()->releaseLock(virtPtr.ptr);
             data = 0;
@@ -80,6 +86,8 @@ template <typename C, typename M, typename A> inline CVirtPtr<M, A> getMembrPtr(
 // for nested member
 template <typename C, typename M, typename NC, typename NM, typename A> inline CVirtPtr<NM, A> getMembrPtr(const CVirtPtr<C, A> &c, const M C::*m, const NM NC::*nm)
 { CVirtPtr<NM, A> ret = static_cast<CVirtPtr<NM, A> >(static_cast<CVirtPtr<char, A> >(getMembrPtr(c, m)) + private_utils::getMembrOffset(nm)); return ret; }
+
+}
 
 #include "utils.hpp"
 

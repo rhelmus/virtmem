@@ -7,6 +7,7 @@
 #else
 #include <Arduino.h>
 
+#if 0
 // From https://forum.pjrc.com/threads/23256-Get-Free-Memory-for-Teensy-3-0?p=34242&viewfull=1#post34242
 inline void freeRam(const char *msg)
 {
@@ -26,6 +27,7 @@ inline void freeRam(const char *msg)
 
 //    return stacktop - heaptop;
 }
+#endif
 
 #if 0
 #define ASSERT(x) \
@@ -45,6 +47,8 @@ inline void freeRam(const char *msg)
 
 #endif
 
+namespace virtmem {
+
 namespace private_utils {
 
 template <typename T> T minimal(const T &v1, const T &v2) { return (v1 < v2) ? v1 : v2; }
@@ -52,6 +56,8 @@ template <typename T> T maximal(const T &v1, const T &v2) { return (v1 > v2) ? v
 
 template <typename T> struct TAntiConst { typedef T type; };
 template <typename T> struct TAntiConst<const T> { typedef T type; };
+
+}
 
 }
 

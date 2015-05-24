@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#include <stdio.h> // UNDONE
+namespace virtmem {
 
 namespace private_utils {
 
@@ -220,7 +220,6 @@ inline int strComparator(const char *p1, const char *p2, TVirtPtrSize n, bool &d
 
 }
 
-namespace virtmem {
 
 // Specialize memcpy/memset/memcmp for char types: we may have to convert to this type anyway,
 // and this saves some template code duplication for other types. A general template function will just

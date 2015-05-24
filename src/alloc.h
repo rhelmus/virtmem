@@ -3,6 +3,8 @@
 
 #include "base_alloc.h"
 
+namespace virtmem {
+
 // TDerived is necessary to ensure unique instance variables
 template <typename TProperties, typename TDerived>
 class CVirtMemAlloc : public CBaseVirtMemAlloc
@@ -48,5 +50,6 @@ public:
 template <typename TProperties, typename TDerived>
 CVirtMemAlloc<TProperties, TDerived> *CVirtMemAlloc<TProperties, TDerived>::instance = 0;
 
+}
 
 #endif // VIRTMEM_ALLOC_H

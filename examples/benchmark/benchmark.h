@@ -1,11 +1,13 @@
 #ifndef BENCHMARK_H
 #define BENCHMARK_H
 
+using namespace virtmem;
+
 // arduino template functions must be in headers... :-(
 
 inline void printBenchStart(uint32_t bufsize, uint8_t repeats)
 {
-    Serial.print("Copying "); Serial.print((int)repeats); Serial.print(" x ");
+    Serial.print("Writing "); Serial.print((int)repeats); Serial.print(" x ");
     Serial.print(bufsize); Serial.println(" bytes");
 }
 
@@ -45,10 +47,31 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
             buf[j] = (char)j;
     }
 
+    valloc.clearPages();
     printBenchEnd(millis() - time, bufsize, repeats);
     printVAStats(valloc);
 
-    Serial.println("Repeating previous test with locks...");
+    Serial.println("Reading data");
+
+    time = millis();
+    for (uint8_t i=0; i<repeats; ++i)
+    {
+        for (uint32_t j=0; j<bufsize; ++j)
+        {
+            if (buf[j] != (char)j)
+            {
+                Serial.print("Mismatch! index/value/actual: "); Serial.print(j);
+                Serial.print("/"); Serial.print((int)(char)j);
+                Serial.print("/"); Serial.println((int)buf[j]);
+            }
+        }
+    }
+
+    valloc.clearPages();
+    printBenchEnd(millis() - time, bufsize, repeats);
+    printVAStats(valloc);
+
+    Serial.println("Repeating tests with locks...");
     time = millis();
 
     for (uint8_t i=0; i<repeats; ++i)
@@ -69,6 +92,39 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
         }
     }
 
+    valloc.clearPages();
+    printBenchEnd(millis() - time, bufsize, repeats);
+    printVAStats(valloc);
+
+    Serial.println("Reading data");
+
+    time = millis();
+    for (uint8_t i=0; i<repeats; ++i)
+    {
+        uint32_t sizeleft = bufsize;
+        TVirtPtr p = buf;
+        uint8_t counter = 0;
+
+        while (sizeleft)
+        {
+            uint16_t lsize = min(valloc.getBigPageSize(), sizeleft);
+            CVirtPtrLock<TVirtPtr> l = makeVirtPtrLock(p, lsize, true);
+            lsize = l.getLockSize();
+            char *b = *l;
+            for (uint16_t j=0; j<lsize; ++j, ++counter)
+            {
+                if (b[j] != counter)
+                {
+                    Serial.print("Mismatch! index/value/actual: "); Serial.print(j);
+                    Serial.print("/"); Serial.print((int)counter);
+                    Serial.print("/"); Serial.println((int)buf[j]);
+                }
+            }
+            p += lsize; sizeleft -= lsize;
+        }
+    }
+
+    valloc.clearPages();
     printBenchEnd(millis() - time, bufsize, repeats);
     printVAStats(valloc);
 

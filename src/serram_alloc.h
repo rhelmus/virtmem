@@ -5,6 +5,8 @@
 #include "alloc.h"
 #include "serram_utils.h"
 
+namespace virtmem {
+
 template <typename IOStream=typeof(Serial), typename TProperties=SDefaultAllocProperties>
 class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAlloc<IOStream, TProperties> >
 {
@@ -13,35 +15,34 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 
     void doStart(void)
     {
-        SerramUtils::init(stream, baudRate, this->getPoolSize());
+        serramutils::init(stream, baudRate, this->getPoolSize());
     }
 
-    void doSuspend(void) { } // UNDONE
     void doStop(void) { }
 
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
 //        uint32_t t = micros();
-        SerramUtils::sendReadCommand(stream, SerramUtils::CMD_READ);
-        SerramUtils::writeUInt32(stream, offset);
-        SerramUtils::writeUInt32(stream, size);
+        serramutils::sendReadCommand(stream, serramutils::CMD_READ);
+        serramutils::writeUInt32(stream, offset);
+        serramutils::writeUInt32(stream, size);
         Serial.flush();
-        SerramUtils::readBlock(stream, (char *)data, size);
+        serramutils::readBlock(stream, (char *)data, size);
 //        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
 //        const uint32_t t = micros();
-        SerramUtils::sendWriteCommand(stream, SerramUtils::CMD_WRITE);
-        SerramUtils::writeUInt32(stream, offset);
-        SerramUtils::writeUInt32(stream, size);
-        SerramUtils::writeBlock(stream, (const uint8_t *)data, size);
+        serramutils::sendWriteCommand(stream, serramutils::CMD_WRITE);
+        serramutils::writeUInt32(stream, offset);
+        serramutils::writeUInt32(stream, size);
+        serramutils::writeBlock(stream, (const uint8_t *)data, size);
 //        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:
-    SerramUtils::CSerialInput<IOStream> input;
+    serramutils::CSerialInput<IOStream> input;
 
     CSerRAMVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
@@ -51,9 +52,9 @@ public:
 
     uint32_t ping(void) const
     {
-        SerramUtils::sendReadCommand(stream, SerramUtils::CMD_PING);
+        serramutils::sendReadCommand(stream, serramutils::CMD_PING);
         const uint32_t starttime = micros();
-        while (!SerramUtils::waitForCommand(stream, SerramUtils::CMD_PING, 1000))
+        while (!serramutils::waitForCommand(stream, serramutils::CMD_PING, 1000))
             ;
         return micros() - starttime;
     }
@@ -62,5 +63,6 @@ public:
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TSerRAMVirtPtr { typedef CVirtPtr<T, CSerRAMVirtMemAlloc<typeof(Serial)> > type; };
 
+}
 
 #endif // VIRTMEM_SERRAM_ALLOC_H

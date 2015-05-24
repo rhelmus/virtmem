@@ -6,6 +6,8 @@
 
 #include <serialram.h>
 
+namespace virtmem {
+
 template <typename TProperties=SDefaultAllocProperties>
 class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAlloc<TProperties> >
 {
@@ -19,7 +21,6 @@ class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAllo
         serialRAM.begin(largeAddressing, chipSelect, SPISpeed);
     }
 
-    void doSuspend(void) { } // UNDONE
     void doStop(void)
     {
         serialRAM.end();
@@ -75,7 +76,6 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
         Serial.print(", "); Serial.println(chipAmount);
     }
 
-    void doSuspend(void) { } // UNDONE
     void doStop(void)
     {
         for (uint8_t i=0; i<chipAmount; ++i)
@@ -147,5 +147,7 @@ public:
 
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TSPIRAMVirtPtr { typedef CVirtPtr<T, CSPIRAMVirtMemAlloc<> > type; };
+
+}
 
 #endif // VIRTMEM_SPIRAM_ALLOC_H

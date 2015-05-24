@@ -9,6 +9,7 @@
 // Used for allocators with variable sized pools (sdfatlib, stdio, serram etc)
 #define DEFAULT_POOLSIZE 1024 * 1024
 
+namespace virtmem {
 
 // Default virtual memory page settings
 // NOTE: Take care of sufficiently large int types when increasing these values
@@ -20,7 +21,7 @@ struct SDefaultAllocProperties
     static const uint8_t mediumPageCount = 4;
     static const uint16_t mediumPageSize = 256;
     static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024 * 4;
+    static const uint16_t bigPageSize = 1024 * 1;
 };
 #elif defined(__MK20DX128__) // Teensy 3.0 (16 kB sram)
 struct SDefaultAllocProperties
@@ -65,9 +66,8 @@ struct SDefaultAllocProperties
     static const uint8_t bigPageCount = 1, bigPageSize = 128;
 };
 
-
-// UNDONE
 #endif
 
+}
 
 #endif // CONFIG_H

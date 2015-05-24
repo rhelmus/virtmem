@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+namespace virtmem {
+
 template <typename TProperties> class CStdioVirtMemAlloc;
 
 template <typename TProperties = SDefaultAllocProperties>
@@ -53,5 +55,7 @@ public:
 
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TStdioVirtPtr { typedef CVirtPtr<T, CStdioVirtMemAlloc<> > type; };
+
+}
 
 #endif // VIRTMEM_STDIO_ALLOC_H

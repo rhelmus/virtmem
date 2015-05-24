@@ -2,19 +2,17 @@
 #include <virtmem.h>
 #include "benchmark.h"
 
-using namespace virtmem;
-
-//#define RUN_STATICALLOC
+#define RUN_STATICALLOC
 //#define RUN_SPIRAMALLOC
 //#define RUN_NATIVE
-#define RUN_SERIALALLOC
+//#define RUN_SERIALALLOC
 
 
 #define NATIVE_BUFSIZE 1024 * 4
 #define NATIVE_REPEATS 100
 
-#define STATICALLOC_POOLSIZE 1024 * 6 + 128 // plus some size overhead
-#define STATICALLOC_BUFSIZE 1024 * 6
+#define STATICALLOC_POOLSIZE 1024 * 32 + 128 // plus some size overhead
+#define STATICALLOC_BUFSIZE 1024 * 32
 #define STATICALLOC_REPEATS 100
 
 #define SPIRAM_POOLSIZE 1024 * 128
@@ -22,8 +20,8 @@ using namespace virtmem;
 #define SPIRAM_REPEATS 5
 #define SPIRAM_CSPIN 9
 
-#define SERIALRAM_POOLSIZE 1024l * 128l
-#define SERIALRAM_BUFSIZE 1024l * 6l
+#define SERIALRAM_POOLSIZE 1024l * 1024l
+#define SERIALRAM_BUFSIZE 1024l * 128l
 #define SERIALRAM_REPEATS 5
 
 
@@ -65,7 +63,7 @@ void runNativeBenchmark(uint32_t bufsize, uint8_t repeats)
 
 void setup()
 {
-#if 0
+#ifndef RUN_SERIALALLOC
     while (!Serial)
         ;
 

@@ -11,6 +11,8 @@
 
 #include <stdint.h>
 
+namespace virtmem {
+
 typedef uint32_t TVirtPointer;
 typedef uint32_t TVirtPtrSize;
 typedef uint16_t TVirtPageSize;
@@ -113,7 +115,6 @@ protected:
     void writeZeros(TVirtPointer start, TVirtPtrSize n); // NOTE: only call this in doStart()
 
     virtual void doStart(void) = 0;
-    virtual void doSuspend(void) = 0;
     virtual void doStop(void) = 0;
     virtual void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size) = 0;
     virtual void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size) = 0;
@@ -160,5 +161,7 @@ public:
     void resetStats(void) { memUsed = maxMemUsed = 0; bigPageReads = bigPageWrites = bytesRead = bytesWritten = 0; }
 #endif
 };
+
+}
 
 #endif // VIRTMEM_BASE_ALLOC_H

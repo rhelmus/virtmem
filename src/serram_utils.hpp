@@ -2,7 +2,9 @@
 
 #include "serram_utils.h"
 
-namespace SerramUtils {
+namespace virtmem {
+
+namespace serramutils {
 
 enum { CMD_START = 0xFF };
 
@@ -174,5 +176,7 @@ template <typename IOStream> int16_t CSerialInput<IOStream>::peek()
     return readUInt8(stream);
 }
 
+
+}
 
 }

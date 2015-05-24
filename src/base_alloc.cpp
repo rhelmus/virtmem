@@ -18,8 +18,8 @@
 #include <stdio.h>
 #endif
 
-#undef min
-#undef max
+namespace virtmem {
+
 
 void CBaseVirtMemAlloc::initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize)
 {
@@ -1252,4 +1252,6 @@ void CBaseVirtMemAlloc::printStats()
     printf("\n");
     fflush(stdout);
 #endif
+}
+
 }

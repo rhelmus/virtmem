@@ -1,7 +1,9 @@
 #ifndef VIRTMEM_SERRAM_UTILS_H
 #define VIRTMEM_SERRAM_UTILS_H
 
-namespace SerramUtils {
+namespace virtmem {
+
+namespace serramutils {
 
 enum
 {
@@ -29,6 +31,8 @@ public:
     uint32_t readBytes(char *buffer, uint32_t count);
     int16_t peek(void);
 };
+
+}
 
 }
 

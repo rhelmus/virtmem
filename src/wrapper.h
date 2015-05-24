@@ -7,7 +7,13 @@
 
 #include <stddef.h>
 
-//#include <stdio.h> // UNDONE
+#if __cplusplus > 199711L
+#define EXPLICIT explicit
+#else
+#define EXPLICIT
+#endif
+
+namespace virtmem {
 
 template <typename T, typename TA> class CVirtPtr;
 
@@ -35,17 +41,21 @@ private:
     {
         if (!p)
             return 0;
+#ifdef VIRTMEM_WRAP_CPOINTERS
         if (isWrapped(p))
             return static_cast<T *>(CVirtPtrBase::unwrap(p));
+#endif
         return static_cast<T *>(getAlloc()->read(p, sizeof(T)));
     }
     T *read(void) const { return read(ptr); }
 
     static void write(TPtrNum p, const T *d)
     {
+#ifdef VIRTMEM_WRAP_CPOINTERS
         if (isWrapped(p))
             *(static_cast<T *>(CVirtPtrBase::unwrap(p))) = *d;
         else
+#endif
             getAlloc()->write(p, d, sizeof(T));
     }
     void write(const T *d) { write(ptr, d); }
@@ -131,19 +141,28 @@ public:
         CMemberWrapper &operator=(const CMemberWrapper &); // No assignment
 
     public:
-        ~CMemberWrapper(void) { if (!isWrapped(ptr)) getAlloc()->releaseLock(ptr); }
+        ~CMemberWrapper(void)
+        {
+#ifdef VIRTMEM_WRAP_CPOINTERS
+            if (!isWrapped(ptr))
+#endif
+                getAlloc()->releaseLock(ptr);
+        }
 
         T *operator->(void)
         {
+#ifdef VIRTMEM_WRAP_CPOINTERS
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
+#endif
             return static_cast<T *>(getAlloc()->makeDataLock(getPtrNum(ptr), sizeof(T)));
         }
         const T *operator->(void) const
         {
+#ifdef VIRTMEM_WRAP_CPOINTERS
             if (isWrapped(ptr))
                 return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
-
+#endif
             return static_cast<T *>(getAlloc()->makeDataLock(getPtrNum(ptr), sizeof(T), true));
         }
     };
@@ -162,8 +181,6 @@ public:
         p.ptr = 0;
     }
 
-    // UNDONE
-#ifndef ARDUINO
     // C++ style new/delete --> call constructors (by placement new) and destructors
     static TVirtPtr newClass(TVirtPtrSize size=sizeof(T))
     {
@@ -198,8 +215,8 @@ public:
             (read(p.ptr + (s * sizeof(T))))->~T();
         getAlloc()->free(soffset); // soffset points at beginning of actual block
     }
-#endif
 
+#ifdef VIRTMEM_WRAP_CPOINTERS
     static TVirtPtr wrap(const void *p)
     {
         TVirtPtr ret;
@@ -209,6 +226,7 @@ public:
     static T *unwrap(const TVirtPtr &p) { return static_cast<T *>(CVirtPtrBase::unwrap(p)); }
     T *unwrap(void) { return static_cast<T *>(CVirtPtrBase::unwrap(ptr)); }
     const T *unwrap(void) const { return static_cast<const T *>(CVirtPtrBase::unwrap(ptr)); }
+#endif
 
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }
     CMemberWrapper operator->(void) { return CMemberWrapper(ptr); }
@@ -242,5 +260,8 @@ public:
     static inline TAllocator *getAlloc(void) { return static_cast<TAllocator *>(TAllocator::getInstance()); }
 };
 
+}
+
+#undef EXPLICIT
 
 #endif // VIRTMEM_WRAPPER_H

@@ -11,7 +11,6 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 SOURCES += \
-    wrapper.cpp \
     base_alloc.cpp \
     utils.cpp
 

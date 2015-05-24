@@ -5,6 +5,8 @@
 
 #include <SdFat.h>
 
+namespace virtmem {
+
 template <typename> class CSdfatlibVirtMemAlloc;
 
 template <typename TProperties=SDefaultAllocProperties>
@@ -32,7 +34,6 @@ class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMem
         }
     }
 
-    void doSuspend(void) { } // UNDONE
     void doStop(void)
     {
         sdFile.close();
@@ -61,5 +62,7 @@ public:
 
 template <typename, typename> class CVirtPtr;
 template <typename T> struct TSdfatlibVirtPtr { typedef CVirtPtr<T, CSdfatlibVirtMemAlloc<> > type; };
+
+}
 
 #endif // VIRTMEM_SDFATLIB_ALLOC_H

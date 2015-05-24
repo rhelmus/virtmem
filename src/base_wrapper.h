@@ -11,6 +11,8 @@
 #define EXPLICIT
 #endif
 
+namespace virtmem {
+
 class CNILL;
 
 namespace private_utils {
@@ -54,12 +56,14 @@ public:
 #endif
 
 private:
+#ifdef VIRTMEM_WRAP_CPOINTERS
     enum { WRAP_BIT = sizeof(TPtrNum) * 8 - 1 }; // Last bit is used to check if wrapping real pointer
+#endif
 
 protected:
     // UNDONE
     // For debug
-#if defined(__x86_64__) || defined(_M_X64)
+#if defined(VIRTMEM_WRAP_CPOINTERS) && (defined(__x86_64__) || defined(_M_X64))
     union
     {
         TPtrNum ptr;
@@ -71,22 +75,28 @@ protected:
 #else
     TPtrNum ptr;
 #endif
+
+#ifdef VIRTMEM_WRAP_CPOINTERS
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
     static intptr_t getPtrNum(TPtrNum p) { return p & ~((TPtrNum)1 << WRAP_BIT); }
+    static void *unwrap(TPtrNum p) { ASSERT(isWrapped(p)); return reinterpret_cast<void *>(getPtrNum(p)); }
+#else
+    static intptr_t getPtrNum(TPtrNum p) { return p; }
+#endif
     intptr_t getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
 
-    static void *unwrap(TPtrNum p) { ASSERT(isWrapped(p)); return reinterpret_cast<void *>(getPtrNum(p)); }
-
 public:
+#ifdef VIRTMEM_WRAP_CPOINTERS
     static TPtrNum getWrapped(TPtrNum p) { return p | ((TPtrNum)1 << WRAP_BIT); }
-
     static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     bool isWrapped(void) const { return isWrapped(ptr); }
+#endif
 
     TPtrNum getRawNum(void) const { return ptr; }
     void setRawNum(TPtrNum p) { ptr = p; }
 
+#ifdef VIRTMEM_WRAP_CPOINTERS
     static CVirtPtrBase wrap(const void *p)
     {
         CVirtPtrBase ret;
@@ -96,6 +106,7 @@ public:
     void *unwrap(const CVirtPtrBase &p) {  return unwrap(p); }
     void *unwrap(void) { return unwrap(ptr); }
     const void *unwrap(void) const { return unwrap(ptr); }
+#endif
 
     // HACK: this allows constructing CVirtPtr objects from CVirtPtrBase variables, similar to
     // initializing non void pointers with a void pointer
@@ -132,5 +143,9 @@ public:
 #endif
 
 };
+
+}
+
+#undef EXPLICIT
 
 #endif // VIRTMEM_BASE_WRAPPER_H
