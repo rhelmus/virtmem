@@ -7,7 +7,7 @@
 #define VIRTMEM_TRACE_STATS
 
 // Used for allocators with variable sized pools (sdfatlib, stdio, serram etc)
-#define DEFAULT_POOLSIZE 1024 * 1024
+#define DEFAULT_POOLSIZE 1024l * 1024l
 
 namespace virtmem {
 
@@ -29,7 +29,7 @@ struct SDefaultAllocProperties
     static const uint8_t smallPageCount = 4, smallPageSize = 32;
     static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
     static const uint8_t bigPageCount = 4;
-    static const uint16_t bigPageSize = 1024 * 1;
+    static const uint16_t bigPageSize = 512 * 1;
 };
 // Teensy LC / Arduino mega (8 kB sram)
 #elif defined(__MKL26Z64__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)

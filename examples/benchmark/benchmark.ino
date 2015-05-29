@@ -2,11 +2,14 @@
 #include <virtmem.h>
 #include "benchmark.h"
 
-#define RUN_STATICALLOC
+//#define RUN_STATICALLOC
 //#define RUN_SPIRAMALLOC
 //#define RUN_NATIVE
 //#define RUN_SERIALALLOC
+#define RUN_SDFATALLOC
 
+// uncomment to disable a SPI select pin, useful when using ethernet shield
+#define DISABLE_SELECTPIN 10
 
 #define NATIVE_BUFSIZE 1024 * 4
 #define NATIVE_REPEATS 100
@@ -23,6 +26,12 @@
 #define SERIALRAM_POOLSIZE 1024l * 1024l
 #define SERIALRAM_BUFSIZE 1024l * 128l
 #define SERIALRAM_REPEATS 5
+
+#define SDFATLIB_POOLSIZE 1024l * 1024l
+#define SDFATLIB_BUFSIZE 1024l * 128l
+#define SDFATLIB_REPEATS 5
+#define SDFATLIB_CSPIN 9
+#define SDFATLIB_SPISPEED SPI_FULL_SPEED
 
 
 #ifdef RUN_STATICALLOC
@@ -41,6 +50,14 @@ CSPIRAMVirtMemAlloc<> SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRa
 #include <serram_alloc.h>
 CSerRAMVirtMemAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
 #endif
+
+#ifdef RUN_SDFATALLOC
+#include <SdFat.h>
+#include <sdfatlib_alloc.h>
+CSdfatlibVirtMemAlloc<> SdFatRamAlloc(SDFATLIB_POOLSIZE);
+SdFat sd;
+#endif
+
 
 #ifdef RUN_NATIVE
 void runNativeBenchmark(uint32_t bufsize, uint8_t repeats)
@@ -63,6 +80,11 @@ void runNativeBenchmark(uint32_t bufsize, uint8_t repeats)
 
 void setup()
 {
+#ifdef DISABLE_SELECTPIN
+    pinMode(DISABLE_SELECTPIN, OUTPUT);
+    digitalWrite(DISABLE_SELECTPIN, HIGH);
+#endif
+
 #ifndef RUN_SERIALALLOC
     while (!Serial)
         ;
@@ -70,6 +92,11 @@ void setup()
     Serial.begin(115200);
 
     delay(3000);
+#endif
+
+#ifdef RUN_SDFATALLOC
+    if (!sd.begin(SDFATLIB_CSPIN, SDFATLIB_SPISPEED))
+        sd.initErrorHalt();
 #endif
 }
 
@@ -96,6 +123,12 @@ void loop()
 #ifdef RUN_SERIALALLOC
     Serial.println("Running serial ram allocator...\n");
     runBenchmarks(serialRamAlloc, SERIALRAM_BUFSIZE, SERIALRAM_REPEATS);
+    Serial.println("\nDone!");
+#endif
+
+#ifdef RUN_SDFATALLOC
+    Serial.println("Running sd fat allocator...\n");
+    runBenchmarks(SdFatRamAlloc, SDFATLIB_BUFSIZE, SDFATLIB_REPEATS);
     Serial.println("\nDone!");
 #endif
 

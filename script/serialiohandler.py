@@ -1,8 +1,10 @@
 import datetime
 import serial
 import struct
+import sys
 import threading
 import time
+import traceback
 
 class Commands:
     init, initPool, read, write, inputAvailable, inputRequest, inputPeek, ping = range(0, 8)
@@ -50,7 +52,8 @@ def processByte(byte, printunknown=True):
     else:
         assert(State.processState == 'idle')
         if printunknown:
-            State.outdev.write(byte.decode('ascii', errors='ignore'))
+#            State.outdev.write(byte.decode('ascii', errors='ignore'))
+            State.outdev.write(byte)
 
 def handleCommand(command):
 #    print("command: ", command)
@@ -131,6 +134,7 @@ def update():
     # NOTE: catch for TypeError as workaround for indexing bug in PySerial
     except (serial.serialutil.SerialException, TypeError):
         print("Caught serial exception, port disconnected?")
+        traceback.print_exc(file=sys.stdout)
         State.initialized = False
         p, b = serInterface.port, serInterface.baudrate
         serInterface.close()
