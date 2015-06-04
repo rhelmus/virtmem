@@ -1,12 +1,28 @@
 #ifndef VIRTMEM_CONFIG_H
 #define VIRTMEM_CONFIG_H
 
+/**
+  @file
+  @brief This header file contains several variables that can be used to customize virtmem.
+  */
+
 #include <stdint.h>
 
 #define VIRTMEM_WRAP_CPOINTERS
+
+/**
+  @brief If defined, several functions in the allocator will be defined that can be used to
+  access statistics such as memory usage and page swaps.
+  @see \ref statf "Statistics functions"
+  */
 #define VIRTMEM_TRACE_STATS
 
-// Used for allocators with variable sized pools (sdfatlib, stdio, serram etc)
+/**
+  @brief The default poolsize for allocators supporting a variable sized pool.
+
+  This value is used for variable sized allocators, such as CSdfatlibVirtMemAlloc and
+  CSerRAMVirtMemAlloc.
+  */
 #define DEFAULT_POOLSIZE 1024l * 1024l
 
 namespace virtmem {
@@ -67,6 +83,46 @@ struct SDefaultAllocProperties
 };
 
 #endif
+
+/**
+  @struct SDefaultAllocProperties
+  @brief This struct contains default parameters for virtual memory pages.
+
+  The fields in this struct define the amount- and size of the *small*, *medium* and *big*
+  memory pages for an allocator. The defaults are platform dependend and can be changed in
+  config.h. Alternatively, page settings can be set by defining a customized structure
+  and passing this structure as a template parameter to an allocator.
+
+  Example:
+  @code
+// This struct contains a customized set of memory page properties.
+// While the datatype of each member does not matter, all members must be static.
+struct SMyAllocProperties
+{
+    static const uint8_t smallPageCount = 4, smallPageSize = 64;
+    static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
+    static const uint8_t bigPageCount = 4,
+    static const uint16_t bigPageSize = 512; // note: uint16_t to contain larger numeric value
+};
+
+// Create allocator with customized page properties
+CSdfatlibVirtMemAlloc<SMyAllocProperties> alloc;
+  @endcode
+
+  @var SDefaultAllocProperties::smallPageCount
+  @brief The number of *small* pages. @hideinitializer
+  @var SDefaultAllocProperties::mediumPageCount
+  @brief The number of *medium* pages. @hideinitializer
+  @var SDefaultAllocProperties::bigPageCount
+  @brief The number of *big* pages. @hideinitializer
+
+  @var SDefaultAllocProperties::smallPageSize
+  @brief The size of a *small* page. @hideinitializer
+  @var SDefaultAllocProperties::mediumPageSize
+  @brief The size of a *medium* page. @hideinitializer
+  @var SDefaultAllocProperties::bigPageSize
+  @brief The size of a *big* page. @hideinitializer
+  */
 
 }
 

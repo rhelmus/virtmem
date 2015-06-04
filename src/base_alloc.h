@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_BASE_ALLOC_H
 #define VIRTMEM_BASE_ALLOC_H
 
+/**
+  @file
+  @brief Base virtual memory class header
+*/
+
 #define NVALGRIND
 
 #ifndef NVALGRIND
@@ -13,13 +18,20 @@
 
 namespace virtmem {
 
-typedef uint32_t TVirtPointer;
-typedef uint32_t TVirtPtrSize;
-typedef uint16_t TVirtPageSize;
+typedef uint32_t TVirtPointer; //!< Numeric type used to store raw virtual pointer addresses
+typedef uint32_t TVirtPtrSize; //!< Numeric type used to store the size of a virtual memory block
+typedef uint16_t TVirtPageSize; //!< Numeric type used to store the size of a virtual memory page
 
+/**
+ * @brief Base class for virtual memory allocators.
+ *
+ * This class defines methods to (de)initialize the allocator (see \ref start() and \ref stop()).
+ * In addition, this class can be used for 'raw' memory access.
+ */
 class CBaseVirtMemAlloc
 {
 protected:
+    // \cond HIDDEN_SYMBOLS
 #if defined(__x86_64__) || defined(_M_X64)
     typedef __uint128_t TAlign;
 #else
@@ -51,6 +63,7 @@ protected:
     static const int valgrindPad = 12;
 #endif
 
+    // \cond HIDDEN_SYMBOLS
     struct SLockPage
     {
         TVirtPointer start;
@@ -62,6 +75,7 @@ protected:
 
         SLockPage(void) : start(0), size(0), pool(0), locks(0), cleanSkips(0), dirty(false), next(-1) { }
     };
+    // \endcond
 
 private:
     struct SPageInfo
@@ -108,9 +122,11 @@ private:
 protected:
     CBaseVirtMemAlloc(void) : poolSize(0) { }
 
+    // \cond HIDDEN_SYMBOLS
     void initSmallPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
     void initMediumPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
     void initBigPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
+    // \endcond
 
     void writeZeros(TVirtPointer start, TVirtPtrSize n); // NOTE: only call this in doStart()
 
@@ -123,6 +139,13 @@ public:
     void start(void);
     void stop(void);
 
+    /**
+     * @brief Sets the total size of the memory pool.
+     * @param ps size of the memory pool.
+     * @note The poolsize can also be set via the constructor of most allocators.
+     * @note This function is unavailable for CMultiSPIRAMVirtMemAlloc and CStaticVirtMemAlloc.
+     * @note This function should always called before \ref start().
+     */
     void setPoolSize(TVirtPtrSize ps) { poolSize = ps; }
 
     TVirtPointer alloc(TVirtPtrSize size);
@@ -133,32 +156,49 @@ public:
     void flush(void);
     void clearPages(void);
     uint8_t getFreeBigPages(void) const;
-    uint8_t getUnlockedSmallPages(void) const { return getUnlockedPages(&smallPages); }
-    uint8_t getUnlockedMediumPages(void) const { return getUnlockedPages(&mediumPages); }
-    uint8_t getUnlockedBigPages(void) const { return getUnlockedPages(&bigPages); }
+    uint8_t getUnlockedSmallPages(void) const { return getUnlockedPages(&smallPages); } //!< Returns amount of *small* pages which are not locked.
+    uint8_t getUnlockedMediumPages(void) const { return getUnlockedPages(&mediumPages); } //!< Returns amount of *medium* pages which are not locked.
+    uint8_t getUnlockedBigPages(void) const { return getUnlockedPages(&bigPages); } //!< Returns amount of *big* pages which are not locked.
 
+    // \cond HIDDEN_SYMBOLS
     void *makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
     void *makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro=false);
     void releaseLock(TVirtPointer ptr);
+    // \endcond
 
-    uint8_t getSmallPageCount(void) const { return smallPages.count; }
-    uint8_t getMediumPageCount(void) const { return mediumPages.count; }
-    uint8_t getBigPageCount(void) const { return bigPages.count; }
-    TVirtPageSize getSmallPageSize(void) const { return smallPages.size; }
-    TVirtPageSize getMediumPageSize(void) const { return mediumPages.size; }
-    TVirtPageSize getBigPageSize(void) const { return bigPages.size; }
+    uint8_t getSmallPageCount(void) const { return smallPages.count; } //!< Returns total amount of *small* pages.
+    uint8_t getMediumPageCount(void) const { return mediumPages.count; } //!< Returns total amount of *medium* pages.
+    uint8_t getBigPageCount(void) const { return bigPages.count; } //!< Returns total amount of *big* pages.
+    TVirtPageSize getSmallPageSize(void) const { return smallPages.size; } //!< Returns the size of a *small* page.
+    TVirtPageSize getMediumPageSize(void) const { return mediumPages.size; } //!< Returns the size of a *medium* page.
+    TVirtPageSize getBigPageSize(void) const { return bigPages.size; } //!< Returns the size of a *big* page.
+
+    /**
+     * @brief Returns the size the memory pool.
+     * @note Some memory is used for bookkeeping, therefore, the amount returned by this function
+     * does *not* equate the amount that can be allocated.
+     */
     TVirtPtrSize getPoolSize(void) const { return poolSize; }
 
+    // \cond HIDDEN_SYMBOLS
     void printStats(void);
+    // \endcond
 
 #ifdef VIRTMEM_TRACE_STATS
-    TVirtPtrSize getMemUsed(void) const { return memUsed; }
-    TVirtPtrSize getMaxMemUsed(void) const { return maxMemUsed; }
-    uint32_t getBigPageReads(void) const { return bigPageReads; }
-    uint32_t getBigPageWrites(void) const { return bigPageWrites; }
-    uint32_t getBytesRead(void) const { return bytesRead; }
-    uint32_t getBytesWritten(void) const { return bytesWritten; }
-    void resetStats(void) { memUsed = maxMemUsed = 0; bigPageReads = bigPageWrites = bytesRead = bytesWritten = 0; }
+    /**
+     * @anchor statf
+     * @name Statistics functions.
+     * The following functions are only available when VIRTMEM_TRACE_STATS is defined (in config.h).
+     */
+    //@{
+    TVirtPtrSize getMemUsed(void) const { return memUsed; } //!< Returns total memory used.
+    TVirtPtrSize getMaxMemUsed(void) const { return maxMemUsed; } //!< Returns the maximum memory used so far.
+    uint32_t getBigPageReads(void) const { return bigPageReads; } //!< Returns the times *big* pages were read (swapped).
+    uint32_t getBigPageWrites(void) const { return bigPageWrites; } //!< Returns the times *big* pages written (synchronized).
+    uint32_t getBytesRead(void) const { return bytesRead; } //!< Returns the amount of bytes read as a result of page swaps.
+    uint32_t getBytesWritten(void) const { return bytesWritten; } //!< Returns the amount of bytes written as a results of page swaps.
+    void resetStats(void) { memUsed = maxMemUsed = 0; bigPageReads = bigPageWrites = bytesRead = bytesWritten = 0; } //!< Reset all statistics. Called by \ref start()
+    //@}
 #endif
 };
 

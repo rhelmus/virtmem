@@ -3,7 +3,7 @@
 
 namespace virtmem {
 
-namespace serramutils {
+namespace serram_utils {
 
 enum
 {

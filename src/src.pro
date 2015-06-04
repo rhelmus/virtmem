@@ -38,7 +38,8 @@ unix {
 
 OTHER_FILES += \
     ../examples/benchmark/benchmark.ino \
-    ../examples/benchmark/benchmark.h
+    ../examples/benchmark/benchmark.h \
+    ../Doxyfile
 
 QMAKE_CXXFLAGS_RELEASE += -Os
 #QMAKE_CXXFLAGS_DEBUG += -Og

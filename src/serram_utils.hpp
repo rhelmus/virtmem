@@ -4,7 +4,7 @@
 
 namespace virtmem {
 
-namespace serramutils {
+namespace serram_utils {
 
 enum { CMD_START = 0xFF };
 

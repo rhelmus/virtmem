@@ -1,3 +1,8 @@
+/**
+  @file
+  @brief
+*/
+
 /*
  * Memory allocator based on memmgr, by Eli Bendersky
  * https://github.com/eliben/code-for-blog/tree/master/2008/memmgr
@@ -5,10 +10,6 @@
 
 #include "base_alloc.h"
 #include "utils.h"
-
-//#include <algorithm>
-//#include <iomanip>
-//#include <iostream>
 
 #include <string.h>
 
@@ -490,6 +491,13 @@ void CBaseVirtMemAlloc::writeZeros(TVirtPointer start, TVirtPtrSize n)
         doWrite(bigPages.pages[0].pool, start + i, private_utils::minimal(n - i, (TVirtPtrSize)bigPages.size));
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::start()
+ * @brief Starts the allocator.
+ *
+ * This function should always be called during initialization, i.e. in *setup()* function of your sketch.
+ * If the allocator was stopped (see \ref stop()), this function should be called again before using the allocator.
+ */
 void CBaseVirtMemAlloc::start()
 {
     freePointer = 0;
@@ -526,11 +534,23 @@ void CBaseVirtMemAlloc::start()
     doStart();
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::stop
+ * @brief Deinitializes the allocator.
+ *
+ * Run \ref start() before using the allocator to re-initialize it.
+ */
 void CBaseVirtMemAlloc::stop()
 {
     doStop();
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::alloc
+ * @brief Allocates a piece of raw (virtual) memory.
+ * @param size the size of the memory block
+ * @return The starting address of the memory block. Will return zero if out of memory.
+ */
 TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
 {
     const TVirtPtrSize quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
@@ -613,14 +633,20 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
     }
 }
 
-// Scans the free list, starting at freePointer, looking the the place to insert the
-// free block. This is either between two existing blocks or at the end of the
-// list. In any case, if the block being freed is adjacent to either neighbor,
-// the adjacent blocks are combined.
+/**
+ * @fn CBaseVirtMemAlloc::free
+ * @brief Frees a memory block for re-usage.
+ * @param ptr starting address of the memory block. This function will do nothing if \a ptr is zero.
+ */
 void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 {
     if (!ptr)
         return;
+
+    // Scans the free list, starting at freePointer, looking the the place to insert the
+    // free block. This is either between two existing blocks or at the end of the
+    // list. In any case, if the block being freed is adjacent to either neighbor,
+    // the adjacent blocks are combined.
 
     // acquire pointer to block header
     const TVirtPointer hdrptr = ptr - sizeof(UMemHeader);
@@ -680,6 +706,15 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
     freePointer = p;
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::read
+ * @brief Reads a raw block of (virtual) memory.
+ * @param p starting address of memory block
+ * @param size number of bytes to read
+ * @return a pointer to a memory block (a memory page) containing the data
+ * @note The memory block returned by this function is temporary and may be invalidated
+ * during a page swap. To use the memory accross reads and writes it should be locked.
+ */
 void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
 {
     SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
@@ -719,6 +754,13 @@ void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
     return pullRawData(p, size, true, false);
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::write
+ * @brief Writes a piece of raw data to (virtual) memory.
+ * @param p starting address of the virtual memory block
+ * @param d pointer to data to be written
+ * @param size number of bytes to write
+ */
 void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
 {
     SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
@@ -764,6 +806,11 @@ void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
     pushRawData(p, d, size);
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::flush
+ * @brief Synchronizes all *big* memory pages.
+ * @note This function is merely used for debugging.
+ */
 void CBaseVirtMemAlloc::flush()
 {
     // UNDONE: also flush locked pages?
@@ -774,6 +821,11 @@ void CBaseVirtMemAlloc::flush()
     }
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::clearPages
+ * @brief Synchronizes and clears all *big* memory pages.
+ * @note This function is merely used for debugging.
+ */
 void CBaseVirtMemAlloc::clearPages()
 {
     // wipe all pages
@@ -787,6 +839,10 @@ void CBaseVirtMemAlloc::clearPages()
     }
 }
 
+/**
+ * @fn CBaseVirtMemAlloc::getFreeBigPages
+ * @return number of *big* pages that are not used and are not locked.
+ */
 uint8_t CBaseVirtMemAlloc::getFreeBigPages() const
 {
     uint8_t ret = 0;

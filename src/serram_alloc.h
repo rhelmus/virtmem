@@ -15,7 +15,7 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 
     void doStart(void)
     {
-        serramutils::init(stream, baudRate, this->getPoolSize());
+        serram_utils::init(stream, baudRate, this->getPoolSize());
     }
 
     void doStop(void) { }
@@ -23,26 +23,26 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
 //        uint32_t t = micros();
-        serramutils::sendReadCommand(stream, serramutils::CMD_READ);
-        serramutils::writeUInt32(stream, offset);
-        serramutils::writeUInt32(stream, size);
+        serram_utils::sendReadCommand(stream, serram_utils::CMD_READ);
+        serram_utils::writeUInt32(stream, offset);
+        serram_utils::writeUInt32(stream, size);
         Serial.flush();
-        serramutils::readBlock(stream, (char *)data, size);
+        serram_utils::readBlock(stream, (char *)data, size);
 //        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
     void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
 //        const uint32_t t = micros();
-        serramutils::sendWriteCommand(stream, serramutils::CMD_WRITE);
-        serramutils::writeUInt32(stream, offset);
-        serramutils::writeUInt32(stream, size);
-        serramutils::writeBlock(stream, (const uint8_t *)data, size);
+        serram_utils::sendWriteCommand(stream, serram_utils::CMD_WRITE);
+        serram_utils::writeUInt32(stream, offset);
+        serram_utils::writeUInt32(stream, size);
+        serram_utils::writeBlock(stream, (const uint8_t *)data, size);
 //        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
 public:
-    serramutils::CSerialInput<IOStream> input;
+    serram_utils::CSerialInput<IOStream> input;
 
     CSerRAMVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
@@ -52,9 +52,9 @@ public:
 
     uint32_t ping(void) const
     {
-        serramutils::sendReadCommand(stream, serramutils::CMD_PING);
+        serram_utils::sendReadCommand(stream, serram_utils::CMD_PING);
         const uint32_t starttime = micros();
-        while (!serramutils::waitForCommand(stream, serramutils::CMD_PING, 1000))
+        while (!serram_utils::waitForCommand(stream, serram_utils::CMD_PING, 1000))
             ;
         return micros() - starttime;
     }
