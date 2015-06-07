@@ -8,15 +8,38 @@
 namespace virtmem {
 
 // Generic NULL type
+/**
+ * @brief Generalized `NULL` pointer class
+ *
+ * This class can be used to assign a zero (`NULL`) value to both virtual and regular
+ * pointers. This is useful, for instance, to write generic code where the type of a pointer is
+ * unknown. The \ref virtmem namespace contains a global instance of the CNILL class: \ref NILL.
+ * @sa NILL
+ */
 class CNILL
 {
 public:
     template <typename T> inline operator T*(void) const { return 0; }
     template <typename T, typename A> inline operator CVirtPtr<T, A>(void) const { return CVirtPtr<T, A>(); }
-    inline operator CVirtPtrBase(void) const { return CVirtPtrBase(); }
+    inline operator CBaseVirtPtr(void) const { return CBaseVirtPtr(); }
     template <typename T, typename A> inline operator typename CVirtPtr<T, A>::CValueWrapper(void) const { return CVirtPtr<T, A>::CValueWrapper(0); }
 
 } extern const NILL;
+
+/**
+ * @var NILL
+ * @brief Global instance of a CNILL class
+ *
+ * This variable can be used to assign a `NULL` pointer to both virtual and regular pointers.
+ * Example:
+ * @code
+ * using namespace virtmem;
+ * char *a = NILL;
+ * CVirtPtr<char, CSdfatlibVirtMemAlloc> b = NILL;
+ * CBaseVirtPtr c = NILL;
+ * @endcode
+ * @sa CNILL
+ */
 
 template <typename TV> class CVirtPtrLock
 {

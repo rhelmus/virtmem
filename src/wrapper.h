@@ -28,7 +28,7 @@ template <typename T, typename A> struct TDereferenced<CVirtPtr<T, A> > { typede
 template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
 }
 
-template <typename T, typename TA> class CVirtPtr : public CVirtPtrBase
+template <typename T, typename TA> class CVirtPtr : public CBaseVirtPtr
 {
 public:
     typedef T *TPtr;
@@ -43,7 +43,7 @@ private:
             return 0;
 #ifdef VIRTMEM_WRAP_CPOINTERS
         if (isWrapped(p))
-            return static_cast<T *>(CVirtPtrBase::unwrap(p));
+            return static_cast<T *>(CBaseVirtPtr::unwrap(p));
 #endif
         return static_cast<T *>(getAlloc()->read(p, sizeof(T)));
     }
@@ -53,7 +53,7 @@ private:
     {
 #ifdef VIRTMEM_WRAP_CPOINTERS
         if (isWrapped(p))
-            *(static_cast<T *>(CVirtPtrBase::unwrap(p))) = *d;
+            *(static_cast<T *>(CBaseVirtPtr::unwrap(p))) = *d;
         else
 #endif
             getAlloc()->write(p, d, sizeof(T));
@@ -153,7 +153,7 @@ public:
         {
 #ifdef VIRTMEM_WRAP_CPOINTERS
             if (isWrapped(ptr))
-                return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
+                return static_cast<T *>(CBaseVirtPtr::unwrap(ptr));
 #endif
             return static_cast<T *>(getAlloc()->makeDataLock(getPtrNum(ptr), sizeof(T)));
         }
@@ -161,13 +161,26 @@ public:
         {
 #ifdef VIRTMEM_WRAP_CPOINTERS
             if (isWrapped(ptr))
-                return static_cast<T *>(CVirtPtrBase::unwrap(ptr));
+                return static_cast<T *>(CBaseVirtPtr::unwrap(ptr));
 #endif
             return static_cast<T *>(getAlloc()->makeDataLock(getPtrNum(ptr), sizeof(T), true));
         }
     };
 
     // C style malloc/free
+    /**
+     * @brief Allocates memory from the linked virtual memory allocator
+     * @param size The number of bytes to allocate. By default this is the size of the type pointed to.
+     * @return Virtual pointer pointing to allocated memory.
+     *
+     * This function is the equivelant of the C `malloc` function. To allocate memory for an
+     * array multiply the array size by the size of the type, for instance:
+     * @code
+     * // allocate array of 10 integers.
+     * vptr = virtmem::CVirtPtr<int, CSdfatlibVirtMemAlloc>::alloc(10 * sizeof(int));
+     * @endcode
+     * @sa free, newClass, newArray, CBaseVirtMemAlloc::alloc
+     */
     static TVirtPtr alloc(TVirtPtrSize size=sizeof(T))
     {
         TVirtPtr ret;
@@ -175,6 +188,13 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Frees a block of virtual memory
+     * @param p virtual pointer that points to block to be freed
+     *
+     * This function is the equivelant of the C `free` function.
+     * @sa alloc, deleteClass, deleteArray, CBaseVirtMemAlloc::free
+     */
     static void free(TVirtPtr &p)
     {
         getAlloc()->free(p.ptr);
@@ -182,6 +202,17 @@ public:
     }
 
     // C++ style new/delete --> call constructors (by placement new) and destructors
+    /**
+     * @brief Allocates memory and constructs data type
+     * @param size The number of bytes to allocate. By default this is the size of the type pointed to.
+     * @return Virtual pointer pointing to allocated memory.
+     *
+     * This function is similar to the C++ `new` operator. Similar to \ref alloc, this function will
+     * allocate a block of virtual memory. Subsequently, the default constructor of the data type is
+     * called. For this reason, this function is typically used for C++ classes.
+     * @note This function should be used together with deleteClass.
+     * @sa deleteClass, newArray, alloc
+     */
     static TVirtPtr newClass(TVirtPtrSize size=sizeof(T))
     {
         TVirtPtr ret = alloc(size);
@@ -189,6 +220,16 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Destructs data type and frees memory
+     * @param p virtual pointer to delete
+     *
+     * This function is similar to the C++ `delete` operator. After calling the destructor of the
+     * data type the respective memory block will be freed.
+     * @note This function should be used together with
+     * newClass.
+     * @sa newClass, deleteArray, free
+     */
     static void deleteClass(TVirtPtr &p)
     {
         read(p.ptr)->~T();
@@ -198,6 +239,16 @@ public:
     // C++ style new []/delete [] --> calls constructors and destructors
     // the size of the array (necessary for destruction) is stored at the beginning of the block.
     // A pointer offset from this is returned.
+    /**
+     * @brief Allocates and constructs an array of objects.
+     * @param elements the size of the array
+     * @return Virtual pointer to start of the array
+     *
+     * This function is similar to the C++ new [] operator. After allocating sufficient size for the
+     * array, the default constructor will be called for each object.
+     * @note This function should be used together with deleteArray.
+     * @sa deleteArray, newClass, alloc
+     */
     static TVirtPtr newArray(TVirtPtrSize elements)
     {
         TVirtPtr ret = alloc(sizeof(T) * elements + sizeof(TVirtPtrSize));
@@ -207,6 +258,15 @@ public:
             new (getAlloc()->read(ret.ptr + (s * sizeof(T)), sizeof(T))) T; // UNDONE: can this be ro?
         return ret;
     }
+    /**
+     * @brief Destructs and frees an array of objects.
+     * @param p Virtual pointer to array that should be deleted
+     *
+     * This function is similar to the C++ `delete []` operator. After calling all the
+     * destructors of each object, the respective memory block will be freed.
+     * @note This function should be used together with newArray.
+     * @sa newArray, deleteClass, free
+     */
     static void deleteArray(TVirtPtr &p)
     {
         const TPtrNum soffset = p.ptr - sizeof(TVirtPtrSize); // pointer to size offset
@@ -217,15 +277,52 @@ public:
     }
 
 #ifdef VIRTMEM_WRAP_CPOINTERS
-    static TVirtPtr wrap(const void *p)
+    /**
+     * @brief Wraps a regular pointer.
+     *
+     * Regular (non virtual) pointers can be stored inside a virtual pointer (wrapping).
+     * In this situation, arithmetic, access, etc. will be proxied to the regular pointer.
+     * This is useful when using code that mixes both virtual and non-virtual pointers.
+     *
+     * Example:
+     * @code
+     * int data[] = { 1, 2, 3, 4 };
+     * typedef virtmem::CVirtPtr<int, CSdfatlibVirtMemAlloc> vptrType;
+     * vptrType vptr = vptrType::wrap(data);
+     * vptr += 2;
+     * Serial.println(*vptr); // prints "3"
+     * @endcode
+     * @param p regular pointer to wrap
+     * @return A virtual pointer wrapping the specified pointer.
+     * @sa unwrap
+     * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
+     */
+    static TVirtPtr wrap(const T *p)
     {
         TVirtPtr ret;
         ret.ptr = getWrapped(reinterpret_cast<TPtrNum>(p));
         return ret;
     }
-    static T *unwrap(const TVirtPtr &p) { return static_cast<T *>(CVirtPtrBase::unwrap(p)); }
-    T *unwrap(void) { return static_cast<T *>(CVirtPtrBase::unwrap(ptr)); }
-    const T *unwrap(void) const { return static_cast<const T *>(CVirtPtrBase::unwrap(ptr)); }
+    /**
+     * @brief Provide access to wrapped regular pointer.
+     * @param p virtual pointer that wraps a regular pointer
+     * @return regular pointer wrapped by specified virtual pointer.
+     * @sa wrap
+     * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
+     */
+    static T *unwrap(const TVirtPtr &p) { return static_cast<T *>(CBaseVirtPtr::unwrap(p)); }
+    /**
+     * @brief Provide access to wrapped regular pointer (non static version).
+     * @sa CVirtPtr::unwrap(const TVirtPtr &p), wrap
+     * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
+     */
+    T *unwrap(void) { return static_cast<T *>(CBaseVirtPtr::unwrap(ptr)); }
+    /**
+     * @brief Provide access to wrapped regular pointer (non static const version).
+     * @sa CVirtPtr::unwrap(const TVirtPtr &p), wrap
+     * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
+     */
+    const T *unwrap(void) const { return static_cast<const T *>(CBaseVirtPtr::unwrap(ptr)); }
 #endif
 
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }

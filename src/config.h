@@ -8,6 +8,10 @@
 
 #include <stdint.h>
 
+/**
+  @brief If defined, enable wrapping of regular pointers inside virtmem::CVirtPtr.
+  @sa virtmem::CVirtPtr::wrap
+  */
 #define VIRTMEM_WRAP_CPOINTERS
 
 /**

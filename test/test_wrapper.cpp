@@ -109,7 +109,7 @@ TYPED_TEST(CWrapFixture, BaseWrapTest)
 {
     this->wrapper = this->wrapper.alloc();
 
-    CVirtPtrBase basewrp = this->wrapper;
+    CBaseVirtPtr basewrp = this->wrapper;
     EXPECT_EQ(basewrp, this->wrapper);
     typename TStdioVirtPtr<TypeParam>::type wrp = static_cast<typename TStdioVirtPtr<TypeParam>::type>(basewrp);
     EXPECT_EQ(basewrp, wrp);

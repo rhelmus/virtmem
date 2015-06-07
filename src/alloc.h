@@ -1,11 +1,23 @@
 #ifndef VIRTMEM_ALLOC_H
 #define VIRTMEM_ALLOC_H
 
+/**
+  @file
+  @brief virtual memory class header
+*/
+
 #include "base_alloc.h"
 
 namespace virtmem {
 
 // TDerived is necessary to ensure unique instance variables
+/**
+ * @brief Base template class for virtual memory allocators.
+ *
+ * This template class is used as parent class for all allocators. Most of the actual code is
+ * defined in CBaseVirtMemAlloc, while this class only contains code dependent upon template
+ * parameters (i.e. page settings).
+ */
 template <typename TProperties, typename TDerived>
 class CVirtMemAlloc : public CBaseVirtMemAlloc
 {
@@ -44,6 +56,20 @@ protected:
     ~CVirtMemAlloc(void) { instance = 0; }
 
 public:
+    /**
+     * @brief Returns a pointer to the instance of the class.
+     *
+     * All allocator classes are singletons: only one instance can exist for a particular allocator.
+     *
+     * Note that, since allocators are template classes, one instance is generated for every set of
+     * unique template parameters. For example:
+     * @code
+     * CSdfatlibVirtMemAlloc alloc1; // allocator with default template parameters
+     * CSdfatlibVirtMemAlloc<mysettings> alloc2; // allocator with custom template parameter
+     * @endcode
+     * In this case, `alloc1` and `alloc2` are variables with a *different* type, hence getInstance()
+     * will return a different instance for both classes.
+     */
     static CVirtMemAlloc *getInstance(void) { return instance; }
 };
 
