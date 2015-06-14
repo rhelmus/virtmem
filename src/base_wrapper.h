@@ -150,7 +150,7 @@ public:
     const void *unwrap(void) const { return unwrap(ptr); } //!< @copydoc CVirtPtr::unwrap(void) const
 #endif
 
-    // HACK: this allows constructing CVirtPtr objects from CVirtPtrBase variables, similar to
+    // HACK: this allows constructing CVirtPtr objects from CBaseVirtPtr variables, similar to
     // initializing non void pointers with a void pointer
     // Note that we could have used a copy constructor in CVirtPtr instead, but this would make the latter
     // class non-POD
@@ -193,12 +193,12 @@ public:
     inline bool operator>(const CBaseVirtPtr &pb) const { return getPtrNum() > pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
     // @}
 #else
-    inline bool operator==(const CVirtPtrBase &pb) const { return ptr == pb.ptr; }
-    inline bool operator!=(const CVirtPtrBase &pb) const { return ptr != pb.ptr; }
-    inline bool operator<(const CVirtPtrBase &pb) const { return ptr < pb.ptr; }
-    inline bool operator<=(const CVirtPtrBase &pb) const { return ptr <= pb.ptr; }
-    inline bool operator>=(const CVirtPtrBase &pb) const { return ptr >= pb.ptr; }
-    inline bool operator>(const CVirtPtrBase &pb) const { return ptr > pb.ptr; }
+    inline bool operator==(const CBaseVirtPtr &pb) const { return ptr == pb.ptr; }
+    inline bool operator!=(const CBaseVirtPtr &pb) const { return ptr != pb.ptr; }
+    inline bool operator<(const CBaseVirtPtr &pb) const { return ptr < pb.ptr; }
+    inline bool operator<=(const CBaseVirtPtr &pb) const { return ptr <= pb.ptr; }
+    inline bool operator>=(const CBaseVirtPtr &pb) const { return ptr >= pb.ptr; }
+    inline bool operator>(const CBaseVirtPtr &pb) const { return ptr > pb.ptr; }
 #endif
 
 };

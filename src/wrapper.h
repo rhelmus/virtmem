@@ -31,8 +31,8 @@ template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
 template <typename T, typename TA> class CVirtPtr : public CBaseVirtPtr
 {
 public:
-    typedef T *TPtr;
-    typedef TA TAllocator;
+    typedef T *TPtr; //!< (non virtual) pointer type to the base type of this virtual pointer.
+    typedef TA TAllocator; //!< Allocator type used by this virtual pointer class. @sa getAlloc
 
 private:
     typedef CVirtPtr<T, TAllocator> TVirtPtr;
@@ -210,7 +210,7 @@ public:
      * This function is similar to the C++ `new` operator. Similar to \ref alloc, this function will
      * allocate a block of virtual memory. Subsequently, the default constructor of the data type is
      * called. For this reason, this function is typically used for C++ classes.
-     * @note This function should be used together with deleteClass.
+     * @note This function should be used together with \ref deleteClass.
      * @sa deleteClass, newArray, alloc
      */
     static TVirtPtr newClass(TVirtPtrSize size=sizeof(T))
@@ -226,8 +226,7 @@ public:
      *
      * This function is similar to the C++ `delete` operator. After calling the destructor of the
      * data type the respective memory block will be freed.
-     * @note This function should be used together with
-     * newClass.
+     * @note This function should be used together with \ref newClass.
      * @sa newClass, deleteArray, free
      */
     static void deleteClass(TVirtPtr &p)
@@ -246,7 +245,7 @@ public:
      *
      * This function is similar to the C++ new [] operator. After allocating sufficient size for the
      * array, the default constructor will be called for each object.
-     * @note This function should be used together with deleteArray.
+     * @note This function should be used together with \ref deleteArray.
      * @sa deleteArray, newClass, alloc
      */
     static TVirtPtr newArray(TVirtPtrSize elements)
@@ -264,7 +263,7 @@ public:
      *
      * This function is similar to the C++ `delete []` operator. After calling all the
      * destructors of each object, the respective memory block will be freed.
-     * @note This function should be used together with newArray.
+     * @note This function should be used together with \ref newArray.
      * @sa newArray, deleteClass, free
      */
     static void deleteArray(TVirtPtr &p)
@@ -277,6 +276,12 @@ public:
     }
 
 #ifdef VIRTMEM_WRAP_CPOINTERS
+    /**
+      * @name Members related to regular pointer wrapping
+      * The following functions / operators are only defined when \ref VIRTMEM_WRAP_CPOINTERS is set.
+      * @{
+      */
+
     /**
      * @brief Wraps a regular pointer.
      *
@@ -323,22 +328,53 @@ public:
      * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
      */
     const T *unwrap(void) const { return static_cast<const T *>(CBaseVirtPtr::unwrap(ptr)); }
+
+#ifdef VIRTMEM_VIRT_ADDRESS_OPERATOR
+    /**
+     * @brief Returns a virtual pointer that has the memory address of this virtual pointer wrapped.
+     * @note This operator is *only* overloaded when \ref VIRTMEM_WRAP_CPOINTERS and \ref VIRTMEM_VIRT_ADDRESS_OPERATOR
+     * are defined (e.g. in config.h).
+     * @sa \ref VIRTMEM_VIRT_ADDRESS_OPERATOR
+     */
+    CVirtPtr<TVirtPtr, TAllocator> operator&(void) { CVirtPtr<TVirtPtr, TAllocator> ret = ret.wrap(this); return ret; }
+
+    /**
+     * @brief Returns a regular pointer to the address of this virtual pointer
+     * @note This function is only defined when \ref VIRTMEM_WRAP_CPOINTERS and \ref VIRTMEM_VIRT_ADDRESS_OPERATOR
+     * are defined (e.g. in config.h).
+     * @sa \ref VIRTMEM_VIRT_ADDRESS_OPERATOR
+     */
+    const CVirtPtr *addressOf(void) const { return this; }
+    CVirtPtr *addressOf(void) { return this; } //!< @copydoc addressOf(void) const
+#endif
+    // @}
+
 #endif
 
+    /**
+     * @name Dereference operators
+     * The following operators are used for accessing the data pointed to by this virtual pointer.
+     * The returned value is a proxy class, which mostly acts as the data itself. For more information, see
+     * \ref ValueWrapping.
+     * @{
+     */
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }
     CMemberWrapper operator->(void) { return CMemberWrapper(ptr); }
     const CMemberWrapper operator->(void) const { return CMemberWrapper(ptr); }
-    // allow double wrapped pointer
-    CVirtPtr<TVirtPtr, TAllocator> operator&(void) { CVirtPtr<TVirtPtr, TAllocator> ret = ret.wrap(this); return ret; }
+    const CValueWrapper operator[](int i) const { return CValueWrapper(ptr + (i * sizeof(T))); }
+    CValueWrapper operator[](int i) { return CValueWrapper(ptr + (i * sizeof(T))); }
+    // @}
 
     // const conversion
     inline operator CVirtPtr<const T, TAllocator>(void) { CVirtPtr<const T, TAllocator> ret; ret.ptr = ptr; return ret; }
     // pointer to pointer conversion
     template <typename T2> EXPLICIT inline operator CVirtPtr<T2, TAllocator>(void) { CVirtPtr<T2, TAllocator> ret; ret.ptr = ptr; return ret; }
 
-    const CVirtPtr *addressOf(void) const { return this; }
-    CVirtPtr *addressOf(void) { return this; }
-
+    /**
+      * @name Pointer arithmetic
+      * These operators can be used for pointer arithmetics.
+      * @{
+      */
     // NOTE: int cast is necessary to deal with negative numbers
     TVirtPtr &operator+=(int n) { ptr += (n * (int)sizeof(T)); return *this; }
     inline TVirtPtr &operator++(void) { return operator +=(1); }
@@ -349,11 +385,13 @@ public:
     inline TVirtPtr operator+(int n) const { return (copy() += n); }
     inline TVirtPtr operator-(int n) const { return (copy() -= n); }
     int operator-(const TVirtPtr &other) const { return (ptr - other.ptr) / sizeof(T); }
-    inline bool operator!=(const TVirtPtr &p) const { return ptr != p.ptr; }
+    // @}
+//    inline bool operator!=(const TVirtPtr &p) const { return ptr != p.ptr; } UNDONE: need this?
 
-    const CValueWrapper operator[](int i) const { return CValueWrapper(ptr + (i * sizeof(T))); }
-    CValueWrapper operator[](int i) { return CValueWrapper(ptr + (i * sizeof(T))); }
-
+    /**
+     * @brief Returns instance of allocator bound to this virtual pointer.
+     * @sa CVirtMemAlloc::getInstance
+     */
     static inline TAllocator *getAlloc(void) { return static_cast<TAllocator *>(TAllocator::getInstance()); }
 };
 

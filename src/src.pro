@@ -12,7 +12,7 @@ CONFIG += staticlib
 
 SOURCES += \
     base_alloc.cpp \
-    utils.cpp
+    utils.cpp \
 
 HEADERS += \
     virtmem.h \
@@ -39,7 +39,8 @@ unix {
 OTHER_FILES += \
     ../examples/benchmark/benchmark.ino \
     ../examples/benchmark/benchmark.h \
-    ../Doxyfile
+    ../Doxyfile \
+    ../groups.dox
 
 QMAKE_CXXFLAGS_RELEASE += -Os
 #QMAKE_CXXFLAGS_DEBUG += -Og

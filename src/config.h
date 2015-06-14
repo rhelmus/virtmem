@@ -15,6 +15,19 @@
 #define VIRTMEM_WRAP_CPOINTERS
 
 /**
+  * @brief If defined, the "address of" operator (`&`) of CVirtPtr will be overloaded to
+  * return a virtual pointer that has its own address wrapped.
+  *
+  * This is useful to allow double pointers, for example:
+  * @code
+  * typedef virtmem::CVirtPtr<int, CSdfatlibVirtMemAlloc> vptrType;
+  * vptrType vptr;
+  * virtmem::CVirtPtr<vptrType, CSdfatlibVirtMemAlloc> vptrptr = &vptr;
+  * @endcode
+  */
+#define VIRTMEM_VIRT_ADDRESS_OPERATOR
+
+/**
   @brief If defined, several functions in the allocator will be defined that can be used to
   access statistics such as memory usage and page swaps.
   @see \ref statf "Statistics functions"

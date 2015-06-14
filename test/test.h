@@ -5,6 +5,8 @@
 
 #include <inttypes.h>
 
+using namespace virtmem;
+
 typedef TStdioVirtPtr<uint8_t>::type TUCharVirtPtr;
 typedef TStdioVirtPtr<char>::type TCharVirtPtr;
 

@@ -24,7 +24,9 @@ public:
     inline operator CBaseVirtPtr(void) const { return CBaseVirtPtr(); }
     template <typename T, typename A> inline operator typename CVirtPtr<T, A>::CValueWrapper(void) const { return CVirtPtr<T, A>::CValueWrapper(0); }
 
-} extern const NILL;
+};
+
+extern const CNILL NILL;
 
 /**
  * @var NILL
