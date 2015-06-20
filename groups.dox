@@ -6,3 +6,5 @@
  * @paragraph Blargh
  * Har??
  */
+
+// Stuff to add: C pointer wrapping (move from elsewhere, add ref to lock description), locking, paging

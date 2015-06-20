@@ -43,6 +43,22 @@ extern const CNILL NILL;
  * @sa CNILL
  */
 
+/**
+ * @brief Creates a lock to some virtual data
+ * @tparam TV Type of virtual pointer that points to data
+ *
+ * This class is used to create and release locks to virtual data. The use of locks
+ * allows more efficient data handling and compatibility with code only accepting regular
+ * pointers. For more information see \ref VirtualLocks.
+ *
+ * The class uses a RAII (resource acquisition is initialization) approach: after a
+ * lock has been acquired (usually during construction), it will be automatically released
+ * as soon as the class variable goes out of scope.
+ *
+ * Wrapped regular pointers (see XXX) are supported: if a given virtual pointer wraps a
+ * regular pointer, this class will not attempt to make or release a lock and
+ * operator *(void) will simply return the wrapped pointer.
+ */
 template <typename TV> class CVirtPtrLock
 {
     typedef typename TV::TPtr TPtr;
@@ -53,14 +69,34 @@ template <typename TV> class CVirtPtrLock
     bool readOnly;
 
 public:
+    /**
+     * @brief Constructs a virtual data lock class and creates a lock to the given data.
+     * @param v A \ref CVirtPtr "virtual pointer" to the data to be locked.
+     * @param s Amount of bytes to lock. **Note**: the actual locked size may be smaller.
+     * @param ro Whether locking should read-only (`true`) or not (`false`). If `ro` is
+     * `false` (default), the locked data will always be synchronized after unlocking (even if unchanged).
+     * Therefore, if no changes in data are expected, it is more efficient to set `ro` to `true`.
+     * @sa getLockSize
+     */
     CVirtPtrLock(const TV &v, TVirtPageSize s, bool ro=false) :
         virtPtr(v), lockSize(s), readOnly(ro) { lock(); }
+    /**
+     * @brief Default constructor. No locks are created.
+     *
+     * The \ref lock(const TV &v, TVirtPageSize s, bool ro) function should be used
+     * to create a lock if this constructor is used.
+     */
     CVirtPtrLock(void) : data(0), lockSize(0), readOnly(false) { }
-    ~CVirtPtrLock(void) { unlock(); }
+    ~CVirtPtrLock(void) { unlock(); } //!< Unlocks data if locked.
     // add extra lock on copying
     CVirtPtrLock(const CVirtPtrLock &other) :
         virtPtr(other.virtPtr), lockSize(other.lockSize), readOnly(other.readOnly) { lock(); }
 
+    /**
+     * @brief Recreates a virtual data lock after \ref unlock was called.
+     * @note This function will re-use the parameters for locking set by \ref CVirtPtrLock(const TV &v, TVirtPageSize s, bool ro)
+     * or \ref lock(const TV &v, TVirtPageSize s, bool ro).
+     */
     void lock(void)
     {
 #ifdef VIRTMEM_WRAP_CPOINTERS
@@ -71,12 +107,18 @@ public:
             data = static_cast<TPtr>(TV::getAlloc()->makeFittingLock(virtPtr.ptr, lockSize, readOnly));
     }
 
+    /**
+     * @brief Locks data. Parameters are described \ref CVirtPtrLock(const TV &v, TVirtPageSize s, bool ro) "here".
+     */
     void lock(const TV &v, TVirtPageSize s, bool ro=false)
     {
         virtPtr = v; lockSize = s; readOnly = ro;
         lock();
     }
 
+    /**
+     * @brief Unlocks data (if locked). Automatically called during destruction.
+     */
     void unlock(void)
     {
 #ifdef VIRTMEM_WRAP_CPOINTERS
@@ -90,7 +132,15 @@ public:
         }
     }
 
-    TPtr operator *(void) { return data; }
+    TPtr operator *(void) { return data; } //!< Provides access to the data.
+    /**
+     * @brief Returns the actual size locked.
+     *
+     * The **actual** size that was locked may be smaller then what was requested.
+     * If the requested size was too large, for instance larger then the largest memory page size,
+     * the locked size will be adjusted accordingly. For this reason, it is *very important* to
+     * use this function after a lock has been created.
+     */
     TVirtPageSize getLockSize(void) const { return lockSize; }
 };
 

@@ -122,7 +122,8 @@ public:
      * regular pointer. If this is the case, the returned value contains the raw pointer address and
      * a flag to indicate that this is not a virtual pointer. In this case getWrapped can be used
      * to obtain the pointer address. If this virtual pointer does *not* wrap a regular pointer,
-     * the value returned by this function equals the raw virtual pointer address.
+     * the value returned by this function equals a virtual pointer address that can be
+     * used directly by an allocator for raw memory access.
      * @sa getWrapped, isWrapped
      */
     TPtrNum getRawNum(void) const { return ptr; }
