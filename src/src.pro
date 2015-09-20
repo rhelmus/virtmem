@@ -51,3 +51,8 @@ OTHER_FILES += \
     arduinofy.sh \
     ../script/serial_host.py \
     ../script/serialiohandler.py
+
+DISTFILES += \
+    ../README.md \
+    TODO.txt \
+    ../doc/manual.md

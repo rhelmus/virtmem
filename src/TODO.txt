@@ -1,0 +1,11 @@
+docs:
+- Describe allocators and virtual pointers
+- Locking
+- Make and link to examples
+- Document allocator classes
+- CVirtPtr/CBaseVirtPtr description
+- util functions
+- check if all references are OK
+
+general:
+- switch to c++11 code? (template aliasing, removal of NILL?)
