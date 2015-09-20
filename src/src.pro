@@ -55,4 +55,5 @@ OTHER_FILES += \
 DISTFILES += \
     ../README.md \
     TODO.txt \
-    ../doc/manual.md
+    ../doc/manual.md \
+    ../doc/Doxyfile

@@ -1,7 +1,7 @@
 Main
 =========
 
-# Introduction {#intro}
+# Introduction
 `virtmem` is an Arduino library that allows your project to easily use an
 external memory source to extend the (limited) amount of available RAM. This
 library supports several memory resources, for instance, SPI ram (e.g. the
