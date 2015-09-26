@@ -221,27 +221,83 @@ residing in regular memory space. For instance, if a function needs to be
 called that requires a pointer to the data, the pointer to the locked memory
 page region can then be passed to such a function.
 
-### Locking memory pages
+### Note on memory pages {#alPages}
 Each virtual data lock will essentially block a memory page. Since the number
 of memory pages is rather small, care should be taken to not to create too many
 different data locks.
 
-Since it is not unusual that a data locked region is relative small in size,
-`virtmem` supports two additional sets of smaller memory pages that are only
-used for data locks. Thus, in total there are three different memory pages:
+To decrease the likelyhood of running out of free memory pages, `virtmem`
+supports two additional sets of smaller memory pages which are specifically
+used for data locking. They are much smaller in size, so they will not use a
+large deal of RAM, while still providing extra capacity for smaller data locks.
+Having a set of smaller memory pages is especially useful for
+[automatic locking of data](@ref alAuto).
 
-* `big pages`: These are mainly used for regular
-virtual memory access and are typically at least several hundreds of bytes.
-* `medium pages` and `small pages`: These are only used for data locks and generally much smaller than `big pages`.
+The default size and amount of memory pages is dependent upon the MCU platform
+and can be customized as described in @ref aConfigAlloc.
 
-Which of the three data pages will be used for a data lock depends on the
-requested lock size and the availability of free pages. The default size and
-amount of memory pages is dependent upon the MCU platform and can be customized
-as described in @ref aConfigAlloc.
+### Using virtual data locks {#alUsing}
+To create a lock to virtual memory the virtmem::CVirtPtrLock class is used:
 
-### Using virtual data locks
+~~~{.cpp}
+typedef virtmem::TSdfatlibVirtPtr<char>::type virtCharPtr; // shortcut
+virtCharPtr vptr = vptr.alloc(100); // allocate some virtual memory
+virtmem::CVirtPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(vptr, 100, false);
+memset(*lock, 10, 100); // set all bytes to '10'
+~~~
 
-### Automatic data locks
+The virtmem::makeVirtPtrLock function is used to create a lock. The last
+parameter to this function (optional, by default `false`) tells whether the
+locked data should be treated as read-only: if set to `false` the data will be
+written back to the virtual memory (even if unchanged). If you know the data
+will not be changed (or you don't care about changes), then it's more efficient
+to pass `true` instead.
+
+Accessing locked data is simply done by dereferencing the lock variable (i.e. `*lock`).
+
+Sometimes it is not possible to completely lock the memory region that was
+requested. For instance, there may not be sufficient space available to lock
+the complete data to a memory page or there will be overlap with another locked
+memory region. For this reason, it is **important to always check the _actual
+size_ that was locked**. After a lock has been made, the effective size of the
+locked region can be requested by the virtmem::CVirtPtrLock::getLockSize()
+function. Because it is rather unpredictable whether the requested data can be
+locked in one go, it is best create a loop that iteratively creates locks until
+all bytes have been dealt with:
+
+~~~{.cpp}
+typedef virtmem::TSdfatlibVirtPtr<char>::type virtCharPtr; // shortcut
+const int size = 10000;
+int sizeleft = size;
+
+virtCharPtr vptr = vptr.alloc(size); // allocate a large block of virtual memory
+virtCharPtr p = vptr;
+
+while (sizeleft)
+{
+    // create a lock to (a part) of the buffer
+    virtmem::CVirtPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(p, sizeleft, false);
+
+    const int lockedsize = lock.getLockSize(); // get the actual size of the memory block that was locked
+    memset(*l, 10, lockedsize);
+
+    p += lockedsize; // increase pointer to next block to lock
+    sizeleft -= lockedsize; // decrease number of bytes to still lock
+}
+
+~~~
+Note that a `memset` overload is provided by `virtmem` which works with virtual pointers.
+
+After you are finished working with a virtual memory lock it has to be
+released. This can be done manually with the virtmem::CVirtPtrLock::unlock
+function. However, the virtmem::CVirtPtrLock destructor will call this function
+automatically (the class follows the
+[RAII principle](https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization)).
+This explains why calling `unlock()` in the above example was not necessary, as
+the destructor will call it automatically when the `lock` variable goes out of
+scope at the end of every iteration.
+
+### Automatic data locks {#alAuto}
 
 
 ## Multiple allocators {#aMultiAlloc}

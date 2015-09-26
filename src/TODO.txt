@@ -9,6 +9,7 @@ docs:
 - Check if example code is OK
 - Describe limitations of structs/classes in CVirtPtr
 - spell checks
+- makeVirtPtrLock()
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
