@@ -126,7 +126,7 @@ things to do is to initialize it:
 ~~~{.cpp}
 // Create a virtual memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
 // The default memory pool size (1 MB) is used.
-CSdfatlibVirtMemAlloc<> valloc;
+virtmem::CSdfatlibVirtMemAlloc<> valloc;
 
 // ...
 
@@ -153,7 +153,52 @@ it is fairly cumbersome to do so.
 
 The second approach is to use _virtual pointer wrappers_. These template
 classes were designed to make virtual memory access as close as 'regular'
-memory access as possible.
+memory access as possible. Here is an example:
+
+~~~{.cpp}
+// define virtual pointer linked to SD fat memory
+virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> vptr;
+// virtmem::TSdfatlibVirtPtr<int>::type vptr; // same, but slightly shorter syntax
+
+vptr = vptr.alloc(); // allocate memory to store integer (size automatically deduced from type)
+*vptr = 4;
+~~~
+
+In this example we defined a virtual pointer to an `int`. Defining virtual
+pointer variables can be done straight from virtmem::CVirtPtr or from one of
+the shortcut helper classes (such as virtmem::TSdfatlibVirtPtr). Either do the
+same.
+
+Memory allocation ([alloc()](@ref virtmem::CVirtPtr::alloc)) is done through a (static)
+function defined in the virtual pointer class. In the above example no
+arguments were passed to [alloc()](@ref virtmem::CVirtPtr::alloc), which means that
+`alloc` will automatically deduce the size required for the pointer type
+(`int`). If you want to allocate a different size (for instance to use the data
+as an array) then the number of bytes should be specified as the first argument
+to `alloc`:
+
+~~~{.cpp}
+vptr = vptr.alloc(1000 * sizeof(int)); // allocate memory to store array of 1000 integers
+vptr[500] = 1337;
+~~~
+
+Besides all standard types (char, int, short, etc.), virtual pointers can also
+work with custom types (structs/classes):
+
+~~~{.cpp}
+struct MyStruct { int x, y; };
+// ...
+TSdfatlibVirtPtr<MyStruct>::type ms = ms.alloc();
+ms->x = 5;
+ms->y = 15;
+~~~
+Note that there are a few imitations when using structs (or classes) with `virtmem`. For details: see virtmem::CVirtPtr.
+
+Finally, to free memory the [free()](@ref virtmem::CVirtPtr::free) function can be used:
+
+~~~{.cpp}
+vptr.free(vptr); // memory size automatically deduced
+~~~
 
 For further info see virtmem::CBaseVirtPtr and virtmem::CVirtPtr.
 
@@ -174,8 +219,33 @@ overhead exists to use the data.
 Another reason to lock data is to work with code that only accepts data
 residing in regular memory space. For instance, if a function needs to be
 called that requires a pointer to the data, the pointer to the locked memory
-page region can be passed as argument.
+page region can then be passed to such a function.
+
+### Locking memory pages
+Each virtual data lock will essentially block a memory page. Since the number
+of memory pages is rather small, care should be taken to not to create too many
+different data locks.
+
+Since it is not unusual that a data locked region is relative small in size,
+`virtmem` supports two additional sets of smaller memory pages that are only
+used for data locks. Thus, in total there are three different memory pages:
+
+* `big pages`: These are mainly used for regular
+virtual memory access and are typically at least several hundreds of bytes.
+* `medium pages` and `small pages`: These are only used for data locks and generally much smaller than `big pages`.
+
+Which of the three data pages will be used for a data lock depends on the
+requested lock size and the availability of free pages. The default size and
+amount of memory pages is dependent upon the MCU platform and can be customized
+as described in @ref aConfigAlloc.
+
+### Using virtual data locks
+
+### Automatic data locks
+
 
 ## Multiple allocators {#aMultiAlloc}
+
+## Configuring allocators {#aConfigAlloc}
 
 # Examples {#examples}

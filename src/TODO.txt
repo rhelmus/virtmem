@@ -6,6 +6,10 @@ docs:
 - CVirtPtr/CBaseVirtPtr description
 - util functions
 - check if all references are OK
+- Check if example code is OK
+- Describe limitations of structs/classes in CVirtPtr
+- spell checks
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
+- decouple alloc and free static functions from virtual pointer class? Guess it's not really possible
