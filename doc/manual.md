@@ -204,8 +204,6 @@ For further info see virtmem::CBaseVirtPtr and virtmem::CVirtPtr.
 
 # Advanced {#advanced}
 
-## Wrapping regular pointers {#aWrapping}
-
 ## Locking virtual data {#aLocking}
 A portion of the virtual memory can be locked to a memory page. Whenever such a
 lock is made, the data is _guaranteed_ to stay in a memory page and will not be
@@ -231,7 +229,7 @@ supports two additional sets of smaller memory pages which are specifically
 used for data locking. They are much smaller in size, so they will not use a
 large deal of RAM, while still providing extra capacity for smaller data locks.
 Having a set of smaller memory pages is especially useful for
-[automatic locking of data](@ref alAuto).
+[locks created when accessing data in structures/classes](@ref aAccess).
 
 The default size and amount of memory pages is dependent upon the MCU platform
 and can be customized as described in @ref aConfigAlloc.
@@ -297,11 +295,53 @@ This explains why calling `unlock()` in the above example was not necessary, as
 the destructor will call it automatically when the `lock` variable goes out of
 scope at the end of every iteration.
 
-### Automatic data locks {#alAuto}
+## Accessing data in virtual memory {#aAccess}
 
+@note This section is mostly theoretical. If you are skimming this manual (or
+lazy), you can skip this section.
+
+Whenever virtual data is accessed, `virtmem` first has to make sure that this
+data resides in regular RAM (i.e. a memory page). In addition, if the data is
+changed, `virtmem` has to flag this data as 'dirty' so that it will be
+synchronized during the next page swap. To achieve these tasks, `virtmem`
+returns a _proxy class_ whenever a virtual pointer is dereferenced, instead of
+returning the actual data. This proxy class (virtmem::CVirtPtr::CValueWrapper)
+acts as it is the actual data, and is mostly invisible to the user:
+
+~~~{.cpp}
+int x = *myIntVptr;
+*myIntVptr = 55;
+~~~
+
+The first line of the above example demonstrates a read operation: in this case
+the proxy class (returned by `*myIntVPtr`) will be converted to an int
+(automatic type cast), during which it will return a copy the data from virtual
+memory. The second line is a write operation: here the proxy class signals
+`virtmem` that data is changed and needs to be synchronized during the next
+page swap.
+
+For accessing data members of structures (everything discussed here also
+applies to classes) in virtual memory the situation is more complicated. When a
+member is accessed through the `->` operator of of the virtual pointer, we
+[must return an actual pointer to the
+structure](http://stackoverflow.com/a/8782794). While it is possible to make
+this data available through a memory page (as is done normally) in the `->`
+overload function, synchronizing the data back is more tricky. For this reason,
+another proxy class is used (virtmem::CVirtPtr::CMemberWrapper) which is
+returned when the `->` operator is called. This proxy class has also its `->`
+operator overloaded, and this overload returns the actual data. The lifetime of
+this proxy class is important and matches that of the lifetime the data needs
+to be available in a memory page (for more details, see [Strousstrup's general
+wrapper paper](http://www.stroustrup.com/wrapper.pdf)). Following from this,
+the proxy class will create a [data lock](@ref aLocking) to the data of the
+structure during construction and release this lock during its destruction.
+
+## Wrapping regular pointers {#aWrapping}
 
 ## Multiple allocators {#aMultiAlloc}
 
 ## Configuring allocators {#aConfigAlloc}
+
+## Virtual pointers to `struct`/`class` data members
 
 # Examples {#examples}

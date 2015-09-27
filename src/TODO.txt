@@ -10,6 +10,9 @@ docs:
 - Describe limitations of structs/classes in CVirtPtr
 - spell checks
 - makeVirtPtrLock()
+- highleight the important things and background stuff
+- pointers to struct members
+- multiple SPI chips also supported
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
