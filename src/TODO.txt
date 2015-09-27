@@ -17,3 +17,4 @@ docs:
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
 - decouple alloc and free static functions from virtual pointer class? Guess it's not really possible
+- Enable/disable right settings in config.h for realease

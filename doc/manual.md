@@ -116,7 +116,16 @@ virtmem::CVirtMemAlloc classes. In addition to this, several allocator classes
 are derived from these base classes that actually implement the code necessary
 to deal with virtual memory (e.g. reading and writing data). For example, the
 class virtmem::CSdfatlibVirtMemAlloc implements an allocator that uses an SD
-card as a virtual memory pool. Note that all allocator classes are _singleton_,
+card as a virtual memory pool.
+
+The `virtmem` library supports the following allocators:
+* virtmem::CSdfatlibVirtMemAlloc: uses a FAT formatted SD card as memory pool
+* virtmem::CSPIRAMVirtMemAlloc: uses SPI ram (Microchip's 23LC series) as memory pool
+* virtmem::CMultiSPIRAMVirtMemAlloc: like virtmem::CSPIRAMVirtMemAlloc, but supports multiple memory chips
+* virtmem::CSerRAMVirtMemAlloc: uses RAM from a computer connected through serial as memory pool
+* For debugging there is also virtmem::CStaticVirtMemAlloc (uses regular RAM as memory pool) and virtmem::CStdioVirtMemAlloc (uses files through regular stdio functions as memory pool)
+
+Note that all allocator classes are _singleton_,
 meaning that only one (global) instance should be defined (however, instances
 of _different_ allocators can co-exist, see @ref aMultiAlloc).
 
@@ -331,17 +340,118 @@ another proxy class is used (virtmem::CVirtPtr::CMemberWrapper) which is
 returned when the `->` operator is called. This proxy class has also its `->`
 operator overloaded, and this overload returns the actual data. The lifetime of
 this proxy class is important and matches that of the lifetime the data needs
-to be available in a memory page (for more details, see [Strousstrup's general
+to be available in a memory page (for more details, see [Stroustrup's general
 wrapper paper](http://www.stroustrup.com/wrapper.pdf)). Following from this,
 the proxy class will create a [data lock](@ref aLocking) to the data of the
 structure during construction and release this lock during its destruction.
 
 ## Wrapping regular pointers {#aWrapping}
 
+Sometimes it may be handy to assign a regular pointer to a virtual pointer:
+~~~{.cpp}
+typedef virtmem::TSdfatlibVirtPtr<int>::type virtIntPtr; // shortcut
+
+void f(virtIntPtr p, int x)
+{
+    *p += x;
+}
+
+// ...
+
+*vptr = 55; // vptr is a virtual pointer to int
+*ptr = 66; // ptr is a regular pointer to int (i.e. int*)
+
+f(vptr, 10);
+f(ptr, 12); // ERROR! Function only accepts virtual pointers
+~~~
+
+In the above example we have a (nonsensical) function `f` which only accepts
+virtual pointers. Hence, the final line in this example will fail. Of course we
+could overload this function and provide an implementation that supports
+regular pointers. Alternatively, you can also 'wrap' the regular pointer inside
+a virtual pointer:
+
+~~~{.cpp}
+typedef virtmem::TSdfatlibVirtPtr<int>::type virtIntPtr; // shortcut
+
+// ...
+
+*ptr = 66; // ptr is a regular pointer to int (i.e. int*)
+virtIntPtr myvptr = myvptr.wrap(ptr); // 'wrap' ptr inside a virtual pointer
+
+f(myvptr, 12); // Success!
+~~~
+
+If you want to obtain the original pointer then you can use the
+[unwrap()](@ref virtmem::CVirtPtr::unwrap) function:
+
+~~~{.cpp}
+int *myptr = vptr.unwrap();
+~~~
+
+Please note that calling `unwrap()` on a non-wrapped virtual pointer yields an
+invalid pointer address. To avoid this, the
+[isWrapped() function](@ref virtmem::CBaseVirtPtr::isWrapped) can be used.
+
+@note Wrapping regular pointers introduces a minor overhead in usage of virtual
+pointers and is therefore **disabled by default**. This feature can be enabled
+in @ref config.h.
+
 ## Multiple allocators {#aMultiAlloc}
+
+While not more than one instance of a memory allocator _type_ should be
+defined, it is possible to define different allocators in the same program:
+
+~~~{.cpp}
+virtmem::CSdfatlibVirtMemAlloc<> fatAlloc;
+virtmem::CSPIRAMVirtMemAlloc<> spiRamAlloc;
+
+virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> fatvptr;
+virtmem::CVirtPtr<int, virtmem::CSPIRAMVirtMemAlloc> spiramvptr;
+
+// ...
+
+// copy a kilobyte of data from SPI ram to a SD fat virtual memory pool
+virtmem::memcpy(fatvptr, spiramvptr, 1024);
+~~~
 
 ## Configuring allocators {#aConfigAlloc}
 
+The number and size of memory pages can be configured in config.h.
+Alternatively, these settings can be passed as a template parameter to the
+allocator. For more info, see the description about
+virtmem::SDefaultAllocProperties.
+
 ## Virtual pointers to `struct`/`class` data members
+
+It might be necessary to obtain a pointer to a member of a structure (or class)
+which resides in virtual memory. The way to obtain such a pointer with
+'regular' memory is by using the address-of operator ('`@`'):
+
+~~~{.cpp}
+int *p = &mystruct->x;
+~~~
+
+You may be tempted to do the same when the structure is in virtual memory:
+
+~~~{.cpp}
+int *p = &vptr->x; // Spoiler: Do not do this!
+~~~
+
+However, this should **never** be done! The problem is that the above code will
+set `p` to an address inside one of the virtual memory pages. This should be
+considered as a temporary storage location and the contents can be changed
+anytime.
+
+To obtain a 'safe' pointer, one should use the [getMembrPtr() function](@ref virtmem::getMembrPtr):
+
+~~~{.cpp}
+struct myStruct { int x; };
+virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> intvptr;
+
+intvptr = virtmem::getMembrPtr(mystruct, &myStruct::x);
+~~~
+
+@sa virtmem::getMembrPtr
 
 # Examples {#examples}

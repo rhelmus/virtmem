@@ -128,7 +128,7 @@ public:
         T operator++(int) { T ret = operator T(); operator++(); return ret; }
     };
 
-    // Based on Strousstrup's general wrapper paper (http://www.stroustrup.com/wrapper.pdf)
+    // Based on Stroustrup's general wrapper paper (http://www.stroustrup.com/wrapper.pdf)
     class CMemberWrapper
     {
         const TPtrNum ptr;
