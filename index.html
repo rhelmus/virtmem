@@ -143,7 +143,7 @@ Demonstration</h1>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;Arduino.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;SdFat.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="virtmem_8h.html">virtmem.h</a>&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;sdfatlib_alloc.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="sdfatlib__alloc_8h.html">sdfatlib_alloc.h</a>&gt;</span></div>
 <div class="line"></div>
 <div class="line"><span class="comment">// Simplify virtmem usage</span></div>
 <div class="line"><span class="keyword">using namespace </span><a class="code" href="namespacevirtmem.html">virtmem</a>;</div>
@@ -233,7 +233,7 @@ Using virtual memory</h2>
 <div class="line"></div>
 <div class="line">vptr = vptr.<a class="code" href="singletonvirtmem_1_1CVirtPtr.html#affa1cd2dfa4d2fe901dc055686aff579">alloc</a>(); <span class="comment">// allocate memory to store integer (size automatically deduced from type)</span></div>
 <div class="line">*vptr = 4;</div>
-</div><!-- fragment --><p>In this example we defined a virtual pointer to an <code>int</code>. Defining virtual pointer variables can be done straight from <a class="el" href="singletonvirtmem_1_1CVirtPtr.html">virtmem::CVirtPtr</a> or from one of the shortcut helper classes (such as <a class="el" href="structvirtmem_1_1TSdfatlibVirtPtr.html">virtmem::TSdfatlibVirtPtr</a>). Either do the same.</p>
+</div><!-- fragment --><p>In this example we defined a virtual pointer to an <code>int</code>. Defining virtual pointer variables can be done straight from <a class="el" href="singletonvirtmem_1_1CVirtPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">virtmem::CVirtPtr</a> or from one of the shortcut helper classes (such as <a class="el" href="structvirtmem_1_1TSdfatlibVirtPtr.html">virtmem::TSdfatlibVirtPtr</a>). Either do the same.</p>
 <p>Memory allocation (<a class="el" href="singletonvirtmem_1_1CVirtPtr.html#affa1cd2dfa4d2fe901dc055686aff579">alloc()</a>) is done through a (static) function defined in the virtual pointer class. In the above example no arguments were passed to <a class="el" href="singletonvirtmem_1_1CVirtPtr.html#affa1cd2dfa4d2fe901dc055686aff579">alloc()</a>, which means that <code>alloc</code> will automatically deduce the size required for the pointer type (<code>int</code>). If you want to allocate a different size (for instance to use the data as an array) then the number of bytes should be specified as the first argument to <code>alloc</code>:</p>
 <div class="fragment"><div class="line">vptr = vptr.<a class="code" href="singletonvirtmem_1_1CVirtPtr.html#affa1cd2dfa4d2fe901dc055686aff579">alloc</a>(1000 * <span class="keyword">sizeof</span>(<span class="keywordtype">int</span>)); <span class="comment">// allocate memory to store array of 1000 integers</span></div>
 <div class="line">vptr[500] = 1337;</div>
@@ -243,10 +243,10 @@ Using virtual memory</h2>
 <div class="line">TSdfatlibVirtPtr&lt;MyStruct&gt;::type ms = ms.<a class="code" href="singletonvirtmem_1_1CVirtPtr.html#affa1cd2dfa4d2fe901dc055686aff579">alloc</a>();</div>
 <div class="line">ms-&gt;x = 5;</div>
 <div class="line">ms-&gt;y = 15;</div>
-</div><!-- fragment --><p> Note that there are a few imitations when using structs (or classes) with <code>virtmem</code>. For details: see <a class="el" href="singletonvirtmem_1_1CVirtPtr.html">virtmem::CVirtPtr</a>.</p>
+</div><!-- fragment --><p> Note that there are a few imitations when using structs (or classes) with <code>virtmem</code>. For details: see <a class="el" href="singletonvirtmem_1_1CVirtPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">virtmem::CVirtPtr</a>.</p>
 <p>Finally, to free memory the <a class="el" href="singletonvirtmem_1_1CVirtPtr.html#aed7594b4c0f00138dd0ff24e2c99b5ef">free()</a> function can be used:</p>
 <div class="fragment"><div class="line">vptr.<a class="code" href="singletonvirtmem_1_1CVirtPtr.html#aed7594b4c0f00138dd0ff24e2c99b5ef">free</a>(vptr); <span class="comment">// memory size is automatically deduced</span></div>
-</div><!-- fragment --><p>For further info see <a class="el" href="classvirtmem_1_1CBaseVirtPtr.html">virtmem::CBaseVirtPtr</a> and <a class="el" href="singletonvirtmem_1_1CVirtPtr.html">virtmem::CVirtPtr</a>.</p>
+</div><!-- fragment --><p>For further info see <a class="el" href="classvirtmem_1_1CBaseVirtPtr.html" title="This is the base class of CVirtPtr and can be used for typeless pointers. ">virtmem::CBaseVirtPtr</a> and <a class="el" href="singletonvirtmem_1_1CVirtPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">virtmem::CVirtPtr</a>.</p>
 <h1><a class="anchor" id="advanced"></a>
 Advanced</h1>
 <h2><a class="anchor" id="aLocking"></a>
@@ -371,7 +371,7 @@ Overloads of some common C library functions for virtual pointers</h2>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespacevirtmem.html#Coverloads">Overview of all overloaded functions</a>.</dd></dl>
 <h2><a class="anchor" id="aTypeless"></a>
 Typeless virtual pointers (analog to void*)</h2>
-<p>When working with regular pointers, a <code>void</code> pointer can be used to store whatever pointer you like. With virtual pointers something similar can be achieved by using the base class for virtual pointers, namely <a class="el" href="classvirtmem_1_1CBaseVirtPtr.html">virtmem::CBaseVirtPtr</a>:</p>
+<p>When working with regular pointers, a <code>void</code> pointer can be used to store whatever pointer you like. With virtual pointers something similar can be achieved by using the base class for virtual pointers, namely <a class="el" href="classvirtmem_1_1CBaseVirtPtr.html" title="This is the base class of CVirtPtr and can be used for typeless pointers. ">virtmem::CBaseVirtPtr</a>:</p>
 <div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code" href="singletonvirtmem_1_1CVirtPtr.html">virtmem::CVirtPtr&lt;int, virtmem::CSdfatlibVirtMemAlloc&gt;</a> virtIntPtr; <span class="comment">// shortcut</span></div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">int</span> *intptr;</div>
@@ -395,7 +395,7 @@ Examples</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Oct 4 2015 19:57:45 for virtmem by
+    <li class="footer">Generated on Sun Oct 4 2015 21:27:03 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.8 </li>
   </ul>

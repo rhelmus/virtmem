@@ -115,13 +115,18 @@ $(document).ready(function(){initNavTree('singletonvirtmem_1_1CVirtPtr.html','')
 <div class="title">virtmem::CVirtPtr&lt; T, TA &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Virtual pointer class that provides an interface to access virtual much like 'regular pointers'.  
+ <a href="singletonvirtmem_1_1CVirtPtr.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="wrapper_8h_source.html">wrapper.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for virtmem::CVirtPtr&lt; T, TA &gt;:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="singletonvirtmem_1_1CVirtPtr.png" usemap="#virtmem::CVirtPtr&lt; T, TA &gt;_map" alt=""/>
   <map id="virtmem::CVirtPtr&lt; T, TA &gt;_map" name="virtmem::CVirtPtr&lt; T, TA &gt;_map">
-<area href="classvirtmem_1_1CBaseVirtPtr.html" alt="virtmem::CBaseVirtPtr" shape="rect" coords="0,0,162,24"/>
+<area href="classvirtmem_1_1CBaseVirtPtr.html" title="This is the base class of CVirtPtr and can be used for typeless pointers. " alt="virtmem::CBaseVirtPtr" shape="rect" coords="0,0,162,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -229,7 +234,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>operator-</b> (const <
 <tr class="memitem:ad13017cdabd3d516891daf8dd30d2851 inherit pub_methods_classvirtmem_1_1CBaseVirtPtr"><td class="memTemplParams" colspan="2"><a class="anchor" id="ad13017cdabd3d516891daf8dd30d2851"></a>
 template&lt;typename T , typename A &gt; </td></tr>
 <tr class="memitem:ad13017cdabd3d516891daf8dd30d2851 inherit pub_methods_classvirtmem_1_1CBaseVirtPtr"><td class="memTemplItemLeft" align="right" valign="top">EXPLICIT&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvirtmem_1_1CBaseVirtPtr.html#ad13017cdabd3d516891daf8dd30d2851">operator CVirtPtr&lt; T, A &gt;</a> (void) const </td></tr>
-<tr class="memdesc:ad13017cdabd3d516891daf8dd30d2851 inherit pub_methods_classvirtmem_1_1CBaseVirtPtr"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversion operator to <a class="el" href="singletonvirtmem_1_1CVirtPtr.html">CVirtPtr</a> types. <br /></td></tr>
+<tr class="memdesc:ad13017cdabd3d516891daf8dd30d2851 inherit pub_methods_classvirtmem_1_1CBaseVirtPtr"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversion operator to <a class="el" href="singletonvirtmem_1_1CVirtPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">CVirtPtr</a> types. <br /></td></tr>
 <tr class="separator:ad13017cdabd3d516891daf8dd30d2851 inherit pub_methods_classvirtmem_1_1CBaseVirtPtr"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4456add8a28da9386e8da0c106621f36 inherit pub_methods_classvirtmem_1_1CBaseVirtPtr"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4456add8a28da9386e8da0c106621f36"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const <a class="el" href="classvirtmem_1_1CBaseVirtPtr.html">CBaseVirtPtr</a> &amp;pb) const </td></tr>
@@ -351,7 +356,21 @@ static void *&#160;</td><td class="memItemRight" valign="bottom"><b>unwrap</b> (
 <a class="el" href="classvirtmem_1_1CBaseVirtPtr.html#a8f4eb39d2b57325eb8f2fd370ee5615b">TPtrNum</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ptr</b></td></tr>
 <tr class="separator:a02b1c59e4e937b95be62041d43c408f4 inherit pro_attribs_classvirtmem_1_1CBaseVirtPtr"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><h3>template&lt;typename T, typename TA&gt;<br />
+class virtmem::CVirtPtr&lt; T, TA &gt;</h3>
+
+<p>Virtual pointer class that provides an interface to access virtual much like 'regular pointers'. </p>
+<p>This class provides an easy to use interface to access from virtual memory. The class provides functionality such as dereferencing data, array access, memory (de)allocation and pointer arithmetic.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">T</td><td>The type of the data this pointer points to (e.g. char, int, a struct etc...) </td></tr>
+    <tr><td class="paramname">TA</td><td>The allocator type that contains the virtual memory pool where the pointed data resides.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classvirtmem_1_1CBaseVirtPtr.html" title="This is the base class of CVirtPtr and can be used for typeless pointers. ">CBaseVirtPtr</a>, <a class="el" href="structvirtmem_1_1TSPIRAMVirtPtr.html">TSPIRAMVirtPtr</a>, <a class="el" href="structvirtmem_1_1TSdfatlibVirtPtr.html">TSdfatlibVirtPtr</a>, <a class="el" href="structvirtmem_1_1TSerRAMVirtPtr.html">TSerRAMVirtPtr</a>, <a class="el" href="structvirtmem_1_1TStaticVirtPtr.html">TStaticVirtPtr</a> and <a class="el" href="structvirtmem_1_1TStdioVirtPtr.html">TStdioVirtPtr</a> </dd></dl>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="ad04a0fd4e39006603d3e94bc0fdc748c"></a>
 <div class="memitem">
 <div class="memproto">
@@ -858,7 +877,7 @@ template&lt;typename T, typename TA&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevirtmem.html">virtmem</a></li><li class="navelem"><a class="el" href="singletonvirtmem_1_1CVirtPtr.html">CVirtPtr</a></li>
-    <li class="footer">Generated on Sun Oct 4 2015 19:57:45 for virtmem by
+    <li class="footer">Generated on Sun Oct 4 2015 21:27:03 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.8 </li>
   </ul>
