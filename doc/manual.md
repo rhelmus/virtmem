@@ -206,7 +206,7 @@ Note that there are a few imitations when using structs (or classes) with `virtm
 Finally, to free memory the [free()](@ref virtmem::CVirtPtr::free) function can be used:
 
 ~~~{.cpp}
-vptr.free(vptr); // memory size automatically deduced
+vptr.free(vptr); // memory size is automatically deduced
 ~~~
 
 For further info see virtmem::CBaseVirtPtr and virtmem::CVirtPtr.
@@ -422,7 +422,7 @@ Alternatively, these settings can be passed as a template parameter to the
 allocator. For more info, see the description about
 virtmem::SDefaultAllocProperties.
 
-## Virtual pointers to `struct`/`class` data members
+## Virtual pointers to `struct`/`class` data members {#aPointStructMem}
 
 It might be necessary to obtain a pointer to a member of a structure (or class)
 which resides in virtual memory. The way to obtain such a pointer with
@@ -453,5 +453,53 @@ intvptr = virtmem::getMembrPtr(mystruct, &myStruct::x);
 ~~~
 
 @sa virtmem::getMembrPtr
+
+## Overloads of some common C library functions for virtual pointers {#aCoverloads}
+
+Overloads of some common C functions for dealing with memory and strings are
+provided by `virtmem`. They accept virtual pointers or a mix of virtual and
+regular pointers as function arguments. Please note that they are defined in the
+[virtmem namespace](@ref virtmem) like any other code from `virtmem`, hence, they will
+not "polute" the global namespace unless you want to (i.e. by using the `using`
+directive).
+
+The following function overloads exist:
+* `memcpy`
+* `memset`
+* `memcmp`
+* `strncpy`
+* `strcpy`
+* `strncmp`
+* `strcmp`
+* `strlen`
+
+@sa [Overview of all overloaded functions](@ref Coverloads).
+
+## Typeless virtual pointers (analog to void*) {#aTypeless}
+
+When working with regular pointers, a `void` pointer can be used to store
+whatever pointer you like. With virtual pointers something similar can be
+achieved by using the base class for virtual pointers, namely
+virtmem::CBaseVirtPtr:
+
+~~~{.cpp}
+typedef virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> virtIntPtr; // shortcut
+
+int *intptr;
+virtIntPtr intvptr;
+
+// ...
+
+// Store pointers in typeless pointer
+void *voidptr = intptr;
+virtmem::CBaseVirtPtr basevptr = intvptr;
+
+// ...
+
+// Get it back
+intptr = static_cast<int *>(voidptr);
+intvptr = static_cast<virtIntPtr>(basevptr);
+~~~
+
 
 # Examples {#examples}

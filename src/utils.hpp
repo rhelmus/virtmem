@@ -1,8 +1,14 @@
 #ifndef VIRTMEM_UTILS_HPP
 #define VIRTMEM_UTILS_HPP
 
+/**
+  @file
+  @brief This header file contains several overloads of common C functions that work with virtual pointers.
+  */
+
 #include "config.h"
 #include "utils.h"
+#include "wrapper.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -225,6 +231,17 @@ inline int strComparator(const char *p1, const char *p2, TVirtPtrSize n, bool &d
 // and this saves some template code duplication for other types. A general template function will just
 // cast and call the specialized function.
 
+
+/**
+ * @anchor Coverloads
+ * @name Overloads of C library functions for virtual pointers
+ * The following functions are overloads of some common C functions for dealing with memory and strings.
+ * They accept virtual pointers or a mix of virtual and regular pointers. Please note that they are
+ * defined in the [virtmem namespace](@ref virtmem) like any other code from `virtmem`, hence, they will not
+ * "polute" the global namespace unless you want to (i.e. by using the `using` directive).
+ * @{
+ **/
+
 template <typename T1, typename A1, typename T2, typename A2>
 CVirtPtr<T1, A1> memcpy(CVirtPtr<T1, A1> dest, const CVirtPtr<T2, A2> src, TVirtPtrSize size)
 {
@@ -401,6 +418,8 @@ template <typename A> int strcmp(CVirtPtr<char, A> dest, const char *src)
 { return strcmp(static_cast<CVirtPtr<const char, A> >(dest), src); }
 
 template <typename A> int strlen(CVirtPtr<char, A> str) { return strlen(static_cast<CVirtPtr<const char, A> >(str)); }
+
+// @}
 
 }
 

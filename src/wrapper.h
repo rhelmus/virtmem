@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_WRAPPER_H
 #define VIRTMEM_WRAPPER_H
 
+/**
+  @file
+  @brief This header contains the class definition of the CVirtPtr class
+  */
+
 #include "alloc.h"
 #include "base_wrapper.h"
 #include "utils.h"

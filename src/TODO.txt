@@ -1,5 +1,4 @@
 docs:
-- Describe allocators and virtual pointers
 - Locking
 - Make and link to examples
 - Document allocator classes
@@ -10,8 +9,7 @@ docs:
 - Describe limitations of structs/classes in CVirtPtr
 - spell checks
 - makeVirtPtrLock()
-- highleight the important things and background stuff
-- pointers to struct members
+- highlight the important things and background stuff
 - multiple SPI chips also supported
 
 general:
