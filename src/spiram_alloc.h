@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_SPIRAM_ALLOC_H
 #define VIRTMEM_SPIRAM_ALLOC_H
 
+/**
+  * @file
+  * @brief This file contains the SPI RAM virtual memory allocator
+  */
+
 #include <Arduino.h>
 #include "alloc.h"
 

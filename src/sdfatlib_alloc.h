@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_SDFATLIB_ALLOC_H
 #define VIRTMEM_SDFATLIB_ALLOC_H
 
+/**
+  * @file
+  * @brief This file contains the SD fat virtual memory allocator
+  */
+
 #include "alloc.h"
 
 #include <SdFat.h>

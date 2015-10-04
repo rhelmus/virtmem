@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_STDIO_ALLOC_H
 #define VIRTMEM_STDIO_ALLOC_H
 
+/**
+  * @file
+  * @brief This file contains the stdio virtual memory allocator (for debug)
+  */
+
 #include "alloc.h"
 #include "config.h"
 

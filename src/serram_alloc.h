@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_SERRAM_ALLOC_H
 #define VIRTMEM_SERRAM_ALLOC_H
 
+/**
+  * @file
+  * @brief This file contains the serial virtual memory allocator
+  */
+
 #include <Arduino.h>
 #include "alloc.h"
 #include "serram_utils.h"

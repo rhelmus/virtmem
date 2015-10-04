@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_STATIC_ALLOC_H
 #define VIRTMEM_STATIC_ALLOC_H
 
+/**
+  * @file
+  * @brief This file contains the static virtual memory allocator (for debug)
+  */
+
 // allocator using static array; for testing
 
 #include <string.h>

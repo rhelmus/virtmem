@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_WRAPPER_UTILS_H
 #define VIRTMEM_WRAPPER_UTILS_H
 
+/**
+  * @file
+  * @brief This file contains several utilities for virtual pointers.
+  */
+
 #include "wrapper.h"
 
 #include <string.h>
@@ -55,7 +60,7 @@ extern const CNILL NILL;
  * lock has been acquired (usually during construction), it will be automatically released
  * as soon as the class variable goes out of scope.
  *
- * Wrapped regular pointers (see XXX) are supported: if a given virtual pointer wraps a
+ * [Wrapped regular pointers](@ref aWrapping) are supported: if a given virtual pointer wraps a
  * regular pointer, this class will not attempt to make or release a lock and
  * operator *(void) will simply return the wrapped pointer.
  */

@@ -1,6 +1,11 @@
 #ifndef VIRTMEM_BASE_WRAPPER_H
 #define VIRTMEM_BASE_WRAPPER_H
 
+/**
+  * @file
+  * @brief This file contains the virtual pointer base class
+  */
+
 #include "config.h"
 #include "alloc.h"
 #include "utils.h"
@@ -30,6 +35,17 @@ template <typename T1, typename T2> struct TConditional<false, T1, T2>
 }
 
 template <typename, typename> class CVirtPtr;
+
+/**
+ * @brief This is the base class of CVirtPtr and can be used for typeless pointers.
+ *
+ * This base class contains all the functionality of virtual pointers which do not depend
+ * on any templated code to reduce code size.
+ *
+ * This class can be used for 'typeless' virtual pointers, similar as void* is used
+ * for 'regular' typeless pointers.
+ * @sa @ref aTypeless
+ */
 
 class CBaseVirtPtr
 {

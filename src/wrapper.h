@@ -33,6 +33,19 @@ template <typename T, typename A> struct TDereferenced<CVirtPtr<T, A> > { typede
 template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
 }
 
+/**
+ * @brief Virtual pointer class that provides an interface to access virtual much like 'regular pointers'.
+ *
+ * This class provides an easy to use interface to access from virtual memory. The class provides
+ * functionality such as dereferencing data, array access, memory (de)allocation and
+ * pointer arithmetic.
+ *
+ * @param T The type of the data this pointer points to (e.g. char, int, a struct etc...)
+ * @param TA The allocator type that contains the virtual memory pool where the pointed data resides.
+ *
+ * @sa CBaseVirtPtr, TSPIRAMVirtPtr, TSdfatlibVirtPtr, TSerRAMVirtPtr, TStaticVirtPtr and TStdioVirtPtr
+ */
+
 template <typename T, typename TA> class CVirtPtr : public CBaseVirtPtr
 {
 public:
