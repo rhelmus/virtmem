@@ -16,3 +16,5 @@ this _virtual memory_ closely resembles working with data from 'normal' memory.
 * New memory interfaces can be added easily
 * Easily ported to other plaforms (x86 port exists for debugging)
 
+# Manual
+The manual [can be found here](http://rhelmus.github.io/virtmem/index.html).
