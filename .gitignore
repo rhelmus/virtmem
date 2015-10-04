@@ -1,9 +1,0 @@
-*.pro.user
-*/*.o
-*.o
-*/Makefile
-Makefile
-src/libvirtmem.a
-test/test
-doc/html
-
