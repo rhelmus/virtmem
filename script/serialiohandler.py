@@ -54,6 +54,7 @@ def processByte(byte, printunknown=True):
         if printunknown:
 #            State.outdev.write(byte.decode('ascii', errors='ignore'))
             State.outdev.write(byte)
+            State.outdev.flush()
 
 def handleCommand(command):
 #    print("command: ", command)
