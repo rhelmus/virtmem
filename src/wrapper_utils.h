@@ -161,9 +161,32 @@ template <typename C, typename M> ptrdiff_t getMembrOffset(const M C::*m)
 { return ((char *)&((char &)((C *)(0)->*m)) - (char *)(0)); }
 }
 
+/**
+ * @brief Obtains a virtual pointer to a data member that is stored in virtual memory.
+ *
+ * @tparam C Type of virtual data (e.g. the structure)
+ * @tparam M Type of the data member
+ * @tparam A Type of the virtual memory allocator
+ * @param c The virtual pointer of the structure (or class) to which the data member belongs
+ * @param m A pointer to the member (e.g. &MyStruct::x)
+ * @sa [section about virtual pointers to data members in manual](@ref aPointStructMem)
+ */
 template <typename C, typename M, typename A> inline CVirtPtr<M, A> getMembrPtr(const CVirtPtr<C, A> &c, const M C::*m)
 { CVirtPtr<M, A> ret; ret.setRawNum(c.getRawNum() + private_utils::getMembrOffset(m)); return ret; }
-// for nested member
+
+/**
+ * @brief Obtains a virtual pointer to a nested data member that is stored in virtual memory.
+ *
+ * @tparam C Type of virtual data (e.g. the structure)
+ * @tparam M Type of the data member
+ * @tparam NC Type of the nested structure
+ * @tparam NM Type of nested data member
+ * @tparam A Type of the virtual memory allocator
+ * @param c The virtual pointer of the structure (or class) to which the data member belongs
+ * @param m A pointer to the nested structure/class (e.g. &MyStruct::MyOtherStruct)
+ * @param nm A pointer to the nested data member (e.g. &MyStruct::MyOtherStruct::y)
+ * @sa [section about virtual pointers to data members in manual](@ref aPointStructMem)
+ */
 template <typename C, typename M, typename NC, typename NM, typename A> inline CVirtPtr<NM, A> getMembrPtr(const CVirtPtr<C, A> &c, const M C::*m, const NM NC::*nm)
 { CVirtPtr<NM, A> ret = static_cast<CVirtPtr<NM, A> >(static_cast<CVirtPtr<char, A> >(getMembrPtr(c, m)) + private_utils::getMembrOffset(nm)); return ret; }
 

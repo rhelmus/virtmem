@@ -40,8 +40,8 @@ template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
  * functionality such as dereferencing data, array access, memory (de)allocation and
  * pointer arithmetic.
  *
- * @param T The type of the data this pointer points to (e.g. char, int, a struct etc...)
- * @param TA The allocator type that contains the virtual memory pool where the pointed data resides.
+ * @tparam T The type of the data this pointer points to (e.g. char, int, a struct etc...)
+ * @tparam TA The allocator type that contains the virtual memory pool where the pointed data resides.
  *
  * @sa CBaseVirtPtr, TSPIRAMVirtPtr, TSdfatlibVirtPtr, TSerRAMVirtPtr, TStaticVirtPtr and TStdioVirtPtr
  */
