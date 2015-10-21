@@ -54,7 +54,7 @@ extern const CNILL NILL;
  *
  * This class is used to create and release locks to virtual data. The use of locks
  * allows more efficient data handling and compatibility with code only accepting regular
- * pointers. For more information see \ref VirtualLocks.
+ * pointers. For more information see \ref aLocking.
  *
  * The class uses a RAII (resource acquisition is initialization) approach: after a
  * lock has been acquired (usually during construction), it will be automatically released

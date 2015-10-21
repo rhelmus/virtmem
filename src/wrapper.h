@@ -82,6 +82,10 @@ private:
     template <typename> friend class CPtrWrapLock;
 
 public:
+    /**
+     * @brief Proxy class returned when dereferencing virtual pointers.
+     * @sa @ref aAccess
+     */
     class CValueWrapper
     {
         TPtrNum ptr;
@@ -147,6 +151,10 @@ public:
     };
 
     // Based on Stroustrup's general wrapper paper (http://www.stroustrup.com/wrapper.pdf)
+    /**
+     * @brief Proxy class used when member access is requested on a virtual pointer.
+     * @sa @ref aAccess
+     */
     class CMemberWrapper
     {
         const TPtrNum ptr;
@@ -372,8 +380,8 @@ public:
     /**
      * @name Dereference operators
      * The following operators are used for accessing the data pointed to by this virtual pointer.
-     * The returned value is a proxy class, which mostly acts as the data itself. For more information, see
-     * \ref ValueWrapping.
+     * The returned value is a proxy class, which mostly acts as the data itself.
+     * @sa aAccess
      * @{
      */
     CValueWrapper operator*(void) { return CValueWrapper(ptr); }

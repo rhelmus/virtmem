@@ -123,7 +123,6 @@ public:
     static bool isWrapped(TPtrNum p) { return p & ((TPtrNum)1 << WRAP_BIT); }
     /**
      * @brief Returns whether a virtual pointer has wrapped a regular pointer (non static version).
-     * @param p Numeric value of the virtual pointer
      * @sa getRawNum
      * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
      */
