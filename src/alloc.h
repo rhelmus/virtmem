@@ -63,9 +63,9 @@ public:
      *
      * Note that, since allocators are template classes, one instance is generated for every set of
      * unique template parameters. For example:
-     * @code
-     * CSdfatlibVirtMemAlloc alloc1; // allocator with default template parameters
-     * CSdfatlibVirtMemAlloc<mysettings> alloc2; // allocator with custom template parameter
+     * @code{.cpp}
+     * virtmem::CSDVirtMemAlloc alloc1; // allocator with default template parameters
+     * virtmem::CSDVirtMemAlloc<mysettings> alloc2; // allocator with custom template parameter
      * @endcode
      * In this case, `alloc1` and `alloc2` are variables with a *different* type, hence getInstance()
      * will return a different instance for both classes.

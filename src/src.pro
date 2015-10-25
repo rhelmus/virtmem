@@ -23,14 +23,14 @@ HEADERS += \
     config.h \
     utils.hpp \
     stdio_alloc.h \
-    sdfatlib_alloc.h \
     alloc.h \
     wrapper_utils.h \
     spiram_alloc.h \
     static_alloc.h \
     serram_utils.h \
     serram_alloc.h \
-    serram_utils.hpp
+    serram_utils.hpp \
+    sd_alloc.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
