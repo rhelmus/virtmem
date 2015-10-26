@@ -1,5 +1,5 @@
-#ifndef VIRTMEM_SDFATLIB_ALLOC_H
-#define VIRTMEM_SDFATLIB_ALLOC_H
+#ifndef VIRTMEM_SD_ALLOC_H
+#define VIRTMEM_SD_ALLOC_H
 
 /**
   * @file
@@ -12,21 +12,33 @@
 
 namespace virtmem {
 
-template <typename> class CSdfatlibVirtMemAlloc;
+template <typename> class CSDVirtMemAlloc;
 
+/**
+ * @brief Virtual allocator class that uses SD card as virtual pool
+ *
+ * This class uses a temporary file on an FAT formatted SD card as virtual memory pool. The
+ * class uses [SD FAT lib](https://github.com/greiman/SdFat) to interface with the SD card.
+ *
+ * When the allocator is initialized (i.e. by calling start()) it will create a file called
+ * 'ramfile.vm' in the root directory. Existing files will be reused and resized if necessary.
+ *
+ * @note The SD FAT library needs to be initialized (i.e. by calling SdFat::begin()) *before*
+ * initializing this allocator.
+ */
 template <typename TProperties=SDefaultAllocProperties>
-class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMemAlloc<TProperties> >
+class CSDVirtMemAlloc : public CVirtMemAlloc<TProperties, CSDVirtMemAlloc<TProperties> >
 {
     SdFile sdFile;
 
     void doStart(void)
     {
         // file does not exist yet (can we create it)?
-        if (sdFile.open("ramfile.vir", O_CREAT | O_EXCL))
+        if (sdFile.open("ramfile.vm", O_CREAT | O_EXCL))
             this->writeZeros(0, this->getPoolSize()); // make it the right size
         else // already exists, check size
         {
-            if (!sdFile.open("ramfile", O_CREAT | O_RDWR))
+            if (!sdFile.open("ramfile.vm", O_CREAT | O_RDWR))
             {
                 Serial.println("opening ram file failed");
                 while (true)
@@ -42,7 +54,6 @@ class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMem
     void doStop(void)
     {
         sdFile.close();
-        sdFile.remove();
     }
     void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
     {
@@ -61,13 +72,22 @@ class CSdfatlibVirtMemAlloc : public CVirtMemAlloc<TProperties, CSdfatlibVirtMem
     }
 
 public:
-    CSdfatlibVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
-    ~CSdfatlibVirtMemAlloc(void) { doStop(); }
+    /** Constructs (but not initializes) the SD FAT allocator.
+     * @param ps The size of the virtual memory pool
+     */
+    CSDVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
+    ~CSDVirtMemAlloc(void) { doStop(); }
+
+    /**
+     * Removes the temporary file used as virtual memory pool.
+     * @note Only call this when the allocator is not initialized!
+     */
+    void removeTempFile(void) { sdFile.remove(); }
 };
 
 template <typename, typename> class CVirtPtr;
-template <typename T> struct TSdfatlibVirtPtr { typedef CVirtPtr<T, CSdfatlibVirtMemAlloc<> > type; };
+template <typename T> struct TSDVirtPtr { typedef CVirtPtr<T, CSDVirtMemAlloc<> > type; };
 
 }
 
-#endif // VIRTMEM_SDFATLIB_ALLOC_H
+#endif // VIRTMEM_SD_ALLOC_H

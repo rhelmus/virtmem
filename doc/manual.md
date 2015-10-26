@@ -28,14 +28,14 @@ Before delving into specifics, here is a simple example to demonstrate how `virt
 #include <Arduino.h>
 #include <SdFat.h>
 #include <virtmem.h>
-#include <sdfatlib_alloc.h>
+#include <sd_alloc.h>
 
 // Simplify virtmem usage
 using namespace virtmem;
 
 // Create virtual a memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
 // The default memory pool size (1 MB) is used.
-CSdfatlibVirtMemAlloc<> valloc;
+CSDVirtMemAlloc<> valloc;
 
 SdFat sd;
 
@@ -50,7 +50,7 @@ void setup()
     valloc.start(); // Always call this to initialize the allocator before using it
 
     // Allocate a char buffer of 10000 bytes in virtual memory and store the address to a virtual pointer
-    TSdfatlibVirtPtr<char>::type str = str.alloc(10000);
+    TSDVirtPtr<char>::type str = str.alloc(10000);
 
     // Set the first 1000 bytes to 'A'
     memset(str, 'A', 1000);
@@ -59,7 +59,7 @@ void setup()
     str[1] = 'B';
 
     // Own types (structs/classes) also work.
-    TSdfatlibVirtPtr<MyStruct>::type ms = ms.alloc(); // alloc call without parameters: use automatic size deduction
+    TSDVirtPtr<MyStruct>::type ms = ms.alloc(); // alloc call without parameters: use automatic size deduction
     ms->x = 5;
     ms->y = 15;
 }
@@ -115,11 +115,11 @@ functionality is defined in the virtmem::CBaseVirtMemAlloc and
 virtmem::CVirtMemAlloc classes. In addition to this, several allocator classes
 are derived from these base classes that actually implement the code necessary
 to deal with virtual memory (e.g. reading and writing data). For example, the
-class virtmem::CSdfatlibVirtMemAlloc implements an allocator that uses an SD
+class virtmem::CSDVirtMemAlloc implements an allocator that uses an SD
 card as a virtual memory pool.
 
 The `virtmem` library supports the following allocators:
-* virtmem::CSdfatlibVirtMemAlloc: uses a FAT formatted SD card as memory pool
+* virtmem::CSDVirtMemAlloc: uses a FAT formatted SD card as memory pool
 * virtmem::CSPIRAMVirtMemAlloc: uses SPI ram (Microchip's 23LC series) as memory pool
 * virtmem::CMultiSPIRAMVirtMemAlloc: like virtmem::CSPIRAMVirtMemAlloc, but supports multiple memory chips
 * virtmem::CSerRAMVirtMemAlloc: uses RAM from a computer connected through serial as memory pool
@@ -135,7 +135,7 @@ things to do is to initialize it:
 ~~~{.cpp}
 // Create a virtual memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
 // The default memory pool size (1 MB) is used.
-virtmem::CSdfatlibVirtMemAlloc<> valloc;
+virtmem::CSDVirtMemAlloc<> valloc;
 
 // ...
 
@@ -150,7 +150,7 @@ void setup()
 ~~~
 
 Please note that, since this example uses the SD fat lib allocator, SD fat lib has
-to be initialized prior to the allocator (see virtmem::CSdfatlibVirtMemAlloc).
+to be initialized prior to the allocator (see virtmem::CSDVirtMemAlloc).
 
 Two interfaces exist to actually use virtual memory.
 
@@ -166,8 +166,8 @@ memory access as possible. Here is an example:
 
 ~~~{.cpp}
 // define virtual pointer linked to SD fat memory
-virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> vptr;
-// virtmem::TSdfatlibVirtPtr<int>::type vptr; // same, but slightly shorter syntax
+virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> vptr;
+// virtmem::TSDVirtPtr<int>::type vptr; // same, but slightly shorter syntax
 
 vptr = vptr.alloc(); // allocate memory to store integer (size automatically deduced from type)
 *vptr = 4;
@@ -175,7 +175,7 @@ vptr = vptr.alloc(); // allocate memory to store integer (size automatically ded
 
 In this example we defined a virtual pointer to an `int`. Defining virtual
 pointer variables can be done straight from virtmem::CVirtPtr or from one of
-the shortcut helper classes (such as virtmem::TSdfatlibVirtPtr). Either do the
+the shortcut helper classes (such as virtmem::TSDVirtPtr). Either do the
 same.
 
 Memory allocation ([alloc()](@ref virtmem::CVirtPtr::alloc)) is done through a (static)
@@ -197,7 +197,7 @@ work with custom types (structs/classes):
 ~~~{.cpp}
 struct MyStruct { int x, y; };
 // ...
-TSdfatlibVirtPtr<MyStruct>::type ms = ms.alloc();
+TSDVirtPtr<MyStruct>::type ms = ms.alloc();
 ms->x = 5;
 ms->y = 15;
 ~~~
@@ -247,7 +247,7 @@ and can be customized as described in @ref aConfigAlloc.
 To create a lock to virtual memory the virtmem::CVirtPtrLock class is used:
 
 ~~~{.cpp}
-typedef virtmem::TSdfatlibVirtPtr<char>::type virtCharPtr; // shortcut
+typedef virtmem::TSDVirtPtr<char>::type virtCharPtr; // shortcut
 virtCharPtr vptr = vptr.alloc(100); // allocate some virtual memory
 virtmem::CVirtPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(vptr, 100, false);
 memset(*lock, 10, 100); // set all bytes to '10'
@@ -273,7 +273,7 @@ locked in one go, it is best create a loop that iteratively creates locks until
 all bytes have been dealt with:
 
 ~~~{.cpp}
-typedef virtmem::TSdfatlibVirtPtr<char>::type virtCharPtr; // shortcut
+typedef virtmem::TSDVirtPtr<char>::type virtCharPtr; // shortcut
 const int size = 10000;
 int sizeleft = size;
 
@@ -349,7 +349,7 @@ structure during construction and release this lock during its destruction.
 
 Sometimes it may be handy to assign a regular pointer to a virtual pointer:
 ~~~{.cpp}
-typedef virtmem::TSdfatlibVirtPtr<int>::type virtIntPtr; // shortcut
+typedef virtmem::TSDVirtPtr<int>::type virtIntPtr; // shortcut
 
 void f(virtIntPtr p, int x)
 {
@@ -372,7 +372,7 @@ regular pointers. Alternatively, you can also 'wrap' the regular pointer inside
 a virtual pointer:
 
 ~~~{.cpp}
-typedef virtmem::TSdfatlibVirtPtr<int>::type virtIntPtr; // shortcut
+typedef virtmem::TSDVirtPtr<int>::type virtIntPtr; // shortcut
 
 // ...
 
@@ -403,10 +403,10 @@ While not more than one instance of a memory allocator _type_ should be
 defined, it is possible to define different allocators in the same program:
 
 ~~~{.cpp}
-virtmem::CSdfatlibVirtMemAlloc<> fatAlloc;
+virtmem::CSDVirtMemAlloc<> fatAlloc;
 virtmem::CSPIRAMVirtMemAlloc<> spiRamAlloc;
 
-virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> fatvptr;
+virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> fatvptr;
 virtmem::CVirtPtr<int, virtmem::CSPIRAMVirtMemAlloc> spiramvptr;
 
 // ...
@@ -447,7 +447,7 @@ To obtain a 'safe' pointer, one should use the [getMembrPtr() function](@ref vir
 
 ~~~{.cpp}
 struct myStruct { int x; };
-virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> intvptr;
+virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> intvptr;
 
 intvptr = virtmem::getMembrPtr(mystruct, &myStruct::x);
 ~~~
@@ -483,7 +483,7 @@ achieved by using the base class for virtual pointers, namely
 virtmem::CBaseVirtPtr:
 
 ~~~{.cpp}
-typedef virtmem::CVirtPtr<int, virtmem::CSdfatlibVirtMemAlloc> virtIntPtr; // shortcut
+typedef virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> virtIntPtr; // shortcut
 
 int *intptr;
 virtIntPtr intvptr;

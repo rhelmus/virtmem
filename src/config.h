@@ -20,9 +20,9 @@
   *
   * This is useful to allow double pointers, for example:
   * @code
-  * typedef virtmem::CVirtPtr<int, CSdfatlibVirtMemAlloc> vptrType;
+  * typedef virtmem::CVirtPtr<int, CSDVirtMemAlloc> vptrType;
   * vptrType vptr;
-  * virtmem::CVirtPtr<vptrType, CSdfatlibVirtMemAlloc> vptrptr = &vptr;
+  * virtmem::CVirtPtr<vptrType, CSDVirtMemAlloc> vptrptr = &vptr;
   * @endcode
   */
 #define VIRTMEM_VIRT_ADDRESS_OPERATOR
@@ -37,7 +37,7 @@
 /**
   @brief The default poolsize for allocators supporting a variable sized pool.
 
-  This value is used for variable sized allocators, such as CSdfatlibVirtMemAlloc and
+  This value is used for variable sized allocators, such as CSDVirtMemAlloc and
   CSerRAMVirtMemAlloc.
   */
 #define DEFAULT_POOLSIZE 1024l * 1024l
@@ -123,7 +123,7 @@ struct SMyAllocProperties
 };
 
 // Create allocator with customized page properties
-CSdfatlibVirtMemAlloc<SMyAllocProperties> alloc;
+CSDVirtMemAlloc<SMyAllocProperties> alloc;
   @endcode
 
   @var SDefaultAllocProperties::smallPageCount

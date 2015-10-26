@@ -43,7 +43,7 @@ template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
  * @tparam T The type of the data this pointer points to (e.g. char, int, a struct etc...)
  * @tparam TA The allocator type that contains the virtual memory pool where the pointed data resides.
  *
- * @sa CBaseVirtPtr, TSPIRAMVirtPtr, TSdfatlibVirtPtr, TSerRAMVirtPtr, TStaticVirtPtr and TStdioVirtPtr
+ * @sa CBaseVirtPtr, TSPIRAMVirtPtr, TSDVirtPtr, TSerRAMVirtPtr, TStaticVirtPtr and TStdioVirtPtr
  */
 
 template <typename T, typename TA> class CVirtPtr : public CBaseVirtPtr
@@ -203,7 +203,7 @@ public:
      * array multiply the array size by the size of the type, for instance:
      * @code
      * // allocate array of 10 integers.
-     * vptr = virtmem::CVirtPtr<int, CSdfatlibVirtMemAlloc>::alloc(10 * sizeof(int));
+     * vptr = virtmem::CVirtPtr<int, CSDVirtMemAlloc>::alloc(10 * sizeof(int));
      * @endcode
      * @sa free, newClass, newArray, CBaseVirtMemAlloc::alloc
      */
@@ -318,7 +318,7 @@ public:
      * Example:
      * @code
      * int data[] = { 1, 2, 3, 4 };
-     * typedef virtmem::CVirtPtr<int, CSdfatlibVirtMemAlloc> vptrType;
+     * typedef virtmem::CVirtPtr<int, CSDVirtMemAlloc> vptrType;
      * vptrType vptr = vptrType::wrap(data);
      * vptr += 2;
      * Serial.println(*vptr); // prints "3"

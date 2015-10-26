@@ -6,7 +6,7 @@
 //#define RUN_SPIRAMALLOC
 //#define RUN_NATIVE
 //#define RUN_SERIALALLOC
-#define RUN_SDFATALLOC
+#define RUN_SDALLOC
 
 // uncomment to disable a SPI select pin, useful when using ethernet shield
 #define DISABLE_SELECTPIN 10
@@ -27,11 +27,11 @@
 #define SERIALRAM_BUFSIZE 1024l * 128l
 #define SERIALRAM_REPEATS 5
 
-#define SDFATLIB_POOLSIZE 1024l * 1024l
-#define SDFATLIB_BUFSIZE 1024l * 128l
-#define SDFATLIB_REPEATS 5
-#define SDFATLIB_CSPIN 9
-#define SDFATLIB_SPISPEED SPI_FULL_SPEED
+#define SD_POOLSIZE 1024l * 1024l
+#define SD_BUFSIZE 1024l * 128l
+#define SD_REPEATS 5
+#define SD_CSPIN 9
+#define SD_SPISPEED SPI_FULL_SPEED
 
 
 #ifdef RUN_STATICALLOC
@@ -51,10 +51,10 @@ CSPIRAMVirtMemAlloc<> SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRa
 CSerRAMVirtMemAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
 #endif
 
-#ifdef RUN_SDFATALLOC
+#ifdef RUN_SDALLOC
 #include <SdFat.h>
-#include <sdfatlib_alloc.h>
-CSdfatlibVirtMemAlloc<> SdFatRamAlloc(SDFATLIB_POOLSIZE);
+#include <sd_alloc.h>
+CSDVirtMemAlloc<> SDRamAlloc(SD_POOLSIZE);
 SdFat sd;
 #endif
 
@@ -94,8 +94,8 @@ void setup()
     delay(3000);
 #endif
 
-#ifdef RUN_SDFATALLOC
-    if (!sd.begin(SDFATLIB_CSPIN, SDFATLIB_SPISPEED))
+#ifdef RUN_SDALLOC
+    if (!sd.begin(SD_CSPIN, SD_SPISPEED))
         sd.initErrorHalt();
 #endif
 }
@@ -126,9 +126,9 @@ void loop()
     Serial.println("\nDone!");
 #endif
 
-#ifdef RUN_SDFATALLOC
+#ifdef RUN_SDALLOC
     Serial.println("Running sd fat allocator...\n");
-    runBenchmarks(SdFatRamAlloc, SDFATLIB_BUFSIZE, SDFATLIB_REPEATS);
+    runBenchmarks(SDRamAlloc, SD_BUFSIZE, SD_REPEATS);
     Serial.println("\nDone!");
 #endif
 

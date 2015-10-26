@@ -42,7 +42,7 @@ extern const CNILL NILL;
  * @code
  * using namespace virtmem;
  * char *a = NILL;
- * CVirtPtr<char, CSdfatlibVirtMemAlloc> b = NILL;
+ * CVirtPtr<char, CSDVirtMemAlloc> b = NILL;
  * CBaseVirtPtr c = NILL;
  * @endcode
  * @sa CNILL
