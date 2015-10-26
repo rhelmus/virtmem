@@ -481,6 +481,11 @@ uint8_t CBaseVirtMemAlloc::getUnlockedPages(const SPageInfo *pinfo) const
     return ret;
 }
 
+/**
+ * @brief Writes zeros to raw virtual memory. Can be used to initialize the memory pool.
+ * @param start Start address
+ * @param n Amount of bytes (zeros) to write
+ */
 void CBaseVirtMemAlloc::writeZeros(TVirtPointer start, TVirtPtrSize n)
 {
     ASSERT(bigPages.pages[0].start == 0);
@@ -856,6 +861,7 @@ uint8_t CBaseVirtMemAlloc::getFreeBigPages() const
     return ret;
 }
 
+// @cond HIDDEN_SYMBOLS
 void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
 {
     ASSERT(ptr != 0);
@@ -1309,5 +1315,7 @@ void CBaseVirtMemAlloc::printStats()
     fflush(stdout);
 #endif
 }
+
+// @endcond
 
 }

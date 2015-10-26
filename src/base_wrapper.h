@@ -92,9 +92,10 @@ protected:
         } ugh;
     };
 #else
-    TPtrNum ptr;
+    TPtrNum ptr; //!< Numeric representation of this virtual pointer
 #endif
 
+    // @cond HIDDEN_SYMBOLS
 #ifdef VIRTMEM_WRAP_CPOINTERS
     // Return 'real' address of pointer, ie without wrapping bit
     // static so that CValueWrapper can use it as well
@@ -104,6 +105,7 @@ protected:
     static intptr_t getPtrNum(TPtrNum p) { return p; }
 #endif
     intptr_t getPtrNum(void) const { return getPtrNum(ptr); } // Shortcut
+    // @endcond
 
 public:
 #ifdef VIRTMEM_WRAP_CPOINTERS

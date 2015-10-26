@@ -150,6 +150,14 @@ public:
 };
 
 // Shortcut
+/**
+ * @brief Creates a virtual lock (shortcut)
+ *
+ * This function is a shortcut for making a virtual lock: unlike using CVirtPtrLock,
+ * you don't need to specify the virtual pointer type as a template parameter. The
+ * function parameters are the same as CVirtPtrLock::CVirtPtrLock.
+ * @sa CVirtPtr and @ref aLocking
+ */
 template <typename T> CVirtPtrLock<T> makeVirtPtrLock(const T &w, TVirtPageSize s, bool ro=false)
 { return CVirtPtrLock<T>(w, s, ro); }
 
