@@ -18,7 +18,8 @@ template <typename TProperties> class CSDVirtMemAlloc;
  * @brief Virtual allocator class that uses SD card as virtual pool
  *
  * This class uses a file on an FAT formatted SD card as virtual memory pool. The
- * [SD FAT library](https://github.com/greiman/SdFat) is used to interface with the SD card.
+ * [SD FAT library](https://github.com/greiman/SdFat) is used to interface with the SD card
+ * and therefore has to be installed.
  *
  * When the allocator is initialized (i.e. by calling start()) it will create a file called
  * 'ramfile.vm' in the root directory. Existing files will be reused and resized if necessary.
