@@ -93,9 +93,9 @@ public:
      */
     CVirtPtrLock(void) : data(0), lockSize(0), readOnly(false) { }
     ~CVirtPtrLock(void) { unlock(); } //!< Unlocks data if locked.
-    // add extra lock on copying
     CVirtPtrLock(const CVirtPtrLock &other) :
-        virtPtr(other.virtPtr), lockSize(other.lockSize), readOnly(other.readOnly) { lock(); }
+        virtPtr(other.virtPtr), lockSize(other.lockSize),
+        readOnly(other.readOnly) { lock(); } //!< Copy constructor, adds extra lock to data
 
     /**
      * @brief Recreates a virtual data lock after \ref unlock was called.

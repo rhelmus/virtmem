@@ -20,7 +20,8 @@ DEPENDPATH += $$PWD/../src
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../src/libvirtmem.a
 
-LIBS += -lgtest -lgtest_main
+INCLUDEPATH += ../gtest/gtest/include
+LIBS += -L../gtest/gtest/build -lgtest -lgtest_main
 DEFINES += __STDC_FORMAT_MACROS
 QMAKE_CXXFLAGS_RELEASE += -Os
 QMAKE_CXXFLAGS +=  -std=gnu++11 -pthread

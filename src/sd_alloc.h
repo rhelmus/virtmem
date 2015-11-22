@@ -12,19 +12,22 @@
 
 namespace virtmem {
 
-template <typename> class CSDVirtMemAlloc;
+template <typename TProperties> class CSDVirtMemAlloc;
 
 /**
  * @brief Virtual allocator class that uses SD card as virtual pool
  *
- * This class uses a temporary file on an FAT formatted SD card as virtual memory pool. The
- * class uses [SD FAT lib](https://github.com/greiman/SdFat) to interface with the SD card.
+ * This class uses a file on an FAT formatted SD card as virtual memory pool. The
+ * [SD FAT library](https://github.com/greiman/SdFat) is used to interface with the SD card.
  *
  * When the allocator is initialized (i.e. by calling start()) it will create a file called
  * 'ramfile.vm' in the root directory. Existing files will be reused and resized if necessary.
  *
+ * @tparam TProperties Allocator properties, see SDefaultAllocProperties
+ *
  * @note The SD FAT library needs to be initialized (i.e. by calling SdFat::begin()) *before*
  * initializing this allocator.
+ * @sa @ref bUsing
  */
 template <typename TProperties=SDefaultAllocProperties>
 class CSDVirtMemAlloc : public CVirtMemAlloc<TProperties, CSDVirtMemAlloc<TProperties> >

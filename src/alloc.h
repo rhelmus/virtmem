@@ -10,13 +10,15 @@
 
 namespace virtmem {
 
-// TDerived is necessary to ensure unique instance variables
 /**
  * @brief Base template class for virtual memory allocators.
  *
  * This template class is used as parent class for all allocators. Most of the actual code is
  * defined in CBaseVirtMemAlloc, while this class only contains code dependent upon template
  * parameters (i.e. page settings).
+ *
+ * @tparam TProperties Allocator properties, see SDefaultAllocProperties
+ * @tparam TDerived Dummy parameter, used to create unique singleton instances for each derived class.
  */
 template <typename TProperties, typename TDerived>
 class CVirtMemAlloc : public CBaseVirtMemAlloc
