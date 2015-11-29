@@ -22,7 +22,7 @@
 namespace virtmem {
 
 
-void CBaseVirtMemAlloc::initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize)
+void BaseVAlloc::initPages(PageInfo *info, LockPage *pages, uint8_t *pool, uint8_t pcount, VirtPageSize psize)
 {
     info->pages = pages;
     info->count = pcount;
@@ -42,10 +42,10 @@ void CBaseVirtMemAlloc::initPages(SPageInfo *info, SLockPage *pages, uint8_t *po
     }
 }
 
-TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
+VPtrNum BaseVAlloc::getMem(VPtrSize size)
 {
-    size = private_utils::maximal(size, (TVirtPtrSize)MIN_ALLOC_SIZE);
-    const TVirtPtrSize totalsize = size * sizeof(UMemHeader);
+    size = private_utils::maximal(size, (VPtrSize)MIN_ALLOC_SIZE);
+    const VPtrSize totalsize = size * sizeof(UMemHeader);
 
     if ((poolFreePos + totalsize) <= poolSize)
     {
@@ -68,14 +68,14 @@ TVirtPointer CBaseVirtMemAlloc::getMem(TVirtPtrSize size)
     return freePointer;
 }
 
-void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
+void BaseVAlloc::syncBigPage(LockPage *page)
 {
     ASSERT(page->start != 0);
 
     if (page->dirty)
     {
 //        std::cout << "dirty page\n";
-        const TVirtPageSize wrsize = private_utils::minimal((poolSize - page->start), (TVirtPtrSize)bigPages.size);
+        const VirtPageSize wrsize = private_utils::minimal((poolSize - page->start), (VPtrSize)bigPages.size);
         doWrite(page->pool, page->start, wrsize);
         page->dirty = false;
         page->cleanSkips = 0;
@@ -86,7 +86,7 @@ void CBaseVirtMemAlloc::syncBigPage(SLockPage *page)
     }
 }
 
-void CBaseVirtMemAlloc::copyRawData(void *dest, TVirtPointer p, TVirtPtrSize size)
+void BaseVAlloc::copyRawData(void *dest, VPtrNum p, VPtrSize size)
 {
     // First check if we should copy data from loaded big pages
     // Note that the size of these pages are never smaller than the copy size,
@@ -97,11 +97,11 @@ void CBaseVirtMemAlloc::copyRawData(void *dest, TVirtPointer p, TVirtPtrSize siz
         if (!bigPages.pages[i].start)
             continue;
 
-        const TVirtPointer pageend = bigPages.pages[i].start + bigPages.size;
+        const VPtrNum pageend = bigPages.pages[i].start + bigPages.size;
         if (p >= bigPages.pages[i].start && p < pageend) // start address within this page?
         {
-            const TVirtPtrSize offset = p - bigPages.pages[i].start;
-            const TVirtPtrSize copysize = private_utils::minimal(size, bigPages.pages[i].size - offset);
+            const VPtrSize offset = p - bigPages.pages[i].start;
+            const VPtrSize copysize = private_utils::minimal(size, bigPages.pages[i].size - offset);
             memcpy(dest, bigPages.pages[i].pool + offset, copysize);
 
             // move start to end of this page
@@ -112,8 +112,8 @@ void CBaseVirtMemAlloc::copyRawData(void *dest, TVirtPointer p, TVirtPtrSize siz
         // end overlaps?
         else if (p < bigPages.pages[i].start && (p + size) > bigPages.pages[i].start)
         {
-            const TVirtPtrSize offset = bigPages.pages[i].start - p;
-            const TVirtPtrSize copysize = private_utils::minimal(size - offset, (TVirtPtrSize)bigPages.pages[i].size);
+            const VPtrSize offset = bigPages.pages[i].start - p;
+            const VPtrSize copysize = private_utils::minimal(size - offset, (VPtrSize)bigPages.pages[i].size);
             memcpy((uint8_t *)dest + offset, bigPages.pages[i].pool, copysize);
             size = offset;
         }
@@ -130,18 +130,18 @@ void CBaseVirtMemAlloc::copyRawData(void *dest, TVirtPointer p, TVirtPtrSize siz
 }
 
 // This function is the reverse of copyRawData()
-void CBaseVirtMemAlloc::saveRawData(void *src, TVirtPointer p, TVirtPtrSize size)
+void BaseVAlloc::saveRawData(void *src, VPtrNum p, VPtrSize size)
 {
     for (int8_t i=bigPages.freeIndex; i!=-1 && size; i=bigPages.pages[i].next)
     {
         if (!bigPages.pages[i].start)
             continue;
 
-        const TVirtPointer pageend = bigPages.pages[i].start + bigPages.size;
+        const VPtrNum pageend = bigPages.pages[i].start + bigPages.size;
         if (p >= bigPages.pages[i].start && p < pageend) // start address within this page?
         {
-            const TVirtPtrSize offset = p - bigPages.pages[i].start;
-            const TVirtPtrSize copysize = private_utils::minimal(size, bigPages.pages[i].size - offset);
+            const VPtrSize offset = p - bigPages.pages[i].start;
+            const VPtrSize copysize = private_utils::minimal(size, bigPages.pages[i].size - offset);
 
             // only copy data if regular page is already dirty or data changed
             if (bigPages.pages[i].dirty || memcmp(bigPages.pages[i].pool + offset, src, copysize) != 0)
@@ -158,8 +158,8 @@ void CBaseVirtMemAlloc::saveRawData(void *src, TVirtPointer p, TVirtPtrSize size
         // end overlaps?
         else if (p < bigPages.pages[i].start && (p + size) > bigPages.pages[i].start)
         {
-            const TVirtPtrSize offset = bigPages.pages[i].start - p;
-            const TVirtPtrSize copysize = private_utils::minimal(size - offset, (TVirtPtrSize)bigPages.pages[i].size);
+            const VPtrSize offset = bigPages.pages[i].start - p;
+            const VPtrSize copysize = private_utils::minimal(size - offset, (VPtrSize)bigPages.pages[i].size);
 
             // only copy data if regular page is already dirty or data changed
             if (bigPages.pages[i].dirty || memcmp(bigPages.pages[i].pool, (uint8_t *)src + offset, copysize) != 0)
@@ -182,7 +182,7 @@ void CBaseVirtMemAlloc::saveRawData(void *src, TVirtPointer p, TVirtPtrSize size
     }
 }
 
-void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart)
+void *BaseVAlloc::pullRawData(VPtrNum p, VPtrSize size, bool readonly, bool forcestart)
 {
     ASSERT(p && p < poolSize);
 
@@ -201,13 +201,13 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
         pagefindstate = STATE_GOTFULL;
     else
     {
-        const TVirtPointer newpageend = p + bigPages.size;
+        const VPtrNum newpageend = p + bigPages.size;
 
         for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
         {
             if (bigPages.pages[i].start != 0)
             {
-                const TVirtPointer pageend = bigPages.pages[i].start + bigPages.size;
+                const VPtrNum pageend = bigPages.pages[i].start + bigPages.size;
                 if ((p >= bigPages.pages[i].start && p < pageend) ||
                     (newpageend >= bigPages.pages[i].start && newpageend <= pageend))
                 {
@@ -262,7 +262,7 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
         // Load in page
         if (/*!forcestart*/false) // check alignment UNDONE
         {
-            const TVirtPointer alignp = p - (p & (sizeof(TAlign) - 1));
+            const VPtrNum alignp = p - (p & (sizeof(TAlign) - 1));
             if ((alignp + bigPages.size) >= (p + size))
                 bigPages.pages[pageindex].start = alignp;
             else
@@ -273,7 +273,7 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
 
 //        std::cout << "start: " << bigPages.pages[pageindex].start <<"/" << p << std::endl;
 
-        const TVirtPageSize rdsize = private_utils::minimal((poolSize - bigPages.pages[pageindex].start), (TVirtPtrSize)bigPages.size);
+        const VirtPageSize rdsize = private_utils::minimal((poolSize - bigPages.pages[pageindex].start), (VPtrSize)bigPages.size);
         doRead(bigPages.pages[pageindex].pool, bigPages.pages[pageindex].start, rdsize);
 
 #ifdef VIRTMEM_TRACE_STATS
@@ -295,20 +295,20 @@ void *CBaseVirtMemAlloc::pullRawData(TVirtPointer p, TVirtPtrSize size, bool rea
     return &((uint8_t *)bigPages.pages[pageindex].pool)[p - bigPages.pages[pageindex].start];
 }
 
-void CBaseVirtMemAlloc::pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size)
+void BaseVAlloc::pushRawData(VPtrNum p, const void *d, VPtrSize size)
 {
     void *pool = pullRawData(p, size, false, false);
     memcpy(pool, d, size);
 }
 
-const CBaseVirtMemAlloc::UMemHeader *CBaseVirtMemAlloc::getHeaderConst(TVirtPointer p)
+const BaseVAlloc::UMemHeader *BaseVAlloc::getHeaderConst(VPtrNum p)
 {
     if (p == BASE_INDEX)
         return &baseFreeList;
     return reinterpret_cast<UMemHeader *>(read(p, sizeof(UMemHeader)));
 }
 
-void CBaseVirtMemAlloc::updateHeader(TVirtPointer p, UMemHeader *h)
+void BaseVAlloc::updateHeader(VPtrNum p, UMemHeader *h)
 {
     if (p == BASE_INDEX)
         memcpy(&baseFreeList, h, sizeof(UMemHeader));
@@ -316,9 +316,9 @@ void CBaseVirtMemAlloc::updateHeader(TVirtPointer p, UMemHeader *h)
         write(p, h, sizeof(UMemHeader));
 }
 
-int8_t CBaseVirtMemAlloc::findFreePage(CBaseVirtMemAlloc::SPageInfo *pinfo, TVirtPointer p, TVirtPtrSize size, bool atstart)
+int8_t BaseVAlloc::findFreePage(BaseVAlloc::PageInfo *pinfo, VPtrNum p, VPtrSize size, bool atstart)
 {
-    const TVirtPointer pend = p + size;
+    const VPtrNum pend = p + size;
     for (int8_t i=pinfo->freeIndex; i!=-1; i=pinfo->pages[i].next)
     {
         if (pinfo->pages[i].start != 0 && ((atstart && pinfo->pages[i].start == p) ||
@@ -329,7 +329,7 @@ int8_t CBaseVirtMemAlloc::findFreePage(CBaseVirtMemAlloc::SPageInfo *pinfo, TVir
     return -1;
 }
 
-int8_t CBaseVirtMemAlloc::findUnusedLockedPage(SPageInfo *pinfo)
+int8_t BaseVAlloc::findUnusedLockedPage(PageInfo *pinfo)
 {
     for (int8_t i=pinfo->lockedIndex; i!=-1; i=pinfo->pages[i].next)
     {
@@ -340,7 +340,7 @@ int8_t CBaseVirtMemAlloc::findUnusedLockedPage(SPageInfo *pinfo)
     return -1;
 }
 
-void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SLockPage *page)
+void BaseVAlloc::syncLockedPage(BaseVAlloc::LockPage *page)
 {
     ASSERT(page->start != 0);
     if (page->dirty)
@@ -364,7 +364,7 @@ void CBaseVirtMemAlloc::syncLockedPage(CBaseVirtMemAlloc::SLockPage *page)
     }
 }
 
-int8_t CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, TVirtPointer ptr, TVirtPageSize size)
+int8_t BaseVAlloc::lockPage(PageInfo *pinfo, VPtrNum ptr, VirtPageSize size)
 {
     int8_t index;
 
@@ -400,7 +400,7 @@ int8_t CBaseVirtMemAlloc::lockPage(SPageInfo *pinfo, TVirtPointer ptr, TVirtPage
     return index;
 }
 
-int8_t CBaseVirtMemAlloc::freeLockedPage(CBaseVirtMemAlloc::SPageInfo *pinfo, int8_t index)
+int8_t BaseVAlloc::freeLockedPage(BaseVAlloc::PageInfo *pinfo, int8_t index)
 {
     if (pinfo != &bigPages)
         syncLockedPage(&pinfo->pages[index]);
@@ -436,7 +436,7 @@ int8_t CBaseVirtMemAlloc::freeLockedPage(CBaseVirtMemAlloc::SPageInfo *pinfo, in
     return ret;
 }
 
-int8_t CBaseVirtMemAlloc::findLockedPage(SPageInfo *pinfo, TVirtPointer p)
+int8_t BaseVAlloc::findLockedPage(PageInfo *pinfo, VPtrNum p)
 {
     for (int8_t i=pinfo->lockedIndex; i!=-1; i=pinfo->pages[i].next)
     {
@@ -447,7 +447,7 @@ int8_t CBaseVirtMemAlloc::findLockedPage(SPageInfo *pinfo, TVirtPointer p)
     return -1;
 }
 
-CBaseVirtMemAlloc::SLockPage *CBaseVirtMemAlloc::findLockedPage(TVirtPointer p)
+BaseVAlloc::LockPage *BaseVAlloc::findLockedPage(VPtrNum p)
 {
     int8_t index = findLockedPage(&smallPages, p);
     if (index != -1)
@@ -464,7 +464,7 @@ CBaseVirtMemAlloc::SLockPage *CBaseVirtMemAlloc::findLockedPage(TVirtPointer p)
     return 0;
 }
 
-uint8_t CBaseVirtMemAlloc::getUnlockedPages(const SPageInfo *pinfo) const
+uint8_t BaseVAlloc::getUnlockedPages(const PageInfo *pinfo) const
 {
     uint8_t ret = 0;
 
@@ -486,24 +486,24 @@ uint8_t CBaseVirtMemAlloc::getUnlockedPages(const SPageInfo *pinfo) const
  * @param start Start address
  * @param n Amount of bytes (zeros) to write
  */
-void CBaseVirtMemAlloc::writeZeros(TVirtPointer start, TVirtPtrSize n)
+void BaseVAlloc::writeZeros(VPtrNum start, VPtrSize n)
 {
     ASSERT(bigPages.pages[0].start == 0);
 
     // Use zeroed page as buffer
     memset(bigPages.pages[0].pool, 0, bigPages.size);
-    for (TVirtPtrSize i=0; i<n; i+=bigPages.size)
-        doWrite(bigPages.pages[0].pool, start + i, private_utils::minimal(n - i, (TVirtPtrSize)bigPages.size));
+    for (VPtrSize i=0; i<n; i+=bigPages.size)
+        doWrite(bigPages.pages[0].pool, start + i, private_utils::minimal(n - i, (VPtrSize)bigPages.size));
 }
 
 /**
- * @fn CBaseVirtMemAlloc::start()
+ * @fn BaseVAlloc::start()
  * @brief Starts the allocator.
  *
  * This function should always be called during initialization, i.e. in *setup()* function of your sketch.
  * If the allocator was stopped (see \ref stop()), this function should be called again before using the allocator.
  */
-void CBaseVirtMemAlloc::start()
+void BaseVAlloc::start()
 {
     freePointer = 0;
     nextPageToSwap = 0;
@@ -514,7 +514,7 @@ void CBaseVirtMemAlloc::start()
     resetStats();
 #endif
 
-    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    PageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
     for (uint8_t pindex=0; pindex<3; ++pindex)
     {
         plist[pindex]->freeIndex = 0;
@@ -540,26 +540,26 @@ void CBaseVirtMemAlloc::start()
 }
 
 /**
- * @fn CBaseVirtMemAlloc::stop
+ * @fn BaseVAlloc::stop
  * @brief Deinitializes the allocator.
  *
  * Run \ref start() before using the allocator to re-initialize it.
  */
-void CBaseVirtMemAlloc::stop()
+void BaseVAlloc::stop()
 {
     doStop();
 }
 
 /**
- * @fn CBaseVirtMemAlloc::alloc
+ * @fn BaseVAlloc::alloc
  * @brief Allocates a piece of raw (virtual) memory.
  * @param size the size of the memory block
  * @return The starting address of the memory block. Will return zero if out of memory.
  */
-TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
+VPtrNum BaseVAlloc::alloc(VPtrSize size)
 {
-    const TVirtPtrSize quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
-    TVirtPointer prevp = freePointer;
+    const VPtrSize quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
+    VPtrNum prevp = freePointer;
 
     ASSERT(size && quantity);
 
@@ -571,7 +571,7 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
         baseFreeList.s.size = 0;
     }
 
-    TVirtPointer p = getHeaderConst(prevp)->s.next;
+    VPtrNum p = getHeaderConst(prevp)->s.next;
     while (true)
     {
         const UMemHeader *consth = getHeaderConst(p);
@@ -589,7 +589,7 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
             {
                 // just eliminate this block from the free list by pointing
                 // its prev's next to its next
-                TVirtPointer next = consth->s.next;
+                VPtrNum next = consth->s.next;
 //                UMemHeader prevh = *getHeaderConst(prevp); // UNDONE: this seems to sometimes crash while memcpy doesn't?!?
                 UMemHeader prevh;
                 memcpy(&prevh, getHeaderConst(prevp), sizeof(UMemHeader));
@@ -639,11 +639,11 @@ TVirtPointer CBaseVirtMemAlloc::alloc(TVirtPtrSize size)
 }
 
 /**
- * @fn CBaseVirtMemAlloc::free
+ * @fn BaseVAlloc::free
  * @brief Frees a memory block for re-usage.
  * @param ptr starting address of the memory block. This function will do nothing if \a ptr is zero.
  */
-void CBaseVirtMemAlloc::free(TVirtPointer ptr)
+void BaseVAlloc::free(VPtrNum ptr)
 {
     if (!ptr)
         return;
@@ -654,7 +654,7 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
     // the adjacent blocks are combined.
 
     // acquire pointer to block header
-    const TVirtPointer hdrptr = ptr - sizeof(UMemHeader);
+    const VPtrNum hdrptr = ptr - sizeof(UMemHeader);
     UMemHeader statheader;
     memcpy(&statheader, getHeaderConst(hdrptr), sizeof(UMemHeader));
 
@@ -664,7 +664,7 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 
     // Find the correct place to place the block in (the free list is sorted by
     // address, increasing order)
-    TVirtPointer p = freePointer;
+    VPtrNum p = freePointer;
     const UMemHeader *consth = getHeaderConst(p);
     while (!(hdrptr > p && hdrptr < consth->s.next))
     {
@@ -712,7 +712,7 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
 }
 
 /**
- * @fn CBaseVirtMemAlloc::read
+ * @fn BaseVAlloc::read
  * @brief Reads a raw block of (virtual) memory.
  * @param p starting address of memory block
  * @param size number of bytes to read
@@ -720,10 +720,10 @@ void CBaseVirtMemAlloc::free(TVirtPointer ptr)
  * @note The memory block returned by this function is temporary and may be invalidated
  * during a page swap. To use the memory accross reads and writes it should be locked.
  */
-void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
+void *BaseVAlloc::read(VPtrNum p, VPtrSize size)
 {
-    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
-    const TVirtPointer pend = p + size;
+    PageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    const VPtrNum pend = p + size;
 
     for (uint8_t pindex=0; pindex<3; ++pindex)
     {
@@ -735,7 +735,7 @@ void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
 
             if (beginoverlaps)
             {
-                const TVirtPointer offset = p - plist[pindex]->pages[i].start;
+                const VPtrNum offset = p - plist[pindex]->pages[i].start;
                 // data fits in this page?
                 if ((offset + size) <= plist[pindex]->pages[i].size)
                 {
@@ -760,16 +760,16 @@ void *CBaseVirtMemAlloc::read(TVirtPointer p, TVirtPtrSize size)
 }
 
 /**
- * @fn CBaseVirtMemAlloc::write
+ * @fn BaseVAlloc::write
  * @brief Writes a piece of raw data to (virtual) memory.
  * @param p starting address of the virtual memory block
  * @param d pointer to data to be written
  * @param size number of bytes to write
  */
-void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
+void BaseVAlloc::write(VPtrNum p, const void *d, VPtrSize size)
 {
-    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
-    const TVirtPointer pend = p + size;
+    PageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    const VPtrNum pend = p + size;
 
     for (uint8_t pindex=0; pindex<3; ++pindex)
     {
@@ -784,7 +784,7 @@ void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
 
             if (beginoverlaps)
             {
-                const TVirtPointer offset = p - plist[pindex]->pages[i].start;
+                const VPtrNum offset = p - plist[pindex]->pages[i].start;
                 // data fits in this page?
                 if ((offset + size) <= plist[pindex]->pages[i].size)
                 {
@@ -800,7 +800,7 @@ void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
             else if (endoverlaps)
             {
                 // partial fit (data starts before), copy stuff that fits in page
-                const TVirtPointer offset = plist[pindex]->pages[i].start - p;
+                const VPtrNum offset = plist[pindex]->pages[i].start - p;
                 memcpy((char *)plist[pindex]->pages[i].pool, (uint8_t *)d + offset, size - offset);
             }
         }
@@ -812,11 +812,11 @@ void CBaseVirtMemAlloc::write(TVirtPointer p, const void *d, TVirtPtrSize size)
 }
 
 /**
- * @fn CBaseVirtMemAlloc::flush
+ * @fn BaseVAlloc::flush
  * @brief Synchronizes all *big* memory pages.
  * @note This function is merely used for debugging.
  */
-void CBaseVirtMemAlloc::flush()
+void BaseVAlloc::flush()
 {
     // UNDONE: also flush locked pages?
     for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
@@ -827,11 +827,11 @@ void CBaseVirtMemAlloc::flush()
 }
 
 /**
- * @fn CBaseVirtMemAlloc::clearPages
+ * @fn BaseVAlloc::clearPages
  * @brief Synchronizes and clears all *big* memory pages.
  * @note This function is merely used for debugging.
  */
-void CBaseVirtMemAlloc::clearPages()
+void BaseVAlloc::clearPages()
 {
     // wipe all pages
     for (int8_t i=bigPages.freeIndex; i!=-1; i=bigPages.pages[i].next)
@@ -845,10 +845,10 @@ void CBaseVirtMemAlloc::clearPages()
 }
 
 /**
- * @fn CBaseVirtMemAlloc::getFreeBigPages
+ * @fn BaseVAlloc::getFreeBigPages
  * @return number of *big* pages that are not used and are not locked.
  */
-uint8_t CBaseVirtMemAlloc::getFreeBigPages() const
+uint8_t BaseVAlloc::getFreeBigPages() const
 {
     uint8_t ret = 0;
 
@@ -862,12 +862,12 @@ uint8_t CBaseVirtMemAlloc::getFreeBigPages() const
 }
 
 // @cond HIDDEN_SYMBOLS
-void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool ro)
+void *BaseVAlloc::makeDataLock(VPtrNum ptr, VirtPageSize size, bool ro)
 {
     ASSERT(ptr != 0);
     ASSERT(size <= bigPages.size);
 
-    SPageInfo *pinfo, *secpinfo = 0;
+    PageInfo *pinfo, *secpinfo = 0;
     if (size <= smallPages.size)
         pinfo = &smallPages;
     else if (size <= mediumPages.size)
@@ -877,7 +877,7 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
 
 //    std::cout << "request lock: " << ptr << "/" << size << "/" << pinfo->size << std::endl;
 
-    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    PageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
     int8_t pageindex = -1, oldlockindex = -1, secoldlockindex = -1;
     bool fixbeginningoverlap = false, done = false, shrunk = false;
     for (uint8_t pindex=0; pindex<3 && !done; ++pindex)
@@ -982,7 +982,7 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
     // as they are relative 'precious'.
     if (shrunk && size <= mediumPages.size && pinfo == &bigPages && (pageindex == -1 || pinfo->pages[pageindex].locks == 0))
     {
-        SPageInfo *oldpinfo = pinfo;
+        PageInfo *oldpinfo = pinfo;
 
         // first try a small page
         if (size <= smallPages.size)
@@ -1038,7 +1038,7 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
                 pinfo = &bigPages;
         }
 
-        TVirtPageSize copyoffset = 0;
+        VirtPageSize copyoffset = 0;
 
         if (pinfo->freeIndex != -1)
         {
@@ -1083,8 +1083,8 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
                         ASSERT(!fixed);
 
                         // copy their overlapping data (assume this is the most up to date)
-                        const TVirtPtrSize offsetold = ptr - plist[pindex]->pages[i].start;
-                        const TVirtPageSize copysize = private_utils::minimal((TVirtPageSize)(plist[pindex]->pages[i].size - offsetold), size);
+                        const VPtrSize offsetold = ptr - plist[pindex]->pages[i].start;
+                        const VirtPageSize copysize = private_utils::minimal((VirtPageSize)(plist[pindex]->pages[i].size - offsetold), size);
                         memcpy(pinfo->pages[pageindex].pool, (char *)plist[pindex]->pages[i].pool + offsetold, copysize);
                         copyoffset = private_utils::maximal(copyoffset, copysize); // NOTE: take max, copyoffset might have been set earlier
                         plist[pindex]->pages[i].size = offsetold; // shrink other so this one fits
@@ -1098,7 +1098,7 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
         if (copyoffset < size)
         {
 #if 0
-            const TVirtPtrSize copysize = size - copyoffset;
+            const VPtrSize copysize = size - copyoffset;
             memcpy(pinfo->pages[pageindex].pool + copyoffset, pullRawData(ptr + copyoffset, copysize, true, false), copysize); // UNDONE: make this more efficient
 #else
             copyRawData(pinfo->pages[pageindex].pool + copyoffset, ptr + copyoffset, size - copyoffset);
@@ -1112,9 +1112,9 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
         // size increased? (this can happen when either this page was used for a smaller data type, or other pages don't overlap anymore
         if (size > pinfo->pages[pageindex].size)
         {
-            const TVirtPtrSize offset = pinfo->pages[pageindex].size;
+            const VPtrSize offset = pinfo->pages[pageindex].size;
 #if 0
-            const TVirtPtrSize copysize = size - offset;
+            const VPtrSize copysize = size - offset;
             // copy excess data to page
             // UNDONE: make this more efficient
             memcpy(pinfo->pages[pageindex].pool + offset, pullRawData(ptr + offset, copysize, true, false), copysize);
@@ -1142,13 +1142,13 @@ void *CBaseVirtMemAlloc::makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool
 
 // makes a lock that will not resize existing locks. If ptr is in an existing lock, this lock will be used.
 // Otherwise a new lock is created with an apropiate size to avoid overlap
-void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro)
+void *BaseVAlloc::makeFittingLock(VPtrNum ptr, VirtPageSize &size, bool ro)
 {
     ASSERT(ptr != 0);
 
     size = private_utils::minimal(size, bigPages.size);
 
-    SPageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
+    PageInfo *plist[3] = { &smallPages, &mediumPages, &bigPages };
     int8_t unusedlist[3] = { -1, -1, -1 };
     int8_t plistindex = -1, pageindex = -1;
     bool done = false;
@@ -1189,7 +1189,7 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
         }
     }
 
-    TVirtPtrSize offset = 0;
+    VPtrSize offset = 0;
 
     // no existing lock found?
     if (pageindex == -1)
@@ -1246,7 +1246,7 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
         offset = (ptr - plist[plistindex]->pages[pageindex].start);
 
         // fixup size as the starting address may be different than what was requested
-        size = private_utils::minimal(size, static_cast<TVirtPageSize>(plist[plistindex]->pages[pageindex].size - offset));
+        size = private_utils::minimal(size, static_cast<VirtPageSize>(plist[plistindex]->pages[pageindex].size - offset));
     }
 
     // else add to lock count
@@ -1260,9 +1260,9 @@ void *CBaseVirtMemAlloc::makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, 
     return plist[plistindex]->pages[pageindex].pool + offset;
 }
 
-void CBaseVirtMemAlloc::releaseLock(TVirtPointer ptr)
+void BaseVAlloc::releaseLock(VPtrNum ptr)
 {
-    SLockPage *page = findLockedPage(ptr);
+    LockPage *page = findLockedPage(ptr);
     ASSERT(page && page->locks);
 //    std::cout << "temp unlock page: " << (int)ptr << "/" << (int)page->locks << std::endl;
     --page->locks;
@@ -1275,13 +1275,13 @@ void CBaseVirtMemAlloc::releaseLock(TVirtPointer ptr)
     }
 }
 
-void CBaseVirtMemAlloc::printStats()
+void BaseVAlloc::printStats()
 {
 #ifdef PRINTF_STATS
     printf("------ Memory manager stats ------\n\n");
     printf("Pool: free_pos = %u (%u bytes left)\n\n", poolFreePos, poolSize - poolFreePos);
 
-    TVirtPointer p = START_OFFSET + sizeof(UMemHeader);
+    VPtrNum p = START_OFFSET + sizeof(UMemHeader);
     while (p < poolFreePos)
     {
         const UMemHeader *h = getHeaderConst(p);

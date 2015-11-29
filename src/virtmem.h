@@ -3,8 +3,8 @@
 
 #include "config.h"
 #include "utils.h"
-#include "wrapper.h"
-#include "wrapper_utils.h"
+#include "vptr.h"
+#include "vptr_utils.h"
 
 /**
   @file

@@ -33,7 +33,7 @@ template <typename TA> void printVAStats(TA &valloc)
 
 template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t repeats)
 {
-    typedef CVirtPtr<char, TA> TVirtPtr;
+    typedef VPtr<char, TA> TVirtPtr;
     valloc.start();
 
     TVirtPtr buf = buf.alloc(bufsize);
@@ -83,7 +83,7 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
         while (sizeleft)
         {
             uint16_t lsize = min(valloc.getBigPageSize(), sizeleft);
-            CVirtPtrLock<TVirtPtr> l = makeVirtPtrLock(p, lsize);
+            VPtrLock<TVirtPtr> l = makeVirtPtrLock(p, lsize);
             lsize = l.getLockSize();
             char *b = *l;
             for (uint16_t j=0; j<lsize; ++j)
@@ -108,7 +108,7 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
         while (sizeleft)
         {
             uint16_t lsize = min(valloc.getBigPageSize(), sizeleft);
-            CVirtPtrLock<TVirtPtr> l = makeVirtPtrLock(p, lsize, true);
+            VPtrLock<TVirtPtr> l = makeVirtPtrLock(p, lsize, true);
             lsize = l.getLockSize();
             char *b = *l;
             for (uint16_t j=0; j<lsize; ++j, ++counter)

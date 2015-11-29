@@ -124,21 +124,21 @@ template <typename IOStream> void init(IOStream *stream, uint32_t baud, uint32_t
 }
 
 
-template <typename IOStream> uint32_t CSerialInput<IOStream>::available()
+template <typename IOStream> uint32_t SerialInput<IOStream>::available()
 {
     sendReadCommand(stream, CMD_INPUTAVAILABLE);
     stream->flush();
     return readUInt32(stream);
 }
 
-template <typename IOStream> uint32_t CSerialInput<IOStream>::availableAtLeast()
+template <typename IOStream> uint32_t SerialInput<IOStream>::availableAtLeast()
 {
     if (availableMin == 0)
         availableMin = available();
     return availableMin;
 }
 
-template <typename IOStream> int16_t CSerialInput<IOStream>::read()
+template <typename IOStream> int16_t SerialInput<IOStream>::read()
 {
     sendReadCommand(stream, CMD_INPUTREQUEST);
     writeUInt32(stream, 1);
@@ -152,7 +152,7 @@ template <typename IOStream> int16_t CSerialInput<IOStream>::read()
     return readUInt8(stream);
 }
 
-template <typename IOStream> uint32_t CSerialInput<IOStream>::readBytes(char *buffer, uint32_t count)
+template <typename IOStream> uint32_t SerialInput<IOStream>::readBytes(char *buffer, uint32_t count)
 {
     sendReadCommand(stream, CMD_INPUTREQUEST);
     writeUInt32(stream, count);
@@ -167,7 +167,7 @@ template <typename IOStream> uint32_t CSerialInput<IOStream>::readBytes(char *bu
     return count;
 }
 
-template <typename IOStream> int16_t CSerialInput<IOStream>::peek()
+template <typename IOStream> int16_t SerialInput<IOStream>::peek()
 {
     sendReadCommand(stream, CMD_INPUTPEEK);
     stream->flush();

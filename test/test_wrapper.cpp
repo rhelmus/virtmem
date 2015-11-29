@@ -10,7 +10,7 @@
 using namespace virtmem;
 
 // helper function, can't use assertions directly
-template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const CVirtPtr<T, A> &p)
+template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const VPtr<T, A> &p)
 {
     if (p == 0)
         return ::testing::AssertionSuccess();
@@ -18,20 +18,20 @@ template <typename T, typename A>::testing::AssertionResult wrapperIsNull(const 
         return ::testing::AssertionFailure() << "ptr wrapper not null: " << (uint64_t)p.getRawNum();
 }
 
-struct STestStruct
+struct TestStruct
 {
     int x, y;
 
     // For membr ptr tests
-    struct SSubStruct { int x, y; } sub;
-    TCharVirtPtr vbuf;
+    struct SubStruct { int x, y; } sub;
+    CharVirtPtr vbuf;
     char buf[10]; // NOTE: this has to be last for MembrAssignTest
 };
 
-bool operator==(const STestStruct &s1, const STestStruct &s2) { return s1.x == s2.x && s1.y == s2.y; }
-bool operator!=(const STestStruct &s1, const STestStruct &s2) { return s1.x != s2.x && s1.y != s2.y; }
+bool operator==(const TestStruct &s1, const TestStruct &s2) { return s1.x == s2.x && s1.y == s2.y; }
+bool operator!=(const TestStruct &s1, const TestStruct &s2) { return s1.x != s2.x && s1.y != s2.y; }
 
-std::ostream &operator<<(std::ostream &os, const STestStruct& s)
+std::ostream &operator<<(std::ostream &os, const TestStruct& s)
 {
     return os << "(" << s.x << ", " << s.y << ")";
 }
@@ -47,103 +47,103 @@ public:
 
 int CTestClass::constructedClasses = 0;
 
-typedef ::testing::Types<char, int, long, float, double, STestStruct, int *, void *(*)(void)> TWrapTypes;
-TYPED_TEST_CASE(CWrapFixture, TWrapTypes);
+typedef ::testing::Types<char, int, long, float, double, TestStruct, int *, void *(*)(void)> WrapTypes;
+TYPED_TEST_CASE(VPtrFixture, WrapTypes);
 
-template <typename T> class CLimitedWrapFixture: public CWrapFixture<T> { };
-typedef ::testing::Types<char, int, long, float, double> TLimitedWrapTypes;
-TYPED_TEST_CASE(CLimitedWrapFixture, TLimitedWrapTypes);
+template <typename T> class LimitedWrapFixture: public VPtrFixture<T> { };
+typedef ::testing::Types<char, int, long, float, double> LimitedWrapTypes;
+TYPED_TEST_CASE(LimitedWrapFixture, LimitedWrapTypes);
 
-typedef CWrapFixture<int> CIntWrapFixture;
-typedef CWrapFixture<CTestClass> CClassWrapFixture;
-typedef CWrapFixture<STestStruct> CStructWrapFixture;
+typedef VPtrFixture<int> IntWrapFixture;
+typedef VPtrFixture<CTestClass> ClassWrapFixture;
+typedef VPtrFixture<TestStruct> StructWrapFixture;
 
-TYPED_TEST(CWrapFixture, SimpleWrapTest)
+TYPED_TEST(VPtrFixture, SimpleWrapTest)
 {
-    EXPECT_TRUE(wrapperIsNull(this->wrapper));
-    EXPECT_EQ(this->wrapper, NILL);
+    EXPECT_TRUE(wrapperIsNull(this->vptr));
+    EXPECT_EQ(this->vptr, NILL);
 
-    this->wrapper = this->wrapper.alloc();
-    EXPECT_FALSE(wrapperIsNull(this->wrapper));
-    ASSERT_NE(this->wrapper, NILL);
+    this->vptr = this->vptr.alloc();
+    EXPECT_FALSE(wrapperIsNull(this->vptr));
+    ASSERT_NE(this->vptr, NILL);
 
     TypeParam val;
     memset(&val, 10, sizeof(val));
-    *this->wrapper = val;
-    EXPECT_EQ((TypeParam)*this->wrapper, val);
+    *this->vptr = val;
+    EXPECT_EQ((TypeParam)*this->vptr, val);
     this->valloc.clearPages();
-    EXPECT_EQ((TypeParam)*this->wrapper, val);
+    EXPECT_EQ((TypeParam)*this->vptr, val);
 
     typename TStdioVirtPtr<TypeParam>::type wrp2 = wrp2.alloc();
-    *wrp2 = *this->wrapper;
-    EXPECT_EQ((TypeParam)*this->wrapper, (TypeParam)*wrp2);
+    *wrp2 = *this->vptr;
+    EXPECT_EQ((TypeParam)*this->vptr, (TypeParam)*wrp2);
 
-    this->wrapper.free(this->wrapper);
-    EXPECT_TRUE(wrapperIsNull(this->wrapper));
-    EXPECT_EQ(this->wrapper, NILL);
+    this->vptr.free(this->vptr);
+    EXPECT_TRUE(wrapperIsNull(this->vptr));
+    EXPECT_EQ(this->vptr, NILL);
 }
 
-TYPED_TEST(CWrapFixture, ConstWrapTest)
+TYPED_TEST(VPtrFixture, ConstWrapTest)
 {
-    this->wrapper = this->wrapper.alloc();
+    this->vptr = this->vptr.alloc();
     TypeParam val;
     memset(&val, 10, sizeof(val));
-    *this->wrapper = val;
+    *this->vptr = val;
 
     typename TStdioVirtPtr<TypeParam>::type wrp2 = wrp2.alloc();
-    *wrp2 = *this->wrapper;
+    *wrp2 = *this->vptr;
     typename TStdioVirtPtr<const TypeParam>::type cwrp2 = wrp2;
     EXPECT_EQ((TypeParam)*wrp2, (TypeParam)*cwrp2);
     EXPECT_EQ((TypeParam)*cwrp2, (TypeParam)*wrp2);
 
     memset(&val, 20, sizeof(val));
-    *this->wrapper = val;
+    *this->vptr = val;
     // fails if assignment yielded shallow copy
-    EXPECT_NE((TypeParam)*this->wrapper, (TypeParam)*cwrp2) << "ptrs: " << (uint64_t)this->wrapper.getRawNum() << "/" << (uint64_t)cwrp2.getRawNum();
+    EXPECT_NE((TypeParam)*this->vptr, (TypeParam)*cwrp2) << "ptrs: " << (uint64_t)this->vptr.getRawNum() << "/" << (uint64_t)cwrp2.getRawNum();
 
-    *this->wrapper = *cwrp2;
-    EXPECT_EQ((TypeParam)*this->wrapper, (TypeParam)*cwrp2);
+    *this->vptr = *cwrp2;
+    EXPECT_EQ((TypeParam)*this->vptr, (TypeParam)*cwrp2);
 }
 
-TYPED_TEST(CWrapFixture, BaseWrapTest)
+TYPED_TEST(VPtrFixture, BaseWrapTest)
 {
-    this->wrapper = this->wrapper.alloc();
+    this->vptr = this->vptr.alloc();
 
-    CBaseVirtPtr basewrp = this->wrapper;
-    EXPECT_EQ(basewrp, this->wrapper);
+    BaseVPtr basewrp = this->vptr;
+    EXPECT_EQ(basewrp, this->vptr);
     typename TStdioVirtPtr<TypeParam>::type wrp = static_cast<typename TStdioVirtPtr<TypeParam>::type>(basewrp);
     EXPECT_EQ(basewrp, wrp);
-    EXPECT_EQ(wrp, this->wrapper);
+    EXPECT_EQ(wrp, this->vptr);
 }
 
-TYPED_TEST(CWrapFixture, CWrapWrapTest)
+TYPED_TEST(VPtrFixture, WrapWrapTest)
 {
     TypeParam val;
     memset(&val, 10, sizeof(val));
-    this->wrapper = this->wrapper.wrap(&val);
+    this->vptr = this->vptr.wrap(&val);
 
-    EXPECT_EQ(this->wrapper.unwrap(), &val);
-    EXPECT_EQ((TypeParam)*this->wrapper, val);
+    EXPECT_EQ(this->vptr.unwrap(), &val);
+    EXPECT_EQ((TypeParam)*this->vptr, val);
 
     this->valloc.clearPages();
 
-    EXPECT_EQ(this->wrapper.unwrap(), &val);
-    EXPECT_EQ((TypeParam)*this->wrapper, val);
+    EXPECT_EQ(this->vptr.unwrap(), &val);
+    EXPECT_EQ((TypeParam)*this->vptr, val);
 }
 
-TYPED_TEST(CLimitedWrapFixture, ArithmeticTest)
+TYPED_TEST(LimitedWrapFixture, ArithmeticTest)
 {
     const int size = 10, start = 10; // Offset from zero to avoid testing to zero initialized values
 
-    this->wrapper = this->wrapper.alloc(size * sizeof(TypeParam));
-    typename TStdioVirtPtr<TypeParam>::type wrpp = this->wrapper;
+    this->vptr = this->vptr.alloc(size * sizeof(TypeParam));
+    typename TStdioVirtPtr<TypeParam>::type wrpp = this->vptr;
     for (int i=start; i<size+start; ++i)
     {
         *wrpp = i;
         ++wrpp;
     }
 
-    wrpp = this->wrapper;
+    wrpp = this->vptr;
     this->valloc.clearPages();
 
     for (int i=start; i<size+start; ++i)
@@ -152,18 +152,18 @@ TYPED_TEST(CLimitedWrapFixture, ArithmeticTest)
         ++wrpp;
     }
 
-    wrpp = this->wrapper;
-    EXPECT_EQ(wrpp, this->wrapper);
+    wrpp = this->vptr;
+    EXPECT_EQ(wrpp, this->vptr);
     wrpp += 2; wrpp += -2;
-    EXPECT_EQ(wrpp, this->wrapper);
-    EXPECT_EQ(*wrpp, *this->wrapper);
+    EXPECT_EQ(wrpp, this->vptr);
+    EXPECT_EQ(*wrpp, *this->vptr);
 
-    typename TStdioVirtPtr<TypeParam>::type wrpp2 = this->wrapper;
+    typename TStdioVirtPtr<TypeParam>::type wrpp2 = this->vptr;
     EXPECT_EQ(*wrpp, *(wrpp2++));
     EXPECT_EQ(*(++wrpp), *wrpp2);
     EXPECT_EQ(wrpp, wrpp2);
     --wrpp;
-    EXPECT_EQ(*wrpp, *this->wrapper);
+    EXPECT_EQ(*wrpp, *this->vptr);
     EXPECT_NE(wrpp, wrpp2--);
     EXPECT_EQ(wrpp, wrpp2);
 
@@ -176,24 +176,24 @@ TYPED_TEST(CLimitedWrapFixture, ArithmeticTest)
     EXPECT_EQ((wrpp2 - wrpp), 2);
 
     EXPECT_EQ((wrpp += 2), wrpp2);
-    EXPECT_EQ((wrpp2 -= 2), this->wrapper);
+    EXPECT_EQ((wrpp2 -= 2), this->vptr);
 
-    wrpp = this->wrapper;
+    wrpp = this->vptr;
     wrpp2 = wrpp + 1;
-    EXPECT_LE(wrpp, this->wrapper);
+    EXPECT_LE(wrpp, this->vptr);
     EXPECT_LE(wrpp, wrpp2);
-    EXPECT_GE(wrpp2, this->wrapper);
+    EXPECT_GE(wrpp2, this->vptr);
     EXPECT_GE(wrpp2, wrpp);
 }
 
-TYPED_TEST(CLimitedWrapFixture, WrappedArithmeticTest)
+TYPED_TEST(LimitedWrapFixture, WrappedArithmeticTest)
 {
     const int size = 10, start = 10;
 
     TypeParam *buf = new TypeParam[size];
-    this->wrapper = this->wrapper.wrap(buf);
+    this->vptr = this->vptr.wrap(buf);
     TypeParam *bufp = buf;
-    typename TStdioVirtPtr<TypeParam>::type wrpp = this->wrapper;
+    typename TStdioVirtPtr<TypeParam>::type wrpp = this->vptr;
 
     for (int i=start; i<size+start; ++i)
     {
@@ -201,7 +201,7 @@ TYPED_TEST(CLimitedWrapFixture, WrappedArithmeticTest)
         ++wrpp;
     }
 
-    wrpp = this->wrapper;
+    wrpp = this->vptr;
     this->valloc.clearPages();
 
     for (int i=start; i<size+start; ++i)
@@ -232,31 +232,31 @@ TYPED_TEST(CLimitedWrapFixture, WrappedArithmeticTest)
     EXPECT_GE(wrpp.unwrap(), bufp);
 
     bufp += 5;
-    EXPECT_EQ((wrpp - this->wrapper), (bufp - buf));
+    EXPECT_EQ((wrpp - this->vptr), (bufp - buf));
 
     delete [] buf;
 }
 
-TEST_F(CIntWrapFixture, AlignmentTest)
+TEST_F(IntWrapFixture, AlignmentTest)
 {
     const int bufsize = 17;
 
-    this->wrapper = this->wrapper.alloc();
-    TCharVirtPtr buf = buf.alloc(bufsize);
-    TCharVirtPtr unalignedbuf = &buf[1];
+    this->vptr = this->vptr.alloc();
+    CharVirtPtr buf = buf.alloc(bufsize);
+    CharVirtPtr unalignedbuf = &buf[1];
     valloc.clearPages();
     volatile char c = *unalignedbuf; // force load of unaligned address
-    ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->wrapper.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);
+    ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->vptr.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);
 
     // check if int is still aligned after locking a big page
     valloc.clearPages();
     valloc.makeDataLock(unalignedbuf.getRawNum(), valloc.getBigPageSize(), true);
     valloc.releaseLock(unalignedbuf.getRawNum());
 
-    ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->wrapper.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);
+    ASSERT_EQ(reinterpret_cast<intptr_t>(valloc.read(this->vptr.getRawNum(), sizeof(int))) & (sizeof(int)-1), 0);
 }
 
-TEST_F(CClassWrapFixture, ClassAllocTest)
+TEST_F(ClassWrapFixture, ClassAllocTest)
 {
     ASSERT_EQ(CTestClass::constructedClasses, 0);
 
@@ -266,7 +266,7 @@ TEST_F(CClassWrapFixture, ClassAllocTest)
     EXPECT_EQ(CTestClass::constructedClasses, 0);
 }
 
-TEST_F(CClassWrapFixture, ClassArrayAllocTest)
+TEST_F(ClassWrapFixture, ClassArrayAllocTest)
 {
     const int elements = 10;
 
@@ -276,8 +276,8 @@ TEST_F(CClassWrapFixture, ClassArrayAllocTest)
     EXPECT_EQ(CTestClass::constructedClasses, 0);
 }
 
-// Tests for CVirtPtr::CValueWrapper
-TEST_F(CIntWrapFixture, OperatorTest)
+// Tests for VPtr::ValueWrapper
+TEST_F(IntWrapFixture, OperatorTest)
 {
     const int start = 100;
 
@@ -340,86 +340,86 @@ TEST_F(CIntWrapFixture, OperatorTest)
     EXPECT_EQ(*vptr >> 10, i >> 10);
 }
 
-TEST_F(CIntWrapFixture, MultiAllocTest)
+TEST_F(IntWrapFixture, MultiAllocTest)
 {
     // Second allocator
-    typedef CStaticVirtMemAlloc<1024*1024> TAlloc2;
-    TAlloc2 valloc2;
+    typedef StaticVAlloc<1024*1024> Alloc2;
+    Alloc2 valloc2;
     valloc2.start();
 
-    this->wrapper = this->wrapper.alloc();
-    CVirtPtr<int, TAlloc2> vptr2 = vptr2.alloc();
+    this->vptr = this->vptr.alloc();
+    VPtr<int, Alloc2> vptr2 = vptr2.alloc();
 
-    *this->wrapper = 55;
-    *vptr2 = (int)*this->wrapper;
-    EXPECT_EQ(*this->wrapper, *vptr2);
+    *this->vptr = 55;
+    *vptr2 = (int)*this->vptr;
+    EXPECT_EQ(*this->vptr, *vptr2);
     valloc.clearPages();
     valloc2.clearPages();
-    EXPECT_EQ(*this->wrapper, *vptr2);
+    EXPECT_EQ(*this->vptr, *vptr2);
 
     valloc2.stop();
 }
 
-TEST_F(CStructWrapFixture, MembrAssignTest)
+TEST_F(StructWrapFixture, MembrAssignTest)
 {
-    this->wrapper = this->wrapper.alloc();
-    this->wrapper->x = 55;
-    EXPECT_EQ(this->wrapper->x, 55);
+    this->vptr = this->vptr.alloc();
+    this->vptr->x = 55;
+    EXPECT_EQ(this->vptr->x, 55);
 
     // test if usage of other struct fields messes up assignment
-    this->wrapper->y = this->wrapper->x * this->wrapper->x;
-    EXPECT_EQ(this->wrapper->y, (55*55));
+    this->vptr->y = this->vptr->x * this->vptr->x;
+    EXPECT_EQ(this->vptr->y, (55*55));
 
     // Test partial data structures (useful for unions or partially allocated structs)
     // The struct is partially allocated, without the char buffer, while some extra space is requested right after for a virt char buffer
-    const size_t bufsize = sizeof((STestStruct *)0)->buf;
-    const size_t vbufsize = sizeof((STestStruct *)0)->vbuf;
+    const size_t bufsize = sizeof((TestStruct *)0)->buf;
+    const size_t vbufsize = sizeof((TestStruct *)0)->vbuf;
     const int vbufelements = 64;
 
-    this->wrapper.free(this->wrapper);
-    this->wrapper = this->wrapper.alloc(sizeof(STestStruct) - bufsize + vbufsize + vbufelements);
-    this->wrapper->x = 55; this->wrapper->y = 66;
-    this->wrapper->vbuf = (TCharVirtPtr)getMembrPtr(this->wrapper, &STestStruct::vbuf) + vbufsize; // point to end of struct
+    this->vptr.free(this->vptr);
+    this->vptr = this->vptr.alloc(sizeof(TestStruct) - bufsize + vbufsize + vbufelements);
+    this->vptr->x = 55; this->vptr->y = 66;
+    this->vptr->vbuf = (CharVirtPtr)getMembrPtr(this->vptr, &TestStruct::vbuf) + vbufsize; // point to end of struct
 
     const char *str = "Does this somewhat boring sentence compares well?";
-    strcpy(this->wrapper->vbuf, str);
+    strcpy(this->vptr->vbuf, str);
 
     // struct is still ok?
-    EXPECT_EQ(this->wrapper->x, 55);
-    EXPECT_EQ(this->wrapper->y, 66);
+    EXPECT_EQ(this->vptr->x, 55);
+    EXPECT_EQ(this->vptr->y, 66);
     // vbuf ok?
-    EXPECT_EQ(strcmp(this->wrapper->vbuf, str), 0);
+    EXPECT_EQ(strcmp(this->vptr->vbuf, str), 0);
 
     // UNDONE: test data in partial struct with larger datatype than char
 }
 
-TEST_F(CStructWrapFixture, MembrDiffTest)
+TEST_F(StructWrapFixture, MembrDiffTest)
 {
-    this->wrapper = this->wrapper.alloc();
+    this->vptr = this->vptr.alloc();
 
-    const size_t offset_x = offsetof(STestStruct, x);
-    const size_t offset_y = offsetof(STestStruct, y);
-    const size_t offset_buf = offsetof(STestStruct, buf);
-    const size_t offset_vbuf = offsetof(STestStruct, vbuf);
+    const size_t offset_x = offsetof(TestStruct, x);
+    const size_t offset_y = offsetof(TestStruct, y);
+    const size_t offset_buf = offsetof(TestStruct, buf);
+    const size_t offset_vbuf = offsetof(TestStruct, vbuf);
 
-    const TUCharVirtPtr vptr_x = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::x));
-    const TUCharVirtPtr vptr_y = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::y));
-    const TUCharVirtPtr vptr_buf = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::buf));
-    const TUCharVirtPtr vptr_vbuf = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::vbuf));
+    const UCharVirtPtr vptr_x = static_cast<UCharVirtPtr>(getMembrPtr(this->vptr, &TestStruct::x));
+    const UCharVirtPtr vptr_y = static_cast<UCharVirtPtr>(getMembrPtr(this->vptr, &TestStruct::y));
+    const UCharVirtPtr vptr_buf = static_cast<UCharVirtPtr>(getMembrPtr(this->vptr, &TestStruct::buf));
+    const UCharVirtPtr vptr_vbuf = static_cast<UCharVirtPtr>(getMembrPtr(this->vptr, &TestStruct::vbuf));
 
-    const TUCharVirtPtr base = static_cast<TUCharVirtPtr>(this->wrapper);
+    const UCharVirtPtr base = static_cast<UCharVirtPtr>(this->vptr);
     EXPECT_EQ(vptr_x - base, offset_x);
     EXPECT_EQ(vptr_y - base, offset_y);
     EXPECT_EQ(vptr_buf - base, offset_buf);
     EXPECT_EQ(vptr_vbuf - base, offset_vbuf);
 
     // Sub structure
-    const size_t offset_sub = offsetof(STestStruct, sub);
-    const size_t offset_sub_x = offset_sub + offsetof(STestStruct::SSubStruct, x);
-    const size_t offset_sub_y = offset_sub + offsetof(STestStruct::SSubStruct, y);
+    const size_t offset_sub = offsetof(TestStruct, sub);
+    const size_t offset_sub_x = offset_sub + offsetof(TestStruct::SubStruct, x);
+    const size_t offset_sub_y = offset_sub + offsetof(TestStruct::SubStruct, y);
 
-    const TUCharVirtPtr vptr_sub_x = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::sub, &STestStruct::SSubStruct::x));
-    const TUCharVirtPtr vptr_sub_y = static_cast<TUCharVirtPtr>(getMembrPtr(this->wrapper, &STestStruct::sub, &STestStruct::SSubStruct::y));
+    const UCharVirtPtr vptr_sub_x = static_cast<UCharVirtPtr>(getMembrPtr(this->vptr, &TestStruct::sub, &TestStruct::SubStruct::x));
+    const UCharVirtPtr vptr_sub_y = static_cast<UCharVirtPtr>(getMembrPtr(this->vptr, &TestStruct::sub, &TestStruct::SubStruct::y));
     EXPECT_EQ(vptr_sub_x - base, offset_sub_x);
     EXPECT_EQ(vptr_sub_y - base, offset_sub_y);
 }

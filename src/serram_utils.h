@@ -17,13 +17,13 @@ enum
     CMD_PING
 };
 
-template <typename IOStream> class CSerialInput
+template <typename IOStream> class SerialInput
 {
     uint32_t availableMin;
     IOStream *stream;
 
 public:
-    CSerialInput(IOStream *s) : availableMin(0), stream(s) { }
+    SerialInput(IOStream *s) : availableMin(0), stream(s) { }
 
     uint32_t available(void);
     uint32_t availableAtLeast(void);

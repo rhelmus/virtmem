@@ -1,7 +1,7 @@
-#include "wrapper_utils.h"
+#include "vptr_utils.h"
 
 namespace virtmem {
 
-const CNILL NILL = CNILL(); // need empty constructor to prevent compiler error on arduino
+const NILL_t NILL = NILL_t(); // need empty constructor to prevent compiler error on arduino
 
 }

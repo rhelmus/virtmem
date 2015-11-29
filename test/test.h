@@ -7,26 +7,26 @@
 
 using namespace virtmem;
 
-typedef TStdioVirtPtr<uint8_t>::type TUCharVirtPtr;
-typedef TStdioVirtPtr<char>::type TCharVirtPtr;
+typedef TStdioVirtPtr<uint8_t>::type UCharVirtPtr;
+typedef TStdioVirtPtr<char>::type CharVirtPtr;
 
-class CAllocFixture: public ::testing::Test
+class VAllocFixture: public ::testing::Test
 {
 protected:
-    CStdioVirtMemAlloc<> valloc;
+    StdioVAlloc<> valloc;
 
 public:
     void SetUp(void) { valloc.setPoolSize(1024 * 1024 * 10); valloc.start(); }
     void TearDown(void) { valloc.stop(); }
 };
 
-template <typename T> class CWrapFixture: public CAllocFixture
+template <typename T> class VPtrFixture: public VAllocFixture
 {
 protected:
-    typename TStdioVirtPtr<T>::type wrapper;
+    typename TStdioVirtPtr<T>::type vptr;
 
 public:
-    CWrapFixture(void) : wrapper() { } // UNDONE: we need this for proper construction, problem?
+    VPtrFixture(void) : vptr() { } // UNDONE: we need this for proper construction, problem?
 };
 
 #if 0

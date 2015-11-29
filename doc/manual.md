@@ -35,7 +35,7 @@ using namespace virtmem;
 
 // Create virtual a memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
 // The default memory pool size (1 MB) is used.
-CSDVirtMemAlloc<> valloc;
+SDVAlloc<> valloc;
 
 SdFat sd;
 
@@ -111,19 +111,19 @@ memory is quite fast.
 Virtual memory in `virtmem` is managed by a virtual memory allocator. These are
 C++ template classes which are responsible for allocating and releasing virtual
 memory and contain the datablocks utilized for memory pages. Most of this
-functionality is defined in the virtmem::CBaseVirtMemAlloc and
-virtmem::CVirtMemAlloc classes. In addition to this, several allocator classes
+functionality is defined in the virtmem::BaseVAlloc and
+virtmem::VAlloc classes. In addition to this, several allocator classes
 are derived from these base classes that actually implement the code necessary
 to deal with virtual memory (e.g. reading and writing data). For example, the
-class virtmem::CSDVirtMemAlloc implements an allocator that uses an SD
+class virtmem::SDVAlloc implements an allocator that uses an SD
 card as a virtual memory pool.
 
 The `virtmem` library supports the following allocators:
-* virtmem::CSDVirtMemAlloc: uses a FAT formatted SD card as memory pool
-* virtmem::CSPIRAMVirtMemAlloc: uses SPI ram (Microchip's 23LC series) as memory pool
-* virtmem::CMultiSPIRAMVirtMemAlloc: like virtmem::CSPIRAMVirtMemAlloc, but supports multiple memory chips
-* virtmem::CSerRAMVirtMemAlloc: uses RAM from a computer connected through serial as memory pool
-* For debugging there is also virtmem::CStaticVirtMemAlloc (uses regular RAM as memory pool) and virtmem::CStdioVirtMemAlloc (uses files through regular stdio functions as memory pool)
+* virtmem::SDVAlloc: uses a FAT formatted SD card as memory pool
+* virtmem::SPIRAMVAlloc: uses SPI ram (Microchip's 23LC series) as memory pool
+* virtmem::MultiSPIRAMVAlloc: like virtmem::SPIRAMVAlloc, but supports multiple memory chips
+* virtmem::SerRAMVAlloc: uses RAM from a computer connected through serial as memory pool
+* For debugging there is also virtmem::StaticVAlloc (uses regular RAM as memory pool) and virtmem::StdioVAlloc (uses files through regular stdio functions as memory pool)
 
 Note that all allocator classes are _singleton_,
 meaning that only one (global) instance should be defined (however, instances
@@ -135,7 +135,7 @@ things to do is to initialize it:
 ~~~{.cpp}
 // Create a virtual memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
 // The default memory pool size (1 MB) is used.
-virtmem::CSDVirtMemAlloc<> valloc;
+virtmem::SDVAlloc<> valloc;
 
 // ...
 
@@ -150,13 +150,13 @@ void setup()
 ~~~
 
 Please note that, since this example uses the SD fat lib allocator, SD fat lib has
-to be initialized prior to the allocator (see virtmem::CSDVirtMemAlloc).
+to be initialized prior to the allocator (see virtmem::SDVAlloc).
 
 Two interfaces exist to actually use virtual memory.
 
 The first approach is to use interface with raw memory directly through
-functions defined in virtmem::CBaseVirtMemAlloc (e.g. [read()](@ref virtmem::CBaseVirtMemAlloc::read) and
-[write()](@ref virtmem::CBaseVirtMemAlloc::write)). Although dealing with raw memory might be
+functions defined in virtmem::BaseVAlloc (e.g. [read()](@ref virtmem::BaseVAlloc::read) and
+[write()](@ref virtmem::BaseVAlloc::write)). Although dealing with raw memory might be
 slightly more efficient performance wise, this approach is not recommended as
 it is fairly cumbersome to do so.
 
@@ -166,7 +166,7 @@ memory access as possible. Here is an example:
 
 ~~~{.cpp}
 // define virtual pointer linked to SD fat memory
-virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> vptr;
+virtmem::VPtr<int, virtmem::SDVAlloc> vptr;
 // virtmem::TSDVirtPtr<int>::type vptr; // same, but slightly shorter syntax
 
 vptr = vptr.alloc(); // allocate memory to store integer (size automatically deduced from type)
@@ -174,13 +174,13 @@ vptr = vptr.alloc(); // allocate memory to store integer (size automatically ded
 ~~~
 
 In this example we defined a virtual pointer to an `int`. Defining virtual
-pointer variables can be done straight from virtmem::CVirtPtr or from one of
+pointer variables can be done straight from virtmem::VPtr or from one of
 the shortcut helper classes (such as virtmem::TSDVirtPtr). Either do the
 same.
 
-Memory allocation ([alloc()](@ref virtmem::CVirtPtr::alloc)) is done through a (static)
+Memory allocation ([alloc()](@ref virtmem::VPtr::alloc)) is done through a (static)
 function defined in the virtual pointer class. In the above example no
-arguments were passed to [alloc()](@ref virtmem::CVirtPtr::alloc), which means that
+arguments were passed to [alloc()](@ref virtmem::VPtr::alloc), which means that
 `alloc` will automatically deduce the size required for the pointer type
 (`int`). If you want to allocate a different size (for instance to use the data
 as an array) then the number of bytes should be specified as the first argument
@@ -201,15 +201,15 @@ TSDVirtPtr<MyStruct>::type ms = ms.alloc();
 ms->x = 5;
 ms->y = 15;
 ~~~
-Note that there are a few imitations when using structs (or classes) with `virtmem`. For details: see virtmem::CVirtPtr.
+Note that there are a few imitations when using structs (or classes) with `virtmem`. For details: see virtmem::VPtr.
 
-Finally, to free memory the [free()](@ref virtmem::CVirtPtr::free) function can be used:
+Finally, to free memory the [free()](@ref virtmem::VPtr::free) function can be used:
 
 ~~~{.cpp}
 vptr.free(vptr); // memory size is automatically deduced
 ~~~
 
-For further info see virtmem::CBaseVirtPtr and virtmem::CVirtPtr.
+For further info see virtmem::BaseVPtr and virtmem::VPtr.
 
 # Advanced {#advanced}
 
@@ -244,12 +244,12 @@ The default size and amount of memory pages is dependent upon the MCU platform
 and can be customized as described in @ref aConfigAlloc.
 
 ### Using virtual data locks {#alUsing}
-To create a lock to virtual memory the virtmem::CVirtPtrLock class is used:
+To create a lock to virtual memory the virtmem::VPtrLock class is used:
 
 ~~~{.cpp}
 typedef virtmem::TSDVirtPtr<char>::type virtCharPtr; // shortcut
 virtCharPtr vptr = vptr.alloc(100); // allocate some virtual memory
-virtmem::CVirtPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(vptr, 100, false);
+virtmem::VPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(vptr, 100, false);
 memset(*lock, 10, 100); // set all bytes to '10'
 ~~~
 
@@ -267,7 +267,7 @@ requested. For instance, there may not be sufficient space available to lock
 the complete data to a memory page or there will be overlap with another locked
 memory region. For this reason, it is **important to always check the _actual
 size_ that was locked**. After a lock has been made, the effective size of the
-locked region can be requested by the virtmem::CVirtPtrLock::getLockSize()
+locked region can be requested by the virtmem::VPtrLock::getLockSize()
 function. Because it is rather unpredictable whether the requested data can be
 locked in one go, it is best create a loop that iteratively creates locks until
 all bytes have been dealt with:
@@ -283,7 +283,7 @@ virtCharPtr p = vptr;
 while (sizeleft)
 {
     // create a lock to (a part) of the buffer
-    virtmem::CVirtPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(p, sizeleft, false);
+    virtmem::VPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(p, sizeleft, false);
 
     const int lockedsize = lock.getLockSize(); // get the actual size of the memory block that was locked
     memset(*l, 10, lockedsize);
@@ -296,8 +296,8 @@ while (sizeleft)
 Note that a `memset` overload is provided by `virtmem` which works with virtual pointers.
 
 After you are finished working with a virtual memory lock it has to be
-released. This can be done manually with the virtmem::CVirtPtrLock::unlock
-function. However, the virtmem::CVirtPtrLock destructor will call this function
+released. This can be done manually with the virtmem::VPtrLock::unlock
+function. However, the virtmem::VPtrLock destructor will call this function
 automatically (the class follows the
 [RAII principle](https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization)).
 This explains why calling `unlock()` in the above example was not necessary, as
@@ -314,7 +314,7 @@ data resides in regular RAM (i.e. a memory page). In addition, if the data is
 changed, `virtmem` has to flag this data as 'dirty' so that it will be
 synchronized during the next page swap. To achieve these tasks, `virtmem`
 returns a _proxy class_ whenever a virtual pointer is dereferenced, instead of
-returning the actual data. This proxy class (virtmem::CVirtPtr::CValueWrapper)
+returning the actual data. This proxy class (virtmem::VPtr::ValueWrapper)
 acts as it is the actual data, and is mostly invisible to the user:
 
 ~~~{.cpp}
@@ -336,7 +336,7 @@ member is accessed through the `->` operator of of the virtual pointer, we
 structure](http://stackoverflow.com/a/8782794). While it is possible to make
 this data available through a memory page (as is done normally) in the `->`
 overload function, synchronizing the data back is more tricky. For this reason,
-another proxy class is used (virtmem::CVirtPtr::CMemberWrapper) which is
+another proxy class is used (virtmem::VPtr::MemberWrapper) which is
 returned when the `->` operator is called. This proxy class has also its `->`
 operator overloaded, and this overload returns the actual data. The lifetime of
 this proxy class is important and matches that of the lifetime the data needs
@@ -383,7 +383,7 @@ f(myvptr, 12); // Success!
 ~~~
 
 If you want to obtain the original pointer then you can use the
-[unwrap()](@ref virtmem::CVirtPtr::unwrap) function:
+[unwrap()](@ref virtmem::VPtr::unwrap) function:
 
 ~~~{.cpp}
 int *myptr = vptr.unwrap();
@@ -391,7 +391,7 @@ int *myptr = vptr.unwrap();
 
 Please note that calling `unwrap()` on a non-wrapped virtual pointer yields an
 invalid pointer address. To avoid this, the
-[isWrapped() function](@ref virtmem::CBaseVirtPtr::isWrapped) can be used.
+[isWrapped() function](@ref virtmem::BaseVPtr::isWrapped) can be used.
 
 @note Wrapping regular pointers introduces a minor overhead in usage of virtual
 pointers and is therefore **disabled by default**. This feature can be enabled
@@ -403,11 +403,11 @@ While not more than one instance of a memory allocator _type_ should be
 defined, it is possible to define different allocators in the same program:
 
 ~~~{.cpp}
-virtmem::CSDVirtMemAlloc<> fatAlloc;
-virtmem::CSPIRAMVirtMemAlloc<> spiRamAlloc;
+virtmem::SDVAlloc<> fatAlloc;
+virtmem::SPIRAMVAlloc<> spiRamAlloc;
 
-virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> fatvptr;
-virtmem::CVirtPtr<int, virtmem::CSPIRAMVirtMemAlloc> spiramvptr;
+virtmem::VPtr<int, virtmem::SDVAlloc> fatvptr;
+virtmem::VPtr<int, virtmem::SPIRAMVAlloc> spiramvptr;
 
 // ...
 
@@ -420,7 +420,7 @@ virtmem::memcpy(fatvptr, spiramvptr, 1024);
 The number and size of memory pages can be configured in config.h.
 Alternatively, these settings can be passed as a template parameter to the
 allocator. For more info, see the description about
-virtmem::SDefaultAllocProperties.
+virtmem::DefaultAllocProperties.
 
 ## Virtual pointers to `struct`/`class` data members {#aPointStructMem}
 
@@ -447,7 +447,7 @@ To obtain a 'safe' pointer, one should use the [getMembrPtr() function](@ref vir
 
 ~~~{.cpp}
 struct myStruct { int x; };
-virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> intvptr;
+virtmem::VPtr<int, virtmem::SDVAlloc> intvptr;
 
 intvptr = virtmem::getMembrPtr(mystruct, &myStruct::x);
 ~~~
@@ -480,10 +480,10 @@ The following function overloads exist:
 When working with regular pointers, a `void` pointer can be used to store
 whatever pointer you like. With virtual pointers something similar can be
 achieved by using the base class for virtual pointers, namely
-virtmem::CBaseVirtPtr:
+virtmem::BaseVPtr:
 
 ~~~{.cpp}
-typedef virtmem::CVirtPtr<int, virtmem::CSDVirtMemAlloc> virtIntPtr; // shortcut
+typedef virtmem::VPtr<int, virtmem::SDVAlloc> virtIntPtr; // shortcut
 
 int *intptr;
 virtIntPtr intvptr;
@@ -492,7 +492,7 @@ virtIntPtr intvptr;
 
 // Store pointers in typeless pointer
 void *voidptr = intptr;
-virtmem::CBaseVirtPtr basevptr = intvptr;
+virtmem::BaseVPtr basevptr = intvptr;
 
 // ...
 

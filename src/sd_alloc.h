@@ -12,7 +12,7 @@
 
 namespace virtmem {
 
-template <typename TProperties> class CSDVirtMemAlloc;
+template <typename Properties> class SDVAlloc;
 
 /**
  * @brief Virtual allocator class that uses SD card as virtual pool
@@ -24,14 +24,14 @@ template <typename TProperties> class CSDVirtMemAlloc;
  * When the allocator is initialized (i.e. by calling start()) it will create a file called
  * 'ramfile.vm' in the root directory. Existing files will be reused and resized if necessary.
  *
- * @tparam TProperties Allocator properties, see SDefaultAllocProperties
+ * @tparam Properties Allocator properties, see DefaultAllocProperties
  *
  * @note The SD FAT library needs to be initialized (i.e. by calling SdFat::begin()) *before*
  * initializing this allocator.
  * @sa @ref bUsing
  */
-template <typename TProperties=SDefaultAllocProperties>
-class CSDVirtMemAlloc : public CVirtMemAlloc<TProperties, CSDVirtMemAlloc<TProperties> >
+template <typename Properties=DefaultAllocProperties>
+class SDVAlloc : public VAlloc<Properties, SDVAlloc<Properties> >
 {
     SdFile sdFile;
 
@@ -59,7 +59,7 @@ class CSDVirtMemAlloc : public CVirtMemAlloc<TProperties, CSDVirtMemAlloc<TPrope
     {
         sdFile.close();
     }
-    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
         sdFile.seekSet(offset);
@@ -67,7 +67,7 @@ class CSDVirtMemAlloc : public CVirtMemAlloc<TProperties, CSDVirtMemAlloc<TPrope
 //        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
-    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doWrite(const void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
         sdFile.seekSet(offset);
@@ -79,8 +79,8 @@ public:
     /** Constructs (but not initializes) the SD FAT allocator.
      * @param ps The size of the virtual memory pool
      */
-    CSDVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
-    ~CSDVirtMemAlloc(void) { doStop(); }
+    SDVAlloc(VPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
+    ~SDVAlloc(void) { doStop(); }
 
     /**
      * Removes the temporary file used as virtual memory pool.
@@ -89,8 +89,8 @@ public:
     void removeTempFile(void) { sdFile.remove(); }
 };
 
-template <typename, typename> class CVirtPtr;
-template <typename T> struct TSDVirtPtr { typedef CVirtPtr<T, CSDVirtMemAlloc<> > type; };
+template <typename, typename> class VPtr;
+template <typename T> struct TSDVirtPtr { typedef VPtr<T, SDVAlloc<> > type; };
 
 }
 

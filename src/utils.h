@@ -54,8 +54,8 @@ namespace private_utils {
 template <typename T> T minimal(const T &v1, const T &v2) { return (v1 < v2) ? v1 : v2; }
 template <typename T> T maximal(const T &v1, const T &v2) { return (v1 > v2) ? v1 : v2; }
 
-template <typename T> struct TAntiConst { typedef T type; };
-template <typename T> struct TAntiConst<const T> { typedef T type; };
+template <typename T> struct AntiConst { typedef T type; };
+template <typename T> struct AntiConst<const T> { typedef T type; };
 
 }
 

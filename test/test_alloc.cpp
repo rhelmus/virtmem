@@ -5,9 +5,9 @@
 #include <vector>
 
 
-TEST_F(CAllocFixture, SimpleAllocTest)
+TEST_F(VAllocFixture, SimpleAllocTest)
 {
-    const TVirtPointer ptr = valloc.alloc(sizeof(int));
+    const VPtrNum ptr = valloc.alloc(sizeof(int));
     ASSERT_NE(ptr, 0);
 
     int val = 55;
@@ -21,9 +21,9 @@ TEST_F(CAllocFixture, SimpleAllocTest)
     valloc.free(ptr);
 }
 
-TEST_F(CAllocFixture, ReadOnlyTest)
+TEST_F(VAllocFixture, ReadOnlyTest)
 {
-    const TVirtPointer ptr = valloc.alloc(sizeof(int));
+    const VPtrNum ptr = valloc.alloc(sizeof(int));
     int val = 55;
     valloc.write(ptr, &val, sizeof(val));
     valloc.flush();
@@ -37,9 +37,9 @@ TEST_F(CAllocFixture, ReadOnlyTest)
     EXPECT_EQ(*(int *)valloc.read(ptr, sizeof(val)), val);
 }
 
-TEST_F(CAllocFixture, MultiAllocTest)
+TEST_F(VAllocFixture, MultiAllocTest)
 {
-    std::vector<TVirtPointer> ptrlist;
+    std::vector<VPtrNum> ptrlist;
     for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
         ptrlist.push_back(valloc.alloc(valloc.getBigPageSize()));
@@ -60,11 +60,11 @@ TEST_F(CAllocFixture, MultiAllocTest)
     }
 }
 
-TEST_F(CAllocFixture, SimplePageTest)
+TEST_F(VAllocFixture, SimplePageTest)
 {
     EXPECT_EQ(valloc.getFreeBigPages(), valloc.getBigPageCount());
 
-    std::vector<TVirtPointer> ptrlist;
+    std::vector<VPtrNum> ptrlist;
     for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
         ptrlist.push_back(valloc.alloc(valloc.getBigPageSize()));
@@ -89,7 +89,7 @@ TEST_F(CAllocFixture, SimplePageTest)
     }
 }
 
-TEST_F(CAllocFixture, PageLockTest)
+TEST_F(VAllocFixture, PageLockTest)
 {
     EXPECT_EQ(valloc.getUnlockedSmallPages(), valloc.getSmallPageCount());
     EXPECT_EQ(valloc.getUnlockedMediumPages(), valloc.getMediumPageCount());
@@ -128,12 +128,12 @@ TEST_F(CAllocFixture, PageLockTest)
     EXPECT_EQ(valloc.getUnlockedMediumPages(), valloc.getMediumPageCount());
 }
 
-TEST_F(CAllocFixture, LargeDataTest)
+TEST_F(VAllocFixture, LargeDataTest)
 {
-    const TVirtPtrSize size = 1024 * 1024 * 8; // 8 mb data block
+    const VPtrSize size = 1024 * 1024 * 8; // 8 mb data block
 
-    const TVirtPointer vbuffer = valloc.alloc(size);
-    for (TVirtPtrSize i=0; i<size; ++i)
+    const VPtrNum vbuffer = valloc.alloc(size);
+    for (VPtrSize i=0; i<size; ++i)
     {
         char val = size - i;
         valloc.write(vbuffer + i, &val, sizeof(val));
@@ -142,7 +142,7 @@ TEST_F(CAllocFixture, LargeDataTest)
     valloc.clearPages();
 
     // Linear access check
-    for (TVirtPtrSize i=0; i<size; ++i)
+    for (VPtrSize i=0; i<size; ++i)
     {
         char val = size - i;
         ASSERT_EQ(*(char *)valloc.read(vbuffer + i, sizeof(val)), val);
@@ -151,17 +151,17 @@ TEST_F(CAllocFixture, LargeDataTest)
     valloc.clearPages();
 
     // Random access check
-    for (TVirtPtrSize i=0; i<200; ++i)
+    for (VPtrSize i=0; i<200; ++i)
     {
-        const TVirtPtrSize index = (rand() % size);
+        const VPtrSize index = (rand() % size);
         char val = size - index;
         ASSERT_EQ(*(char *)valloc.read(vbuffer + index, sizeof(val)), val);
     }
 }
 
-TEST_F(CAllocFixture, LargeRandomDataTest)
+TEST_F(VAllocFixture, LargeRandomDataTest)
 {
-    const TVirtPtrSize size = 1024 * 1024 * 8; // 8 mb data block
+    const VPtrSize size = 1024 * 1024 * 8; // 8 mb data block
 
     srand(::testing::UnitTest::GetInstance()->random_seed());
     std::vector<char> buffer;
@@ -169,8 +169,8 @@ TEST_F(CAllocFixture, LargeRandomDataTest)
     for (size_t s=0; s<size; ++s)
         buffer.push_back(rand());
 
-    const TVirtPointer vbuffer = valloc.alloc(size);
-    for (TVirtPtrSize i=0; i<size; ++i)
+    const VPtrNum vbuffer = valloc.alloc(size);
+    for (VPtrSize i=0; i<size; ++i)
     {
         char val = buffer[i];
         valloc.write(vbuffer + i, &val, sizeof(val));
@@ -179,7 +179,7 @@ TEST_F(CAllocFixture, LargeRandomDataTest)
     valloc.clearPages();
 
     // Linear access check
-    for (TVirtPtrSize i=0; i<size; ++i)
+    for (VPtrSize i=0; i<size; ++i)
     {
         ASSERT_EQ(*(char *)valloc.read(vbuffer + i, sizeof(char)), buffer[i]);
     }
@@ -187,9 +187,9 @@ TEST_F(CAllocFixture, LargeRandomDataTest)
     valloc.clearPages();
 
     // Random access check
-    for (TVirtPtrSize i=0; i<200; ++i)
+    for (VPtrSize i=0; i<200; ++i)
     {
-        const TVirtPtrSize index = (rand() % size);
+        const VPtrSize index = (rand() % size);
         ASSERT_EQ(*(char *)valloc.read(vbuffer + index, sizeof(char)), buffer[index]);
     }
 }

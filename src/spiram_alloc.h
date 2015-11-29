@@ -21,14 +21,14 @@ namespace virtmem {
  * [serram library](https://github.com/rhelmus/serialram) and must be installed in order to use
  * this allocator.
  *
- * @tparam TProperties Allocator properties, see SDefaultAllocProperties
+ * @tparam Properties Allocator properties, see DefaultAllocProperties
  *
  * @note The `serram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
  * initializing this allocator.
- * @sa @ref bUsing and CMultiSPIRAMVirtMemAlloc
+ * @sa @ref bUsing and MultiSPIRAMVAlloc
  */
-template <typename TProperties=SDefaultAllocProperties>
-class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAlloc<TProperties> >
+template <typename Properties=DefaultAllocProperties>
+class SPIRAMAlloc : public VAlloc<Properties, SPIRAMAlloc<Properties> >
 {
     bool largeAddressing;
     uint8_t chipSelect;
@@ -45,14 +45,14 @@ class CSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSPIRAMVirtMemAllo
         serialRAM.end();
     }
 
-    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
         serialRAM.read((char *)data, offset, size);
 //        Serial.print("read: "); Serial.print(offset); Serial.print("/"); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
-    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doWrite(const void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
         serialRAM.write((const char *)data, offset, size);
@@ -69,21 +69,21 @@ public:
      * CSerialRam::SPEED_QUARTER)
      * @sa setSettings and setPoolSize
      */
-    CSPIRAMVirtMemAlloc(TVirtPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
+    SPIRAMAlloc(VPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
         largeAddressing(la), chipSelect(cs), SPISpeed(s) { this->setPoolSize(ps); }
     /**
      * @brief Constructs (but not initializes) the allocator.
      * @param ps Total amount of bytes of the memory pool (i.e. the size of the SRAM chip)
      * @sa setSettings and setPoolSize
      */
-    CSPIRAMVirtMemAlloc(TVirtPtrSize ps) { this->setPoolSize(ps); }
-    CSPIRAMVirtMemAlloc(void) { } //!< Constructs (but not initializes) the allocator.
-    ~CSPIRAMVirtMemAlloc(void) { doStop(); }
+    SPIRAMAlloc(VPtrSize ps) { this->setPoolSize(ps); }
+    SPIRAMAlloc(void) { } //!< Constructs (but not initializes) the allocator.
+    ~SPIRAMAlloc(void) { doStop(); }
 
     /**
      * @brief Configures the allocator.
      *
-     * See CSPIRAMVirtMemAlloc::CSPIRAMVirtMemAlloc for a description of the parameters.
+     * See SPIRAMVAlloc::SPIRAMVAlloc for a description of the parameters.
      * @note This function should only be called if the allocator is not initialized.
      */
     void setSettings(bool la, uint8_t cs, CSerialRam::ESPISpeed s)
@@ -94,10 +94,10 @@ public:
 
 
 /**
- * @brief This `struct` is used to configure each SRAM chip used by a CMultiSPIRAMVirtMemAlloc
+ * @brief This `struct` is used to configure each SRAM chip used by a MultiSPIRAMVAlloc
  * allocator.
  */
-struct SSPIRamConfig
+struct SPIRamConfig
 {
     bool largeAddressing; //!< Does this chip needs large addressing (`true` if size >= 1 Mbit)
     uint32_t size; //!< Amount of bytes this chip can hold
@@ -109,22 +109,22 @@ struct SSPIRamConfig
  * @brief Virtual allocator that uses multiple SRAM chips (i.e. 23LC series from Microchip)
  * as memory pool.
  *
- * This allocator is similar to CSPIRAMVirtMemAlloc, but combines multiple SRAM chips as
+ * This allocator is similar to SPIRAMVAlloc, but combines multiple SRAM chips as
  * one large memory pool. Interfacing occurs through the
  * [serram library](https://github.com/rhelmus/serialram) and must be installed in order to use
  * this allocator.
  *
- * @tparam SPIChips An array of SSPIRamConfig that is used to configure each individual SRAM chip.
+ * @tparam SPIChips An array of SPIRamConfig that is used to configure each individual SRAM chip.
  * @tparam chipAmount Amount of SRAM chips to be used.
- * @tparam TProperties Allocator properties, see SDefaultAllocProperties
+ * @tparam Properties Allocator properties, see DefaultAllocProperties
  *
  * @note The `serram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
  * initializing this allocator.
- * @sa @ref bUsing, SSPIRamConfig and CSPIRAMVirtMemAlloc
+ * @sa @ref bUsing, SPIRamConfig and SPIRAMVAlloc
  *
  */
-template <const SSPIRamConfig *SPIChips, size_t chipAmount, typename TProperties=SDefaultAllocProperties>
-class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMVirtMemAlloc<SPIChips, chipAmount, TProperties> >
+template <const SPIRamConfig *SPIChips, size_t chipAmount, typename Properties=DefaultAllocProperties>
+class MultiSPIRAMVAlloc : public VAlloc<Properties, MultiSPIRAMVAlloc<SPIChips, chipAmount, Properties> >
 {
     CSerialRam serialRAM[chipAmount];
 
@@ -133,7 +133,7 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
         for (uint8_t i=0; i<chipAmount; ++i)
             serialRAM[i].begin(SPIChips[i].largeAddressing, SPIChips[i].chipSelect, SPIChips[i].speed);
         Serial.print("poolsize: "); Serial.print(this->getPoolSize());
-        Serial.print(", "); Serial.print(sizeof(SSPIRamConfig));
+        Serial.print(", "); Serial.print(sizeof(SPIRamConfig));
         Serial.print(", "); Serial.println(chipAmount);
     }
 
@@ -143,17 +143,17 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
             serialRAM[i].end();
     }
 
-    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
-        TVirtPointer startptr = 0;
+        VPtrNum startptr = 0;
         for (uint8_t i=0; i<chipAmount; ++i)
         {
-            const TVirtPointer endptr = startptr + SPIChips[i].size;
+            const VPtrNum endptr = startptr + SPIChips[i].size;
             if (offset >= startptr && offset < endptr)
             {
-                const TVirtPointer p = offset - startptr; // address relative in this chip
-                const TVirtPtrSize sz = private_utils::minimal(size, SPIChips[i].size - p);
+                const VPtrNum p = offset - startptr; // address relative in this chip
+                const VPtrSize sz = private_utils::minimal(size, SPIChips[i].size - p);
                 serialRAM[i].read((char *)data, p, sz);
 
                 if (sz == size)
@@ -168,17 +168,17 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
 //        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
-    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doWrite(const void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
-        TVirtPointer startptr = 0;
+        VPtrNum startptr = 0;
         for (uint8_t i=0; i<chipAmount; ++i)
         {
-            const TVirtPointer endptr = startptr + SPIChips[i].size;
+            const VPtrNum endptr = startptr + SPIChips[i].size;
             if (offset >= startptr && offset < endptr)
             {
-                const TVirtPointer p = offset - startptr; // address relative in this chip
-                const TVirtPtrSize sz = private_utils::minimal(size, SPIChips[i].size - p);
+                const VPtrNum p = offset - startptr; // address relative in this chip
+                const VPtrSize sz = private_utils::minimal(size, SPIChips[i].size - p);
                 serialRAM[i].write((const char *)data, p, sz);
 
                 if (sz == size)
@@ -193,25 +193,25 @@ class CMultiSPIRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CMultiSPIRAMV
 //        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
-    using CBaseVirtMemAlloc::setPoolSize;
+    using BaseVAlloc::setPoolSize;
 
 public:
     /**
      * Constructs the allocator. The pool size is automatically
      * deduced from the chip configurations.
      */
-    CMultiSPIRAMVirtMemAlloc(void)
+    MultiSPIRAMVAlloc(void)
     {
         uint32_t ps = 0;
         for (uint8_t i=0; i<chipAmount; ++i)
             ps += SPIChips[i].size;
         this->setPoolSize(ps);
     }
-    ~CMultiSPIRAMVirtMemAlloc(void) { doStop(); }
+    ~MultiSPIRAMVAlloc(void) { doStop(); }
 };
 
-template <typename, typename> class CVirtPtr;
-template <typename T> struct TSPIRAMVirtPtr { typedef CVirtPtr<T, CSPIRAMVirtMemAlloc<> > type; };
+template <typename, typename> class VPtr;
+template <typename T> struct TSPIRAMVirtPtr { typedef VPtr<T, SPIRAMAlloc<> > type; };
 
 }
 

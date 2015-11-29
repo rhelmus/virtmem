@@ -12,8 +12,8 @@
 
 namespace virtmem {
 
-template <typename IOStream=typeof(Serial), typename TProperties=SDefaultAllocProperties>
-class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAlloc<IOStream, TProperties> >
+template <typename IOStream=typeof(Serial), typename Properties=DefaultAllocProperties>
+class SerRAMVAlloc : public VAlloc<Properties, SerRAMVAlloc<IOStream, Properties> >
 {
     uint32_t baudRate;
     IOStream *stream;
@@ -25,7 +25,7 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 
     void doStop(void) { }
 
-    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
 //        uint32_t t = micros();
         serram_utils::sendReadCommand(stream, serram_utils::CMD_READ);
@@ -36,7 +36,7 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
 //        Serial.print("read: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
-    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doWrite(const void *data, VPtrSize offset, VPtrSize size)
     {
 //        const uint32_t t = micros();
         serram_utils::sendWriteCommand(stream, serram_utils::CMD_WRITE);
@@ -47,9 +47,9 @@ class CSerRAMVirtMemAlloc : public CVirtMemAlloc<TProperties, CSerRAMVirtMemAllo
     }
 
 public:
-    serram_utils::CSerialInput<IOStream> input;
+    serram_utils::SerialInput<IOStream> input;
 
-    CSerRAMVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
+    SerRAMVAlloc(VPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
 
     // only works before start() is called
@@ -65,8 +65,8 @@ public:
     }
 };
 
-template <typename, typename> class CVirtPtr;
-template <typename T> struct TSerRAMVirtPtr { typedef CVirtPtr<T, CSerRAMVirtMemAlloc<typeof(Serial)> > type; };
+template <typename, typename> class VPtr;
+template <typename T> struct TSerRAMVirtPtr { typedef VPtr<T, SerRAMVAlloc<typeof(Serial)> > type; };
 
 }
 

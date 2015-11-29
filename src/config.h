@@ -9,20 +9,20 @@
 #include <stdint.h>
 
 /**
-  @brief If defined, enable wrapping of regular pointers inside virtmem::CVirtPtr.
-  @sa virtmem::CVirtPtr::wrap
+  @brief If defined, enable wrapping of regular pointers inside virtmem::VPtr.
+  @sa virtmem::VPtr::wrap
   */
 #define VIRTMEM_WRAP_CPOINTERS
 
 /**
-  * @brief If defined, the "address of" operator (`&`) of CVirtPtr will be overloaded to
+  * @brief If defined, the "address of" operator (`&`) of VPtr will be overloaded to
   * return a virtual pointer that has its own address wrapped.
   *
   * This is useful to allow double pointers, for example:
   * @code
-  * typedef virtmem::CVirtPtr<int, CSDVirtMemAlloc> vptrType;
+  * typedef virtmem::VPtr<int, SDVAlloc> vptrType;
   * vptrType vptr;
-  * virtmem::CVirtPtr<vptrType, CSDVirtMemAlloc> vptrptr = &vptr;
+  * virtmem::VPtr<vptrType, SDVAlloc> vptrptr = &vptr;
   * @endcode
   */
 #define VIRTMEM_VIRT_ADDRESS_OPERATOR
@@ -37,8 +37,8 @@
 /**
   @brief The default poolsize for allocators supporting a variable sized pool.
 
-  This value is used for variable sized allocators, such as CSDVirtMemAlloc and
-  CSerRAMVirtMemAlloc.
+  This value is used for variable sized allocators, such as SDVAlloc and
+  SerRAMVAlloc.
   */
 #define DEFAULT_POOLSIZE 1024l * 1024l
 
@@ -48,7 +48,7 @@ namespace virtmem {
 // NOTE: Take care of sufficiently large int types when increasing these values
 
 #if defined(__MK20DX256__) || defined(__SAM3X8E__) // Teensy 3.1 / Arduino Due (>= 64 kB sram)
-struct SDefaultAllocProperties
+struct DefaultAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 64;
     static const uint8_t mediumPageCount = 4;
@@ -57,7 +57,7 @@ struct SDefaultAllocProperties
     static const uint16_t bigPageSize = 1024 * 1;
 };
 #elif defined(__MK20DX128__) // Teensy 3.0 (16 kB sram)
-struct SDefaultAllocProperties
+struct DefaultAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 32;
     static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
@@ -66,7 +66,7 @@ struct SDefaultAllocProperties
 };
 // Teensy LC / Arduino mega (8 kB sram)
 #elif defined(__MKL26Z64__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-struct SDefaultAllocProperties
+struct DefaultAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 32;
     static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
@@ -75,7 +75,7 @@ struct SDefaultAllocProperties
 };
 // PC like platform
 #elif defined(__unix__) || defined(__UNIX__) || (defined(__APPLE__) && defined(__MACH__)) || defined(_WIN32)
-struct SDefaultAllocProperties
+struct DefaultAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 64;
     static const uint8_t mediumPageCount = 4;
@@ -92,7 +92,7 @@ struct SDefaultAllocProperties
 #warning "Unknown platform. You probably want to change virtual memory page settings."
 #endif
 
-struct SDefaultAllocProperties
+struct DefaultAllocProperties
 {
     static const uint8_t smallPageCount = 2, smallPageSize = 16;
     static const uint8_t mediumPageCount = 1, mediumPageSize = 32;
@@ -102,7 +102,7 @@ struct SDefaultAllocProperties
 #endif
 
 /**
-  @struct SDefaultAllocProperties
+  @struct DefaultAllocProperties
   @brief This struct contains default parameters for virtual memory pages.
 
   The fields in this struct define the amount- and size of the *small*, *medium* and *big*
@@ -114,7 +114,7 @@ struct SDefaultAllocProperties
   @code
 // This struct contains a customized set of memory page properties.
 // While the datatype of each member does not matter, all members must be static.
-struct SMyAllocProperties
+struct MyAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 64;
     static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
@@ -123,21 +123,21 @@ struct SMyAllocProperties
 };
 
 // Create allocator with customized page properties
-CSDVirtMemAlloc<SMyAllocProperties> alloc;
+SDVAlloc<MyAllocProperties> alloc;
   @endcode
 
-  @var SDefaultAllocProperties::smallPageCount
+  @var DefaultAllocProperties::smallPageCount
   @brief The number of *small* pages. @hideinitializer
-  @var SDefaultAllocProperties::mediumPageCount
+  @var DefaultAllocProperties::mediumPageCount
   @brief The number of *medium* pages. @hideinitializer
-  @var SDefaultAllocProperties::bigPageCount
+  @var DefaultAllocProperties::bigPageCount
   @brief The number of *big* pages. @hideinitializer
 
-  @var SDefaultAllocProperties::smallPageSize
+  @var DefaultAllocProperties::smallPageSize
   @brief The size of a *small* page. @hideinitializer
-  @var SDefaultAllocProperties::mediumPageSize
+  @var DefaultAllocProperties::mediumPageSize
   @brief The size of a *medium* page. @hideinitializer
-  @var SDefaultAllocProperties::bigPageSize
+  @var DefaultAllocProperties::bigPageSize
   @brief The size of a *big* page. @hideinitializer
   */
 

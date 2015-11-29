@@ -5,7 +5,7 @@
 
 using namespace virtmem;
 
-typedef CAllocFixture CUtilsFixture;
+typedef VAllocFixture UtilsFixture;
 
 // Clamp between -1 - +1
 inline int clampOne(int n)
@@ -13,11 +13,11 @@ inline int clampOne(int n)
     return (n < 0) ? -1 : (n == 0) ? 0 : 1;
 }
 
-TEST_F(CUtilsFixture, memcmpTest)
+TEST_F(UtilsFixture, memcmpTest)
 {
     const int bufsize = 10;
-    TUCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
-    TUCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
+    UCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
 
     uint8_t buf1[bufsize], buf2[bufsize];
 
@@ -50,11 +50,11 @@ TEST_F(CUtilsFixture, memcmpTest)
     EXPECT_EQ(clampOne(memcmp(vbuf2, buf1, bufsize)), clampOne(memcmp(buf2, buf1, bufsize)));
 }
 
-TEST_F(CUtilsFixture, memcpyTest)
+TEST_F(UtilsFixture, memcpyTest)
 {
     const int bufsize = 10;
-    TUCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
-    TUCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
+    UCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
     uint8_t buf[bufsize];
 
     for (int i=0; i<bufsize; ++i)
@@ -76,7 +76,7 @@ TEST_F(CUtilsFixture, memcpyTest)
     EXPECT_EQ(memcmp(buf, vbuf2, bufsize), 0);
 }
 
-TEST_F(CUtilsFixture, memcpyLargeTest)
+TEST_F(UtilsFixture, memcpyLargeTest)
 {
     const int bufsize = valloc.getPoolSize() / 3;
     std::vector<uint8_t> buf;
@@ -85,23 +85,23 @@ TEST_F(CUtilsFixture, memcpyLargeTest)
     for (int i=0; i<bufsize; ++i)
         buf[i] = bufsize - i;
 
-    TUCharVirtPtr vbuf = vbuf.alloc(bufsize);
+    UCharVirtPtr vbuf = vbuf.alloc(bufsize);
     memcpy(vbuf, &buf[0], bufsize);
     valloc.clearPages();
     ASSERT_EQ(memcmp(&buf[0], vbuf, bufsize), 0);
 
-    TUCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
     memcpy(vbuf2, vbuf, bufsize);
     valloc.clearPages();
     EXPECT_EQ(memcmp(vbuf, vbuf2, bufsize), 0);
 }
 
-TEST_F(CUtilsFixture, memsetTest)
+TEST_F(UtilsFixture, memsetTest)
 {
     const int bufsize = valloc.getBigPageSize() * 3;
     const uint8_t fill = 'A';
 
-    TUCharVirtPtr vbuf = vbuf.alloc(bufsize);
+    UCharVirtPtr vbuf = vbuf.alloc(bufsize);
     EXPECT_EQ(memset(vbuf, fill, bufsize), vbuf);
 
     valloc.clearPages();
@@ -110,27 +110,27 @@ TEST_F(CUtilsFixture, memsetTest)
     EXPECT_EQ(memcmp(vbuf, &buf[0], bufsize), 0);
 }
 
-TEST_F(CUtilsFixture, memcpyLargeMultiAllocTest)
+TEST_F(UtilsFixture, memcpyLargeMultiAllocTest)
 {
     // Second allocator
-    typedef CStaticVirtMemAlloc<1024*1024> TAlloc2;
-    TAlloc2 valloc2;
+    typedef StaticVAlloc<1024*1024> Alloc2;
+    Alloc2 valloc2;
     valloc2.start();
 
     const int bufsize = valloc2.getPoolSize() / 2;
 
-    TUCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
-    CVirtPtr<uint8_t, TAlloc2> vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
+    VPtr<uint8_t, Alloc2> vbuf2 = vbuf2.alloc(bufsize);
 
     memset(vbuf1, 'A', bufsize);
     memcpy(vbuf2, vbuf1, bufsize);
     EXPECT_EQ(memcmp(vbuf1, vbuf2, bufsize), 0);
 }
 
-TEST_F(CUtilsFixture, strlenTest)
+TEST_F(UtilsFixture, strlenTest)
 {
     const int strsize = 10;
-    TCharVirtPtr vstr = vstr.alloc(strsize);
+    CharVirtPtr vstr = vstr.alloc(strsize);
 
     vstr[0] = 0;
     valloc.clearPages();
@@ -148,10 +148,10 @@ TEST_F(CUtilsFixture, strlenTest)
     EXPECT_EQ(strlen(vstr), 1);
 }
 
-TEST_F(CUtilsFixture, strncpyTest)
+TEST_F(UtilsFixture, strncpyTest)
 {
     const int strsize = 10;
-    TCharVirtPtr vstr = vstr.alloc(strsize);
+    CharVirtPtr vstr = vstr.alloc(strsize);
 
     char str[strsize] = "Howdy!", str2[strsize];
     EXPECT_EQ(strncpy(vstr, str, strsize), vstr);
@@ -167,11 +167,11 @@ TEST_F(CUtilsFixture, strncpyTest)
 
 }
 
-TEST_F(CUtilsFixture, strncmpTest)
+TEST_F(UtilsFixture, strncmpTest)
 {
     const int strsize = 10;
-    TCharVirtPtr vstr = vstr.alloc(strsize);
-    TCharVirtPtr vstr2 = vstr.alloc(strsize);
+    CharVirtPtr vstr = vstr.alloc(strsize);
+    CharVirtPtr vstr2 = vstr.alloc(strsize);
     char str[strsize] = "Howdy!", str2[strsize];
 
     strncpy(vstr, str, strsize);
@@ -192,6 +192,6 @@ TEST_F(CUtilsFixture, strncmpTest)
     EXPECT_EQ(strncmp(vstr, str2, strsize), strcmp(vstr, str2));
     EXPECT_EQ(strncmp(str2, vstr, strsize), strcmp(str2, vstr));
 
-    CVirtPtr<const char, CStdioVirtMemAlloc<> > cvstr = vstr;
+    VPtr<const char, StdioVAlloc<> > cvstr = vstr;
     EXPECT_EQ(strcmp(cvstr, vstr), 0);
 }

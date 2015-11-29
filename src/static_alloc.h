@@ -14,8 +14,8 @@
 
 namespace virtmem {
 
-template <uint32_t poolSize=DEFAULT_POOLSIZE, typename TProperties=SDefaultAllocProperties>
-class CStaticVirtMemAlloc : public CVirtMemAlloc<TProperties, CStaticVirtMemAlloc<poolSize, TProperties> >
+template <uint32_t poolSize=DEFAULT_POOLSIZE, typename Properties=DefaultAllocProperties>
+class StaticVAlloc : public VAlloc<Properties, StaticVAlloc<poolSize, Properties> >
 {
     char staticData[poolSize];
 
@@ -23,24 +23,24 @@ class CStaticVirtMemAlloc : public CVirtMemAlloc<TProperties, CStaticVirtMemAllo
     void doSuspend(void) { }
     void doStop(void) { }
 
-    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
         ::memcpy(data, &staticData[offset], size);
     }
 
-    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doWrite(const void *data, VPtrSize offset, VPtrSize size)
     {
         ::memcpy(&staticData[offset], data, size);
     }
 
-    using CBaseVirtMemAlloc::setPoolSize;
+    using BaseVAlloc::setPoolSize;
 
 public:
-    CStaticVirtMemAlloc(void) { this->setPoolSize(poolSize); }
+    StaticVAlloc(void) { this->setPoolSize(poolSize); }
 };
 
-template <typename, typename> class CVirtPtr;
-template <typename T> struct TStaticVirtPtr { typedef CVirtPtr<T, CStaticVirtMemAlloc<> > type; };
+template <typename, typename> class VPtr;
+template <typename T> struct TStaticVPtr { typedef VPtr<T, StaticVAlloc<> > type; };
 
 }
 

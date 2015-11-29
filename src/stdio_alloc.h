@@ -15,10 +15,10 @@
 
 namespace virtmem {
 
-template <typename TProperties> class CStdioVirtMemAlloc;
+template <typename Properties> class StdioVAlloc;
 
-template <typename TProperties = SDefaultAllocProperties>
-class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<TProperties> >
+template <typename Properties = DefaultAllocProperties>
+class StdioVAlloc : public VAlloc<Properties, StdioVAlloc<Properties> >
 {
     FILE *ramFile;
 
@@ -32,7 +32,7 @@ class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<
 
     void doSuspend(void) { }
     void doStop(void) { if (ramFile) { fclose(ramFile); ramFile = 0; } }
-    void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
         if (fseek(ramFile, offset, SEEK_SET) != 0)
             fprintf(stderr, "fseek error: %s\n", strerror(errno));
@@ -43,7 +43,7 @@ class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<
 
     }
 
-    void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size)
+    void doWrite(const void *data, VPtrSize offset, VPtrSize size)
     {
         if (fseek(ramFile, offset, SEEK_SET) != 0)
             fprintf(stderr, "fseek error: %s\n", strerror(errno));
@@ -54,12 +54,12 @@ class CStdioVirtMemAlloc : public CVirtMemAlloc<TProperties, CStdioVirtMemAlloc<
     }
 
 public:
-    CStdioVirtMemAlloc(TVirtPtrSize ps=DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
-    ~CStdioVirtMemAlloc(void) { doStop(); }
+    StdioVAlloc(VPtrSize ps=DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
+    ~StdioVAlloc(void) { doStop(); }
 };
 
-template <typename, typename> class CVirtPtr;
-template <typename T> struct TStdioVirtPtr { typedef CVirtPtr<T, CStdioVirtMemAlloc<> > type; };
+template <typename, typename> class VPtr;
+template <typename T> struct TStdioVirtPtr { typedef VPtr<T, StdioVAlloc<> > type; };
 
 }
 

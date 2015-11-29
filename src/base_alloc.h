@@ -18,9 +18,9 @@
 
 namespace virtmem {
 
-typedef uint32_t TVirtPointer; //!< Numeric type used to store raw virtual pointer addresses
-typedef uint32_t TVirtPtrSize; //!< Numeric type used to store the size of a virtual memory block
-typedef uint16_t TVirtPageSize; //!< Numeric type used to store the size of a virtual memory page
+typedef uint32_t VPtrNum; //!< Numeric type used to store raw virtual pointer addresses
+typedef uint32_t VPtrSize; //!< Numeric type used to store the size of a virtual memory block
+typedef uint16_t VirtPageSize; //!< Numeric type used to store the size of a virtual memory page
 
 /**
  * @brief Base class for virtual memory allocators.
@@ -28,7 +28,7 @@ typedef uint16_t TVirtPageSize; //!< Numeric type used to store the size of a vi
  * This class defines methods to (de)initialize the allocator (see \ref start() and \ref stop()).
  * In addition, this class can be used for 'raw' memory access.
  */
-class CBaseVirtMemAlloc
+class BaseVAlloc
 {
 protected:
     // \cond HIDDEN_SYMBOLS
@@ -51,8 +51,8 @@ private:
     {
         struct
         {
-            TVirtPointer next;
-            TVirtPtrSize size;
+            VPtrNum next;
+            VPtrSize size;
         } s;
 
         TAlign alignDummy;
@@ -64,76 +64,76 @@ protected:
 #endif
 
     // \cond HIDDEN_SYMBOLS
-    struct SLockPage
+    struct LockPage
     {
-        TVirtPointer start;
-        TVirtPageSize size;
+        VPtrNum start;
+        VirtPageSize size;
         uint8_t *pool;
         uint8_t locks, cleanSkips;
         bool dirty;
         int8_t next;
 
-        SLockPage(void) : start(0), size(0), pool(0), locks(0), cleanSkips(0), dirty(false), next(-1) { }
+        LockPage(void) : start(0), size(0), pool(0), locks(0), cleanSkips(0), dirty(false), next(-1) { }
     };
     // \endcond
 
 private:
-    struct SPageInfo
+    struct PageInfo
     {
-        SLockPage *pages;
-        TVirtPageSize size;
+        LockPage *pages;
+        VirtPageSize size;
         uint8_t count;
         int8_t freeIndex, lockedIndex;
     };
 
-    // Stuff configured from CVirtMemAlloc
-    TVirtPtrSize poolSize;
-    SPageInfo smallPages, mediumPages, bigPages;
+    // Stuff configured from VAlloc
+    VPtrSize poolSize;
+    PageInfo smallPages, mediumPages, bigPages;
 
     UMemHeader baseFreeList;
-    TVirtPointer freePointer;
-    TVirtPointer poolFreePos;
+    VPtrNum freePointer;
+    VPtrNum poolFreePos;
     int8_t nextPageToSwap;
 
 #ifdef VIRTMEM_TRACE_STATS
-    TVirtPtrSize memUsed, maxMemUsed;
+    VPtrSize memUsed, maxMemUsed;
     uint32_t bigPageReads, bigPageWrites, bytesRead, bytesWritten;
 #endif
 
-    void initPages(SPageInfo *info, SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize);
-    TVirtPointer getMem(TVirtPtrSize size);
-    void syncBigPage(SLockPage *page);
-    void copyRawData(void *dest, TVirtPointer p, TVirtPtrSize size);
-    void saveRawData(void *src, TVirtPointer p, TVirtPtrSize size);
-    void *pullRawData(TVirtPointer p, TVirtPtrSize size, bool readonly, bool forcestart);
-    void pushRawData(TVirtPointer p, const void *d, TVirtPtrSize size);
-    const UMemHeader *getHeaderConst(TVirtPointer p);
-    void updateHeader(TVirtPointer p, UMemHeader *h);
-    int8_t findFreePage(SPageInfo *pinfo, TVirtPointer p, TVirtPtrSize size, bool atstart);
-    int8_t findUnusedLockedPage(SPageInfo *pinfo);
-    void syncLockedPage(SLockPage *page);
-    int8_t lockPage(SPageInfo *pinfo, TVirtPointer ptr, TVirtPageSize size);
-    int8_t freeLockedPage(SPageInfo *pinfo, int8_t index);
-    int8_t findLockedPage(SPageInfo *pinfo, TVirtPointer p);
-    SLockPage *findLockedPage(TVirtPointer p);
-    uint8_t getFreePages(const SPageInfo *pinfo) const;
-    uint8_t getUnlockedPages(const SPageInfo *pinfo) const;
+    void initPages(PageInfo *info, LockPage *pages, uint8_t *pool, uint8_t pcount, VirtPageSize psize);
+    VPtrNum getMem(VPtrSize size);
+    void syncBigPage(LockPage *page);
+    void copyRawData(void *dest, VPtrNum p, VPtrSize size);
+    void saveRawData(void *src, VPtrNum p, VPtrSize size);
+    void *pullRawData(VPtrNum p, VPtrSize size, bool readonly, bool forcestart);
+    void pushRawData(VPtrNum p, const void *d, VPtrSize size);
+    const UMemHeader *getHeaderConst(VPtrNum p);
+    void updateHeader(VPtrNum p, UMemHeader *h);
+    int8_t findFreePage(PageInfo *pinfo, VPtrNum p, VPtrSize size, bool atstart);
+    int8_t findUnusedLockedPage(PageInfo *pinfo);
+    void syncLockedPage(LockPage *page);
+    int8_t lockPage(PageInfo *pinfo, VPtrNum ptr, VirtPageSize size);
+    int8_t freeLockedPage(PageInfo *pinfo, int8_t index);
+    int8_t findLockedPage(PageInfo *pinfo, VPtrNum p);
+    LockPage *findLockedPage(VPtrNum p);
+    uint8_t getFreePages(const PageInfo *pinfo) const;
+    uint8_t getUnlockedPages(const PageInfo *pinfo) const;
 
 protected:
-    CBaseVirtMemAlloc(void) : poolSize(0) { }
+    BaseVAlloc(void) : poolSize(0) { }
 
     // \cond HIDDEN_SYMBOLS
-    void initSmallPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
-    void initMediumPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
-    void initBigPages(SLockPage *pages, uint8_t *pool, uint8_t pcount, TVirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
+    void initSmallPages(LockPage *pages, uint8_t *pool, uint8_t pcount, VirtPageSize psize) { initPages(&smallPages, pages, pool, pcount, psize); }
+    void initMediumPages(LockPage *pages, uint8_t *pool, uint8_t pcount, VirtPageSize psize) { initPages(&mediumPages, pages, pool, pcount, psize); }
+    void initBigPages(LockPage *pages, uint8_t *pool, uint8_t pcount, VirtPageSize psize) { initPages(&bigPages, pages, pool, pcount, psize); }
     // \endcond
 
-    void writeZeros(TVirtPointer start, TVirtPtrSize n); // NOTE: only call this in doStart()
+    void writeZeros(VPtrNum start, VPtrSize n); // NOTE: only call this in doStart()
 
     virtual void doStart(void) = 0;
     virtual void doStop(void) = 0;
-    virtual void doRead(void *data, TVirtPtrSize offset, TVirtPtrSize size) = 0;
-    virtual void doWrite(const void *data, TVirtPtrSize offset, TVirtPtrSize size) = 0;
+    virtual void doRead(void *data, VPtrSize offset, VPtrSize size) = 0;
+    virtual void doWrite(const void *data, VPtrSize offset, VPtrSize size) = 0;
 
 public:
     void start(void);
@@ -143,16 +143,16 @@ public:
      * @brief Sets the total size of the memory pool.
      * @param ps size of the memory pool.
      * @note The poolsize can also be set via the constructor of most allocators.
-     * @note This function is unavailable for CMultiSPIRAMVirtMemAlloc and CStaticVirtMemAlloc.
+     * @note This function is unavailable for MultiSPIRAMVAlloc and StaticVAlloc.
      * @note This function should always called before \ref start().
      */
-    void setPoolSize(TVirtPtrSize ps) { poolSize = ps; }
+    void setPoolSize(VPtrSize ps) { poolSize = ps; }
 
-    TVirtPointer alloc(TVirtPtrSize size);
-    void free(TVirtPointer ptr);
+    VPtrNum alloc(VPtrSize size);
+    void free(VPtrNum ptr);
 
-    void *read(TVirtPointer p, TVirtPtrSize size);
-    void write(TVirtPointer p, const void *d, TVirtPtrSize size);
+    void *read(VPtrNum p, VPtrSize size);
+    void write(VPtrNum p, const void *d, VPtrSize size);
     void flush(void);
     void clearPages(void);
     uint8_t getFreeBigPages(void) const;
@@ -161,24 +161,24 @@ public:
     uint8_t getUnlockedBigPages(void) const { return getUnlockedPages(&bigPages); } //!< Returns amount of *big* pages which are not locked.
 
     // \cond HIDDEN_SYMBOLS
-    void *makeDataLock(TVirtPointer ptr, TVirtPageSize size, bool ro=false);
-    void *makeFittingLock(TVirtPointer ptr, TVirtPageSize &size, bool ro=false);
-    void releaseLock(TVirtPointer ptr);
+    void *makeDataLock(VPtrNum ptr, VirtPageSize size, bool ro=false);
+    void *makeFittingLock(VPtrNum ptr, VirtPageSize &size, bool ro=false);
+    void releaseLock(VPtrNum ptr);
     // \endcond
 
     uint8_t getSmallPageCount(void) const { return smallPages.count; } //!< Returns total amount of *small* pages.
     uint8_t getMediumPageCount(void) const { return mediumPages.count; } //!< Returns total amount of *medium* pages.
     uint8_t getBigPageCount(void) const { return bigPages.count; } //!< Returns total amount of *big* pages.
-    TVirtPageSize getSmallPageSize(void) const { return smallPages.size; } //!< Returns the size of a *small* page.
-    TVirtPageSize getMediumPageSize(void) const { return mediumPages.size; } //!< Returns the size of a *medium* page.
-    TVirtPageSize getBigPageSize(void) const { return bigPages.size; } //!< Returns the size of a *big* page.
+    VirtPageSize getSmallPageSize(void) const { return smallPages.size; } //!< Returns the size of a *small* page.
+    VirtPageSize getMediumPageSize(void) const { return mediumPages.size; } //!< Returns the size of a *medium* page.
+    VirtPageSize getBigPageSize(void) const { return bigPages.size; } //!< Returns the size of a *big* page.
 
     /**
      * @brief Returns the size the memory pool.
      * @note Some memory is used for bookkeeping, therefore, the amount returned by this function
      * does *not* equate the amount that can be allocated.
      */
-    TVirtPtrSize getPoolSize(void) const { return poolSize; }
+    VPtrSize getPoolSize(void) const { return poolSize; }
 
     // \cond HIDDEN_SYMBOLS
     void printStats(void);
@@ -191,8 +191,8 @@ public:
      * The following functions are only available when VIRTMEM_TRACE_STATS is defined (in config.h).
      */
     //@{
-    TVirtPtrSize getMemUsed(void) const { return memUsed; } //!< Returns total memory used.
-    TVirtPtrSize getMaxMemUsed(void) const { return maxMemUsed; } //!< Returns the maximum memory used so far.
+    VPtrSize getMemUsed(void) const { return memUsed; } //!< Returns total memory used.
+    VPtrSize getMaxMemUsed(void) const { return maxMemUsed; } //!< Returns the maximum memory used so far.
     uint32_t getBigPageReads(void) const { return bigPageReads; } //!< Returns the times *big* pages were read (swapped).
     uint32_t getBigPageWrites(void) const { return bigPageWrites; } //!< Returns the times *big* pages written (synchronized).
     uint32_t getBytesRead(void) const { return bytesRead; } //!< Returns the amount of bytes read as a result of page swaps.

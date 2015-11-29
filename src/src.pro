@@ -16,21 +16,21 @@ SOURCES += \
 
 HEADERS += \
     virtmem.h \
-    base_wrapper.h \
-    wrapper.h \
     utils.h \
     base_alloc.h \
     config.h \
-    utils.hpp \
     stdio_alloc.h \
     alloc.h \
-    wrapper_utils.h \
     spiram_alloc.h \
     static_alloc.h \
     serram_utils.h \
     serram_alloc.h \
     serram_utils.hpp \
-    sd_alloc.h
+    sd_alloc.h \
+    vptr_utils.h \
+    vptr.h \
+    base_vptr.h \
+    vptr_utils.hpp
 unix {
     target.path = /usr/lib
     INSTALLS += target

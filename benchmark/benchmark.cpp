@@ -15,7 +15,7 @@ enum
 
 int main()
 {
-    CStdioVirtMemAlloc<> valloc(STDIO_POOLSIZE);
+    StdioVAlloc<> valloc(STDIO_POOLSIZE);
 
     valloc.start();
 

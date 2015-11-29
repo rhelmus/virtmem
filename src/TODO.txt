@@ -2,16 +2,17 @@ docs:
 - Locking
 - Make and link to examples
 - Document allocator classes
-- CVirtPtr/CBaseVirtPtr description
+- VPtr/BaseVPtr description
 - util functions
 - check if all references are OK
 - Check if example code is OK
-- Describe limitations of structs/classes in CVirtPtr
+- Describe limitations of structs/classes in VPtr
 - spell checks
 - makeVirtPtrLock()
 - highlight the important things and background stuff
 - multiple SPI chips also supported
 - "class" --> "template class" for virtual pointers/allocators etc
+- pointer conversion
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
