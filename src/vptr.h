@@ -53,7 +53,7 @@ public:
     typedef TA Allocator; //!< Allocator type used by this virtual pointer class. @sa getAlloc
 
 private:
-    typedef VPtr<T, Allocator> TVirtPtr;
+    typedef VPtr<T, Allocator> ThisVPtr;
 
     static T *read(PtrNum p)
     {
@@ -78,7 +78,7 @@ private:
     }
     void write(const T *d) { write(ptr, d); }
 
-    TVirtPtr copy(void) const { TVirtPtr ret; ret.ptr = ptr; return ret; }
+    ThisVPtr copy(void) const { ThisVPtr ret; ret.ptr = ptr; return ret; }
     template <typename> friend class VPtrLock;
 
 public:
@@ -125,7 +125,7 @@ public:
         }
 
         inline ValueWrapper &operator=(const T &v) { write(ptr, &v); return *this; }
-        inline TVirtPtr operator&(void) { TVirtPtr ret; ret.ptr = ptr; return ret; }
+        inline ThisVPtr operator&(void) { ThisVPtr ret; ret.ptr = ptr; return ret; }
 
         // allow pointer to pointer access
         // UNDONE: use member wrapper here?
@@ -207,9 +207,9 @@ public:
      * @endcode
      * @sa free, newClass, newArray, BaseVAlloc::alloc
      */
-    static TVirtPtr alloc(VPtrSize size=sizeof(T))
+    static ThisVPtr alloc(VPtrSize size=sizeof(T))
     {
-        TVirtPtr ret;
+        ThisVPtr ret;
         ret.ptr = getAlloc()->alloc(size);
         return ret;
     }
@@ -221,7 +221,7 @@ public:
      * This function is the equivelant of the C `free` function.
      * @sa alloc, deleteClass, deleteArray, BaseVAlloc::free
      */
-    static void free(TVirtPtr &p)
+    static void free(ThisVPtr &p)
     {
         getAlloc()->free(p.ptr);
         p.ptr = 0;
@@ -239,9 +239,9 @@ public:
      * @note This function should be used together with \ref deleteClass.
      * @sa deleteClass, newArray, alloc
      */
-    static TVirtPtr newClass(VPtrSize size=sizeof(T))
+    static ThisVPtr newClass(VPtrSize size=sizeof(T))
     {
-        TVirtPtr ret = alloc(size);
+        ThisVPtr ret = alloc(size);
         new (read(ret.ptr)) T; // UNDONE: can this be ro?
         return ret;
     }
@@ -255,7 +255,7 @@ public:
      * @note This function should be used together with \ref newClass.
      * @sa newClass, deleteArray, free
      */
-    static void deleteClass(TVirtPtr &p)
+    static void deleteClass(ThisVPtr &p)
     {
         read(p.ptr)->~T();
         free(p);
@@ -274,9 +274,9 @@ public:
      * @note This function should be used together with \ref deleteArray.
      * @sa deleteArray, newClass, alloc
      */
-    static TVirtPtr newArray(VPtrSize elements)
+    static ThisVPtr newArray(VPtrSize elements)
     {
-        TVirtPtr ret = alloc(sizeof(T) * elements + sizeof(VPtrSize));
+        ThisVPtr ret = alloc(sizeof(T) * elements + sizeof(VPtrSize));
         getAlloc()->write(ret.ptr, &elements, sizeof(VPtrSize));
         ret.ptr += sizeof(VPtrSize);
         for (VPtrSize s=0; s<elements; ++s)
@@ -292,7 +292,7 @@ public:
      * @note This function should be used together with \ref newArray.
      * @sa newArray, deleteClass, free
      */
-    static void deleteArray(TVirtPtr &p)
+    static void deleteArray(ThisVPtr &p)
     {
         const PtrNum soffset = p.ptr - sizeof(VPtrSize); // pointer to size offset
         VPtrSize *size = static_cast<VPtrSize *>(getAlloc()->read(soffset, sizeof(VPtrSize)));
@@ -328,9 +328,9 @@ public:
      * @sa unwrap
      * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
      */
-    static TVirtPtr wrap(const T *p)
+    static ThisVPtr wrap(const T *p)
     {
-        TVirtPtr ret;
+        ThisVPtr ret;
         ret.ptr = getWrapped(reinterpret_cast<PtrNum>(p));
         return ret;
     }
@@ -341,7 +341,7 @@ public:
      * @sa wrap
      * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
      */
-    static T *unwrap(const TVirtPtr &p) { return static_cast<T *>(BaseVPtr::unwrap(p)); }
+    static T *unwrap(const ThisVPtr &p) { return static_cast<T *>(BaseVPtr::unwrap(p)); }
     /**
      * @brief Provide access to wrapped regular pointer (non static version).
      * @sa VPtr::unwrap(const TVirtPtr &p), wrap
@@ -362,7 +362,7 @@ public:
      * are defined (e.g. in config.h).
      * @sa \ref VIRTMEM_VIRT_ADDRESS_OPERATOR
      */
-    VPtr<TVirtPtr, Allocator> operator&(void) { VPtr<TVirtPtr, Allocator> ret = ret.wrap(this); return ret; }
+    VPtr<ThisVPtr, Allocator> operator&(void) { VPtr<ThisVPtr, Allocator> ret = ret.wrap(this); return ret; }
 
     /**
      * @brief Returns a regular pointer to the address of this virtual pointer
@@ -402,15 +402,15 @@ public:
       * @{
       */
     // NOTE: int cast is necessary to deal with negative numbers
-    TVirtPtr &operator+=(int n) { ptr += (n * (int)sizeof(T)); return *this; }
-    inline TVirtPtr &operator++(void) { return operator +=(1); }
-    inline TVirtPtr operator++(int) { TVirtPtr ret = copy(); operator++(); return ret; }
-    inline TVirtPtr &operator-=(int n) { return operator +=(-n); }
-    inline TVirtPtr &operator--(void) { return operator -=(1); }
-    inline TVirtPtr operator--(int) { TVirtPtr ret = copy(); operator--(); return ret; }
-    inline TVirtPtr operator+(int n) const { return (copy() += n); }
-    inline TVirtPtr operator-(int n) const { return (copy() -= n); }
-    int operator-(const TVirtPtr &other) const { return (ptr - other.ptr) / sizeof(T); }
+    ThisVPtr &operator+=(int n) { ptr += (n * (int)sizeof(T)); return *this; }
+    inline ThisVPtr &operator++(void) { return operator +=(1); }
+    inline ThisVPtr operator++(int) { ThisVPtr ret = copy(); operator++(); return ret; }
+    inline ThisVPtr &operator-=(int n) { return operator +=(-n); }
+    inline ThisVPtr &operator--(void) { return operator -=(1); }
+    inline ThisVPtr operator--(int) { ThisVPtr ret = copy(); operator--(); return ret; }
+    inline ThisVPtr operator+(int n) const { return (copy() += n); }
+    inline ThisVPtr operator-(int n) const { return (copy() -= n); }
+    int operator-(const ThisVPtr &other) const { return (ptr - other.ptr) / sizeof(T); }
     // @}
 //    inline bool operator!=(const TVirtPtr &p) const { return ptr != p.ptr; } UNDONE: need this?
 

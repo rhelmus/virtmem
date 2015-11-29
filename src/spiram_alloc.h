@@ -28,7 +28,7 @@ namespace virtmem {
  * @sa @ref bUsing and MultiSPIRAMVAlloc
  */
 template <typename Properties=DefaultAllocProperties>
-class SPIRAMAlloc : public VAlloc<Properties, SPIRAMAlloc<Properties> >
+class SPIRAMVAlloc : public VAlloc<Properties, SPIRAMVAlloc<Properties> >
 {
     bool largeAddressing;
     uint8_t chipSelect;
@@ -69,16 +69,16 @@ public:
      * CSerialRam::SPEED_QUARTER)
      * @sa setSettings and setPoolSize
      */
-    SPIRAMAlloc(VPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
+    SPIRAMVAlloc(VPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
         largeAddressing(la), chipSelect(cs), SPISpeed(s) { this->setPoolSize(ps); }
     /**
      * @brief Constructs (but not initializes) the allocator.
      * @param ps Total amount of bytes of the memory pool (i.e. the size of the SRAM chip)
      * @sa setSettings and setPoolSize
      */
-    SPIRAMAlloc(VPtrSize ps) { this->setPoolSize(ps); }
-    SPIRAMAlloc(void) { } //!< Constructs (but not initializes) the allocator.
-    ~SPIRAMAlloc(void) { doStop(); }
+    SPIRAMVAlloc(VPtrSize ps) { this->setPoolSize(ps); }
+    SPIRAMVAlloc(void) { } //!< Constructs (but not initializes) the allocator.
+    ~SPIRAMVAlloc(void) { doStop(); }
 
     /**
      * @brief Configures the allocator.
@@ -211,7 +211,7 @@ public:
 };
 
 template <typename, typename> class VPtr;
-template <typename T> struct TSPIRAMVirtPtr { typedef VPtr<T, SPIRAMAlloc<> > type; };
+template <typename T> struct TSPIRAMVirtPtr { typedef VPtr<T, SPIRAMVAlloc<> > type; };
 
 }
 

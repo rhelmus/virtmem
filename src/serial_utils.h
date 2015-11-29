@@ -1,5 +1,5 @@
-#ifndef VIRTMEM_SERRAM_UTILS_H
-#define VIRTMEM_SERRAM_UTILS_H
+#ifndef VIRTMEM_SERIAL_UTILS_H
+#define VIRTMEM_SERIAL_UTILS_H
 
 namespace virtmem {
 
@@ -36,6 +36,6 @@ public:
 
 }
 
-#include "serram_utils.hpp"
+#include "serial_utils.hpp"
 
-#endif // VIRTMEM_SERRAM_UTILS_H
+#endif // VIRTMEM_SERIAL_UTILS_H

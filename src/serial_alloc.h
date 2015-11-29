@@ -1,5 +1,5 @@
-#ifndef VIRTMEM_SERRAM_ALLOC_H
-#define VIRTMEM_SERRAM_ALLOC_H
+#ifndef VIRTMEM_SERIAL_ALLOC_H
+#define VIRTMEM_SERIAL_ALLOC_H
 
 /**
   * @file
@@ -8,12 +8,12 @@
 
 #include <Arduino.h>
 #include "alloc.h"
-#include "serram_utils.h"
+#include "serial_utils.h"
 
 namespace virtmem {
 
 template <typename IOStream=typeof(Serial), typename Properties=DefaultAllocProperties>
-class SerRAMVAlloc : public VAlloc<Properties, SerRAMVAlloc<IOStream, Properties> >
+class SerialVAlloc : public VAlloc<Properties, SerialVAlloc<IOStream, Properties> >
 {
     uint32_t baudRate;
     IOStream *stream;
@@ -49,7 +49,7 @@ class SerRAMVAlloc : public VAlloc<Properties, SerRAMVAlloc<IOStream, Properties
 public:
     serram_utils::SerialInput<IOStream> input;
 
-    SerRAMVAlloc(VPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
+    SerialVAlloc(VPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
 
     // only works before start() is called
@@ -66,8 +66,8 @@ public:
 };
 
 template <typename, typename> class VPtr;
-template <typename T> struct TSerRAMVirtPtr { typedef VPtr<T, SerRAMVAlloc<typeof(Serial)> > type; };
+template <typename T> struct TSerRAMVirtPtr { typedef VPtr<T, SerialVAlloc<typeof(Serial)> > type; };
 
 }
 
-#endif // VIRTMEM_SERRAM_ALLOC_H
+#endif // VIRTMEM_SERIAL_ALLOC_H

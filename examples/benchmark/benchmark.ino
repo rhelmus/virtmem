@@ -48,7 +48,7 @@ SPIRAMVAlloc<> SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRam::SPEE
 
 #ifdef RUN_SERIALALLOC
 #include <serram_alloc.h>
-SerRAMVAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
+SerialVAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
 #endif
 
 #ifdef RUN_SDALLOC

@@ -23,14 +23,14 @@ HEADERS += \
     alloc.h \
     spiram_alloc.h \
     static_alloc.h \
-    serram_utils.h \
-    serram_alloc.h \
-    serram_utils.hpp \
     sd_alloc.h \
     vptr_utils.h \
     vptr.h \
     base_vptr.h \
-    vptr_utils.hpp
+    vptr_utils.hpp \
+    serial_alloc.h \
+    serial_utils.h \
+    serial_utils.hpp
 unix {
     target.path = /usr/lib
     INSTALLS += target

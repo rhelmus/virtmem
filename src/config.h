@@ -38,7 +38,7 @@
   @brief The default poolsize for allocators supporting a variable sized pool.
 
   This value is used for variable sized allocators, such as SDVAlloc and
-  SerRAMVAlloc.
+  SerialVAlloc.
   */
 #define DEFAULT_POOLSIZE 1024l * 1024l
 

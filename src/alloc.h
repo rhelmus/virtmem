@@ -10,6 +10,8 @@
 
 namespace virtmem {
 
+template <typename, typename> class VPtr;
+
 /**
  * @brief Base template class for virtual memory allocators.
  *
@@ -73,6 +75,14 @@ public:
      * will return a different instance for both classes.
      */
     static VAlloc *getInstance(void) { return instance; }
+
+    // UNDONE
+    template <typename T> VPtr<T, Derived> allocVPtr(VPtrSize size=sizeof(T))
+    {
+        return virtmem::VPtr<T, Derived>::alloc(size);
+    }
+
+    template <typename T> struct VPtr { typedef virtmem::VPtr<T, Derived> type; };
 };
 
 template <typename Properties, typename Derived>
