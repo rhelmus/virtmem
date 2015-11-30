@@ -148,8 +148,8 @@ public:
      */
     void setPoolSize(VPtrSize ps) { poolSize = ps; }
 
-    VPtrNum alloc(VPtrSize size);
-    void free(VPtrNum ptr);
+    VPtrNum allocRaw(VPtrSize size);
+    void freeRaw(VPtrNum ptr);
 
     void *read(VPtrNum p, VPtrSize size);
     void write(VPtrNum p, const void *d, VPtrSize size);

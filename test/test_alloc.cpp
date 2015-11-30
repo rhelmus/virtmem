@@ -7,7 +7,7 @@
 
 TEST_F(VAllocFixture, SimpleAllocTest)
 {
-    const VPtrNum ptr = valloc.alloc(sizeof(int));
+    const VPtrNum ptr = valloc.allocRaw(sizeof(int));
     ASSERT_NE(ptr, 0);
 
     int val = 55;
@@ -18,12 +18,12 @@ TEST_F(VAllocFixture, SimpleAllocTest)
     valloc.clearPages();
     EXPECT_EQ(*(int *)valloc.read(ptr, sizeof(val)), val);
 
-    valloc.free(ptr);
+    valloc.freeRaw(ptr);
 }
 
 TEST_F(VAllocFixture, ReadOnlyTest)
 {
-    const VPtrNum ptr = valloc.alloc(sizeof(int));
+    const VPtrNum ptr = valloc.allocRaw(sizeof(int));
     int val = 55;
     valloc.write(ptr, &val, sizeof(val));
     valloc.flush();
@@ -42,7 +42,7 @@ TEST_F(VAllocFixture, MultiAllocTest)
     std::vector<VPtrNum> ptrlist;
     for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
-        ptrlist.push_back(valloc.alloc(valloc.getBigPageSize()));
+        ptrlist.push_back(valloc.allocRaw(valloc.getBigPageSize()));
         valloc.write(ptrlist[i], &i, sizeof(int));
         EXPECT_EQ(*(int *)valloc.read(ptrlist[i], sizeof(int)), i);
     }
@@ -67,7 +67,7 @@ TEST_F(VAllocFixture, SimplePageTest)
     std::vector<VPtrNum> ptrlist;
     for (int i=0; i<(int)valloc.getBigPageCount(); ++i)
     {
-        ptrlist.push_back(valloc.alloc(valloc.getBigPageSize()));
+        ptrlist.push_back(valloc.allocRaw(valloc.getBigPageSize()));
         valloc.write(ptrlist[i], &i, sizeof(int));
     }
 
@@ -132,7 +132,7 @@ TEST_F(VAllocFixture, LargeDataTest)
 {
     const VPtrSize size = 1024 * 1024 * 8; // 8 mb data block
 
-    const VPtrNum vbuffer = valloc.alloc(size);
+    const VPtrNum vbuffer = valloc.allocRaw(size);
     for (VPtrSize i=0; i<size; ++i)
     {
         char val = size - i;
@@ -169,7 +169,7 @@ TEST_F(VAllocFixture, LargeRandomDataTest)
     for (size_t s=0; s<size; ++s)
         buffer.push_back(rand());
 
-    const VPtrNum vbuffer = valloc.alloc(size);
+    const VPtrNum vbuffer = valloc.allocRaw(size);
     for (VPtrSize i=0; i<size; ++i)
     {
         char val = buffer[i];

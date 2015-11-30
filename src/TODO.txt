@@ -13,6 +13,8 @@ docs:
 - multiple SPI chips also supported
 - "class" --> "template class" for virtual pointers/allocators etc
 - pointer conversion
+- POD
+- Fix alloc/free/allocRaw etc refs
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)

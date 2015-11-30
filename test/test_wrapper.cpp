@@ -47,7 +47,8 @@ public:
 
 int CTestClass::constructedClasses = 0;
 
-typedef ::testing::Types<char, int, long, float, double, TestStruct, int *, void *(*)(void)> WrapTypes;
+//typedef ::testing::Types<char, int, long, float, double, TestStruct, int *, void *(*)(void)> WrapTypes;
+typedef ::testing::Types<int> WrapTypes;
 TYPED_TEST_CASE(VPtrFixture, WrapTypes);
 
 template <typename T> class LimitedWrapFixture: public VPtrFixture<T> { };
@@ -63,7 +64,7 @@ TYPED_TEST(VPtrFixture, SimpleWrapTest)
     EXPECT_TRUE(wrapperIsNull(this->vptr));
     EXPECT_EQ(this->vptr, NILL);
 
-    this->vptr = this->vptr.alloc();
+    this->vptr = VAllocFixture::valloc.alloc<TypeParam>();
     EXPECT_FALSE(wrapperIsNull(this->vptr));
     ASSERT_NE(this->vptr, NILL);
 
@@ -74,23 +75,23 @@ TYPED_TEST(VPtrFixture, SimpleWrapTest)
     this->valloc.clearPages();
     EXPECT_EQ((TypeParam)*this->vptr, val);
 
-    typename TStdioVirtPtr<TypeParam>::type wrp2 = wrp2.alloc();
+    typename TStdioVirtPtr<TypeParam>::type wrp2 = VAllocFixture::valloc.alloc<TypeParam>();
     *wrp2 = *this->vptr;
     EXPECT_EQ((TypeParam)*this->vptr, (TypeParam)*wrp2);
 
-    this->vptr.free(this->vptr);
+    VAllocFixture::valloc.free(this->vptr);
     EXPECT_TRUE(wrapperIsNull(this->vptr));
     EXPECT_EQ(this->vptr, NILL);
 }
 
 TYPED_TEST(VPtrFixture, ConstWrapTest)
 {
-    this->vptr = this->vptr.alloc();
+    this->vptr = VAllocFixture::valloc.alloc<TypeParam>();
     TypeParam val;
     memset(&val, 10, sizeof(val));
     *this->vptr = val;
 
-    typename TStdioVirtPtr<TypeParam>::type wrp2 = wrp2.alloc();
+    typename TStdioVirtPtr<TypeParam>::type wrp2 = VAllocFixture::valloc.alloc<TypeParam>();
     *wrp2 = *this->vptr;
     typename TStdioVirtPtr<const TypeParam>::type cwrp2 = wrp2;
     EXPECT_EQ((TypeParam)*wrp2, (TypeParam)*cwrp2);
@@ -107,7 +108,7 @@ TYPED_TEST(VPtrFixture, ConstWrapTest)
 
 TYPED_TEST(VPtrFixture, BaseWrapTest)
 {
-    this->vptr = this->vptr.alloc();
+    this->vptr = VAllocFixture::valloc.alloc<TypeParam>();
 
     BaseVPtr basewrp = this->vptr;
     EXPECT_EQ(basewrp, this->vptr);
@@ -135,7 +136,7 @@ TYPED_TEST(LimitedWrapFixture, ArithmeticTest)
 {
     const int size = 10, start = 10; // Offset from zero to avoid testing to zero initialized values
 
-    this->vptr = this->vptr.alloc(size * sizeof(TypeParam));
+    this->vptr = VAllocFixture::valloc.alloc<TypeParam>(size * sizeof(TypeParam));
     typename TStdioVirtPtr<TypeParam>::type wrpp = this->vptr;
     for (int i=start; i<size+start; ++i)
     {
@@ -241,8 +242,8 @@ TEST_F(IntWrapFixture, AlignmentTest)
 {
     const int bufsize = 17;
 
-    this->vptr = this->vptr.alloc();
-    CharVirtPtr buf = buf.alloc(bufsize);
+    this->vptr = valloc.alloc<int>();
+    CharVirtPtr buf = valloc.alloc<char>(bufsize);
     CharVirtPtr unalignedbuf = &buf[1];
     valloc.clearPages();
     volatile char c = *unalignedbuf; // force load of unaligned address
@@ -260,9 +261,9 @@ TEST_F(ClassWrapFixture, ClassAllocTest)
 {
     ASSERT_EQ(CTestClass::constructedClasses, 0);
 
-    TStdioVirtPtr<CTestClass>::type cptr = cptr.newClass();
+    TStdioVirtPtr<CTestClass>::type cptr = valloc.newClass<CTestClass>();
     EXPECT_EQ(CTestClass::constructedClasses, 1);
-    cptr.deleteClass(cptr);
+    valloc.deleteClass(cptr);
     EXPECT_EQ(CTestClass::constructedClasses, 0);
 }
 
@@ -270,9 +271,9 @@ TEST_F(ClassWrapFixture, ClassArrayAllocTest)
 {
     const int elements = 10;
 
-    TStdioVirtPtr<CTestClass>::type cptr = cptr.newArray(elements);
+    TStdioVirtPtr<CTestClass>::type cptr = valloc.newArray<CTestClass>(elements);
     EXPECT_EQ(CTestClass::constructedClasses, elements);
-    cptr.deleteArray(cptr);
+    valloc.deleteArray(cptr);
     EXPECT_EQ(CTestClass::constructedClasses, 0);
 }
 
@@ -281,7 +282,7 @@ TEST_F(IntWrapFixture, OperatorTest)
 {
     const int start = 100;
 
-    TStdioVirtPtr<int>::type vptr = vptr.alloc();
+    TStdioVirtPtr<int>::type vptr = valloc.alloc<int>();
     int i = start;
 
     EXPECT_EQ(*vptr = start, start);
@@ -347,8 +348,8 @@ TEST_F(IntWrapFixture, MultiAllocTest)
     Alloc2 valloc2;
     valloc2.start();
 
-    this->vptr = this->vptr.alloc();
-    VPtr<int, Alloc2> vptr2 = vptr2.alloc();
+    this->vptr = valloc.alloc<int>();
+    VPtr<int, Alloc2> vptr2 = valloc2.alloc<int>();
 
     *this->vptr = 55;
     *vptr2 = (int)*this->vptr;
@@ -362,7 +363,7 @@ TEST_F(IntWrapFixture, MultiAllocTest)
 
 TEST_F(StructWrapFixture, MembrAssignTest)
 {
-    this->vptr = this->vptr.alloc();
+    this->vptr = valloc.alloc<TestStruct>();
     this->vptr->x = 55;
     EXPECT_EQ(this->vptr->x, 55);
 
@@ -376,8 +377,8 @@ TEST_F(StructWrapFixture, MembrAssignTest)
     const size_t vbufsize = sizeof((TestStruct *)0)->vbuf;
     const int vbufelements = 64;
 
-    this->vptr.free(this->vptr);
-    this->vptr = this->vptr.alloc(sizeof(TestStruct) - bufsize + vbufsize + vbufelements);
+    valloc.free(this->vptr);
+    this->vptr = valloc.alloc<TestStruct>(sizeof(TestStruct) - bufsize + vbufsize + vbufelements);
     this->vptr->x = 55; this->vptr->y = 66;
     this->vptr->vbuf = (CharVirtPtr)getMembrPtr(this->vptr, &TestStruct::vbuf) + vbufsize; // point to end of struct
 
@@ -395,7 +396,7 @@ TEST_F(StructWrapFixture, MembrAssignTest)
 
 TEST_F(StructWrapFixture, MembrDiffTest)
 {
-    this->vptr = this->vptr.alloc();
+    this->vptr = valloc.alloc<TestStruct>();
 
     const size_t offset_x = offsetof(TestStruct, x);
     const size_t offset_y = offsetof(TestStruct, y);

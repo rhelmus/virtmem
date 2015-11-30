@@ -19,7 +19,7 @@ int main()
 
     valloc.start();
 
-    TStdioVirtPtr<char>::type buf = buf.alloc(STDIO_BUFSIZE);
+    TStdioVirtPtr<char>::type buf = valloc.alloc<char>(STDIO_BUFSIZE);
 
     auto time = std::chrono::high_resolution_clock::now();
     for (int i=0; i<STDIO_REPEATS; ++i)

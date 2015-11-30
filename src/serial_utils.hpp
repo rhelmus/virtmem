@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "serram_utils.h"
+#include "serial_utils.h"
 
 namespace virtmem {
 

@@ -59,7 +59,7 @@ VPtrNum BaseVAlloc::getMem(VPtrSize size)
         // HACK: increase here to balance the subtraction by free()
         memUsed += totalsize;
 #endif
-        free(poolFreePos + sizeof(UMemHeader));
+        freeRaw(poolFreePos + sizeof(UMemHeader));
         poolFreePos += totalsize;
     }
     else
@@ -551,12 +551,12 @@ void BaseVAlloc::stop()
 }
 
 /**
- * @fn BaseVAlloc::alloc
+ * @fn BaseVAlloc::allocRaw
  * @brief Allocates a piece of raw (virtual) memory.
  * @param size the size of the memory block
  * @return The starting address of the memory block. Will return zero if out of memory.
  */
-VPtrNum BaseVAlloc::alloc(VPtrSize size)
+VPtrNum BaseVAlloc::allocRaw(VPtrSize size)
 {
     const VPtrSize quantity = (size + sizeof(UMemHeader) - 1) / sizeof(UMemHeader) + 1;
     VPtrNum prevp = freePointer;
@@ -639,11 +639,11 @@ VPtrNum BaseVAlloc::alloc(VPtrSize size)
 }
 
 /**
- * @fn BaseVAlloc::free
+ * @fn BaseVAlloc::freeRaw
  * @brief Frees a memory block for re-usage.
  * @param ptr starting address of the memory block. This function will do nothing if \a ptr is zero.
  */
-void BaseVAlloc::free(VPtrNum ptr)
+void BaseVAlloc::freeRaw(VPtrNum ptr)
 {
     if (!ptr)
         return;

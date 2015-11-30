@@ -16,8 +16,8 @@ inline int clampOne(int n)
 TEST_F(UtilsFixture, memcmpTest)
 {
     const int bufsize = 10;
-    UCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
-    UCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf1 = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
+    UCharVirtPtr vbuf2 = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
 
     uint8_t buf1[bufsize], buf2[bufsize];
 
@@ -53,8 +53,8 @@ TEST_F(UtilsFixture, memcmpTest)
 TEST_F(UtilsFixture, memcpyTest)
 {
     const int bufsize = 10;
-    UCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
-    UCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf1 = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
+    UCharVirtPtr vbuf2 = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
     uint8_t buf[bufsize];
 
     for (int i=0; i<bufsize; ++i)
@@ -85,12 +85,12 @@ TEST_F(UtilsFixture, memcpyLargeTest)
     for (int i=0; i<bufsize; ++i)
         buf[i] = bufsize - i;
 
-    UCharVirtPtr vbuf = vbuf.alloc(bufsize);
+    UCharVirtPtr vbuf = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
     memcpy(vbuf, &buf[0], bufsize);
     valloc.clearPages();
     ASSERT_EQ(memcmp(&buf[0], vbuf, bufsize), 0);
 
-    UCharVirtPtr vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf2 = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
     memcpy(vbuf2, vbuf, bufsize);
     valloc.clearPages();
     EXPECT_EQ(memcmp(vbuf, vbuf2, bufsize), 0);
@@ -101,7 +101,7 @@ TEST_F(UtilsFixture, memsetTest)
     const int bufsize = valloc.getBigPageSize() * 3;
     const uint8_t fill = 'A';
 
-    UCharVirtPtr vbuf = vbuf.alloc(bufsize);
+    UCharVirtPtr vbuf = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
     EXPECT_EQ(memset(vbuf, fill, bufsize), vbuf);
 
     valloc.clearPages();
@@ -119,8 +119,8 @@ TEST_F(UtilsFixture, memcpyLargeMultiAllocTest)
 
     const int bufsize = valloc2.getPoolSize() / 2;
 
-    UCharVirtPtr vbuf1 = vbuf1.alloc(bufsize);
-    VPtr<uint8_t, Alloc2> vbuf2 = vbuf2.alloc(bufsize);
+    UCharVirtPtr vbuf1 = VAllocFixture::valloc.alloc<uint8_t>(bufsize);
+    VPtr<uint8_t, Alloc2> vbuf2 = valloc2.alloc<uint8_t>(bufsize);
 
     memset(vbuf1, 'A', bufsize);
     memcpy(vbuf2, vbuf1, bufsize);
@@ -130,7 +130,7 @@ TEST_F(UtilsFixture, memcpyLargeMultiAllocTest)
 TEST_F(UtilsFixture, strlenTest)
 {
     const int strsize = 10;
-    CharVirtPtr vstr = vstr.alloc(strsize);
+    CharVirtPtr vstr = VAllocFixture::valloc.alloc<char>(strsize);
 
     vstr[0] = 0;
     valloc.clearPages();
@@ -151,7 +151,7 @@ TEST_F(UtilsFixture, strlenTest)
 TEST_F(UtilsFixture, strncpyTest)
 {
     const int strsize = 10;
-    CharVirtPtr vstr = vstr.alloc(strsize);
+    CharVirtPtr vstr = VAllocFixture::valloc.alloc<char>(strsize);
 
     char str[strsize] = "Howdy!", str2[strsize];
     EXPECT_EQ(strncpy(vstr, str, strsize), vstr);
@@ -170,8 +170,8 @@ TEST_F(UtilsFixture, strncpyTest)
 TEST_F(UtilsFixture, strncmpTest)
 {
     const int strsize = 10;
-    CharVirtPtr vstr = vstr.alloc(strsize);
-    CharVirtPtr vstr2 = vstr.alloc(strsize);
+    CharVirtPtr vstr = VAllocFixture::valloc.alloc<char>(strsize);
+    CharVirtPtr vstr2 = VAllocFixture::valloc.alloc<char>(strsize);
     char str[strsize] = "Howdy!", str2[strsize];
 
     strncpy(vstr, str, strsize);
