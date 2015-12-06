@@ -6,31 +6,41 @@
   * @brief This file contains several utilities for virtual pointers.
   */
 
+#include "config.h"
 #include "vptr.h"
 
 #include <string.h>
 
 namespace virtmem {
 
-// Generic NULL type
-/**
+// Generic NULL type, partially based on https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/nullptr#Solution_and_Sample_Code
+/** @class NILL_t
  * @brief Generalized `NULL` pointer class
  *
  * This class can be used to assign a zero (`NULL`) value to both virtual and regular
  * pointers. This is useful, for instance, to write generic code where the type of a pointer is
- * unknown. The \ref virtmem namespace contains a global instance of the NILL_t class: \ref NILL.
- * @sa NILL
+ * unknown. The \ref virtmem namespace contains a global instance of the NILL_t class: [NILL](@ref virtmem::NILL).
+ * @note On platforms supporting C++11 NILL_t is simply a `typedef` to [nullptr_t](http://en.cppreference.com/w/cpp/types/nullptr_t)
+ * @sa [NILL](@ref virtmem::NILL)
  */
-class NILL_t
+
+#ifndef VIRTMEM_CPP11
+const class NILL_t
 {
+    void operator&() const; // prevent taking address
+
 public:
     template <typename T> inline operator T*(void) const { return 0; }
+    template <typename C, typename M> inline operator M C::*(void) const { return 0; }
     template <typename T, typename A> inline operator VPtr<T, A>(void) const { return VPtr<T, A>(); }
     inline operator BaseVPtr(void) const { return BaseVPtr(); }
     template <typename T, typename A> inline operator typename VPtr<T, A>::ValueWrapper(void) const { return VPtr<T, A>::ValueWrapper(0); }
 };
+#else
+typedef nullptr_t NILL_t;
+#endif
 
-extern const NILL_t NILL;
+extern NILL_t NILL;
 
 /**
  * @var NILL

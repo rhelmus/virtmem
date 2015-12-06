@@ -15,7 +15,7 @@
 namespace virtmem {
 
 template <uint32_t poolSize=DEFAULT_POOLSIZE, typename Properties=DefaultAllocProperties>
-class StaticVAlloc : public VAlloc<Properties, StaticVAlloc<poolSize, Properties> >
+class StaticVAllocP : public VAlloc<Properties, StaticVAllocP<poolSize, Properties> >
 {
     char staticData[poolSize];
 
@@ -36,11 +36,10 @@ class StaticVAlloc : public VAlloc<Properties, StaticVAlloc<poolSize, Properties
     using BaseVAlloc::setPoolSize;
 
 public:
-    StaticVAlloc(void) { this->setPoolSize(poolSize); }
+    StaticVAllocP(void) { this->setPoolSize(poolSize); }
 };
 
-template <typename, typename> class VPtr;
-template <typename T> struct TStaticVPtr { typedef VPtr<T, StaticVAlloc<> > type; };
+typedef StaticVAllocP<> StaticVAlloc; //!< Shortcut to StaticVAllocP with default template arguments
 
 }
 

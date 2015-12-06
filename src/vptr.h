@@ -8,11 +8,12 @@
 
 #include "alloc.h"
 #include "base_vptr.h"
+#include "config.h"
 #include "utils.h"
 
 #include <stddef.h>
 
-#if __cplusplus > 199711L
+#ifdef VIRTMEM_CPP11
 #define EXPLICIT explicit
 #else
 #define EXPLICIT
@@ -97,7 +98,7 @@ public:
 
     public:
         inline operator T(void) const { return *read(ptr); }
-        template <typename T2> inline operator T2(void) const { return static_cast<T2>(operator T()); } // UNDONE: explicit?
+        template <typename T2> EXPLICIT inline operator T2(void) const { return static_cast<T2>(operator T()); } // UNDONE: explicit?
 
 //        ValueWrapper &operator=(const ValueWrapper &v)
         // HACK: 'allow' non const assignment of types. In reality this makes sure we don't define
@@ -193,6 +194,12 @@ public:
         }
     };
 
+#ifdef VIRTMEM_CPP11
+    // Can only use these constructors on C++11, otherwise vptrs cannot be used with unions
+    VPtr(void) = default; // Must have this to remain union compatible
+    VPtr(NILL_t) : BaseVPtr(nullptr) { }
+#endif
+
 #ifdef VIRTMEM_WRAP_CPOINTERS
     /**
       * @name Members related to regular pointer wrapping
@@ -236,13 +243,13 @@ public:
     static T *unwrap(const ThisVPtr &p) { return static_cast<T *>(BaseVPtr::unwrap(p)); }
     /**
      * @brief Provide access to wrapped regular pointer (non static version).
-     * @sa VPtr::unwrap(const TVirtPtr &p), wrap
+     * @sa VPtr::unwrap(const ThisVPtr &p), wrap
      * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
      */
     T *unwrap(void) { return static_cast<T *>(BaseVPtr::unwrap(ptr)); }
     /**
      * @brief Provide access to wrapped regular pointer (non static const version).
-     * @sa VPtr::unwrap(const TVirtPtr &p), wrap
+     * @sa VPtr::unwrap(const ThisVPtr &p), wrap
      * @note \ref VIRTMEM_WRAP_CPOINTERS needs to be defined (e.g. in config.h) to enable this function.
      */
     const T *unwrap(void) const { return static_cast<const T *>(BaseVPtr::unwrap(ptr)); }

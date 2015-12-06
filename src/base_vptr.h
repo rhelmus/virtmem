@@ -10,7 +10,9 @@
 #include "alloc.h"
 #include "utils.h"
 
-#if __cplusplus > 199711L
+#include <stddef.h>
+
+#ifdef VIRTMEM_CPP11
 #define EXPLICIT explicit
 #else
 #define EXPLICIT
@@ -18,7 +20,11 @@
 
 namespace virtmem {
 
+#ifndef VIRTMEM_CPP11
 class NILL_t;
+#else
+typedef nullptr_t NILL_t;
+#endif
 
 namespace private_utils {
 
@@ -108,6 +114,12 @@ protected:
     // @endcond
 
 public:
+#ifdef VIRTMEM_CPP11
+    // Can only use these constructors on C++11, otherwise vptrs cannot be used with unions
+    BaseVPtr(void) = default; // Must have this to remain union compatible
+    BaseVPtr(NILL_t) : ptr(0) { }
+#endif
+
 #ifdef VIRTMEM_WRAP_CPOINTERS
     /**
      * @brief Returns raw address of regular pointer wrapped by a virtual pointer.
@@ -183,12 +195,14 @@ public:
      * The operators also work for wrapped regular pointers.
      * @{
      */
+#ifndef VIRTMEM_CPP11
     inline bool operator==(const Null *) const { return getPtrNum() == 0; }
     friend inline bool operator==(const Null *, const BaseVPtr &pw) { return pw.getPtrNum() == 0; }
-    inline bool operator==(const NILL_t &) const { return getPtrNum() == 0; }
-    friend inline bool operator==(const NILL_t &, const BaseVPtr &pw) { return pw.getPtrNum() == 0; }
     inline bool operator!=(const Null *) const { return getPtrNum() != 0; }
     friend inline bool operator!=(const Null *, const BaseVPtr &pw) { return pw.getPtrNum() != 0; }
+#endif
+    inline bool operator==(const NILL_t &) const { return getPtrNum() == 0; }
+    friend inline bool operator==(const NILL_t &, const BaseVPtr &pw) { return pw.getPtrNum() == 0; }
     inline bool operator!=(const NILL_t &) const { return getPtrNum() != 0; }
     friend inline bool operator!=(const NILL_t &, const BaseVPtr &pw) { return pw.getPtrNum() != 0; }
     //! Allows `if (myvirtptr) ...` expressions.

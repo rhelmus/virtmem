@@ -15,10 +15,8 @@
 
 namespace virtmem {
 
-template <typename Properties> class StdioVAlloc;
-
 template <typename Properties = DefaultAllocProperties>
-class StdioVAlloc : public VAlloc<Properties, StdioVAlloc<Properties> >
+class StdioVAllocP : public VAlloc<Properties, StdioVAllocP<Properties> >
 {
     FILE *ramFile;
 
@@ -54,12 +52,11 @@ class StdioVAlloc : public VAlloc<Properties, StdioVAlloc<Properties> >
     }
 
 public:
-    StdioVAlloc(VPtrSize ps=DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
-    ~StdioVAlloc(void) { doStop(); }
+    StdioVAllocP(VPtrSize ps=DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
+    ~StdioVAllocP(void) { doStop(); }
 };
 
-template <typename, typename> class VPtr;
-template <typename T> struct TStdioVirtPtr { typedef VPtr<T, StdioVAlloc<> > type; };
+typedef StdioVAllocP<> StdioVAlloc; //!< Shortcut to StdioVAllocP with default template arguments
 
 }
 

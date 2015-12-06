@@ -28,7 +28,7 @@ namespace virtmem {
  * @sa @ref bUsing and MultiSPIRAMVAlloc
  */
 template <typename Properties=DefaultAllocProperties>
-class SPIRAMVAlloc : public VAlloc<Properties, SPIRAMVAlloc<Properties> >
+class SPIRAMVAllocP : public VAlloc<Properties, SPIRAMVAllocP<Properties> >
 {
     bool largeAddressing;
     uint8_t chipSelect;
@@ -69,16 +69,16 @@ public:
      * CSerialRam::SPEED_QUARTER)
      * @sa setSettings and setPoolSize
      */
-    SPIRAMVAlloc(VPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
+    SPIRAMVAllocP(VPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
         largeAddressing(la), chipSelect(cs), SPISpeed(s) { this->setPoolSize(ps); }
     /**
      * @brief Constructs (but not initializes) the allocator.
      * @param ps Total amount of bytes of the memory pool (i.e. the size of the SRAM chip)
      * @sa setSettings and setPoolSize
      */
-    SPIRAMVAlloc(VPtrSize ps) { this->setPoolSize(ps); }
-    SPIRAMVAlloc(void) { } //!< Constructs (but not initializes) the allocator.
-    ~SPIRAMVAlloc(void) { doStop(); }
+    SPIRAMVAllocP(VPtrSize ps) { this->setPoolSize(ps); }
+    SPIRAMVAllocP(void) { } //!< Constructs (but not initializes) the allocator.
+    ~SPIRAMVAllocP(void) { doStop(); }
 
     /**
      * @brief Configures the allocator.
@@ -92,6 +92,7 @@ public:
     }
 };
 
+typedef SPIRAMVAllocP<> SPIRAMVAlloc; //!< Shortcut to SPIRAMVAllocP with default template arguments
 
 /**
  * @brief This `struct` is used to configure each SRAM chip used by a MultiSPIRAMVAlloc
@@ -206,9 +207,6 @@ public:
     }
     ~MultiSPIRAMVAlloc(void) { doStop(); }
 };
-
-template <typename, typename> class VPtr;
-template <typename T> struct TSPIRAMVirtPtr { typedef VPtr<T, SPIRAMVAlloc<> > type; };
 
 }
 

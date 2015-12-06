@@ -28,19 +28,24 @@
 #define VIRTMEM_VIRT_ADDRESS_OPERATOR
 
 /**
-  @brief If defined, several functions in the allocator will be defined that can be used to
-  access statistics such as memory usage and page swaps.
-  @see \ref statf "Statistics functions"
+  * @brief If defined, several functions in the allocator will be defined that can be used to
+  * access statistics such as memory usage and page swaps.
+  * @see \ref statf "Statistics functions"
   */
 #define VIRTMEM_TRACE_STATS
 
 /**
-  @brief The default poolsize for allocators supporting a variable sized pool.
-
-  This value is used for variable sized allocators, such as SDVAlloc and
-  SerialVAlloc.
+  * @brief The default poolsize for allocators supporting a variable sized pool.
+  *
+  * This value is used for variable sized allocators, such as SDVAlloc and
+  * SerialVAlloc.
   */
 #define DEFAULT_POOLSIZE 1024l * 1024l
+
+#if __cplusplus > 199711L
+#define VIRTMEM_CPP11 //!< Enabled if current platform enables C++11 support (e.g. Teensyduino, Arduino >=1.6.6)
+#endif
+
 
 namespace virtmem {
 

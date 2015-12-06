@@ -12,8 +12,6 @@
 
 namespace virtmem {
 
-template <typename Properties> class SDVAlloc;
-
 /**
  * @brief Virtual allocator class that uses SD card as virtual pool
  *
@@ -28,10 +26,10 @@ template <typename Properties> class SDVAlloc;
  *
  * @note The SD FAT library needs to be initialized (i.e. by calling SdFat::begin()) *before*
  * initializing this allocator.
- * @sa @ref bUsing
+ * @sa @ref bUsing, SDValloc
  */
 template <typename Properties=DefaultAllocProperties>
-class SDVAlloc : public VAlloc<Properties, SDVAlloc<Properties> >
+class SDVAllocP : public VAlloc<Properties, SDVAllocP<Properties> >
 {
     SdFile sdFile;
 
@@ -79,8 +77,8 @@ public:
     /** Constructs (but not initializes) the SD FAT allocator.
      * @param ps The size of the virtual memory pool
      */
-    SDVAlloc(VPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
-    ~SDVAlloc(void) { doStop(); }
+    SDVAllocP(VPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
+    ~SDVAllocP(void) { doStop(); }
 
     /**
      * Removes the temporary file used as virtual memory pool.
@@ -89,8 +87,7 @@ public:
     void removeTempFile(void) { sdFile.remove(); }
 };
 
-template <typename, typename> class VPtr;
-template <typename T> struct TSDVirtPtr { typedef VPtr<T, SDVAlloc<> > type; };
+typedef SDVAllocP<> SDValloc; //!< Shortcut to SDVallocP with default template arguments
 
 }
 

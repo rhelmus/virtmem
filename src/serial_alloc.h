@@ -13,7 +13,7 @@
 namespace virtmem {
 
 template <typename IOStream=typeof(Serial), typename Properties=DefaultAllocProperties>
-class SerialVAlloc : public VAlloc<Properties, SerialVAlloc<IOStream, Properties> >
+class SerialVAllocP : public VAlloc<Properties, SerialVAllocP<IOStream, Properties> >
 {
     uint32_t baudRate;
     IOStream *stream;
@@ -49,7 +49,7 @@ class SerialVAlloc : public VAlloc<Properties, SerialVAlloc<IOStream, Properties
 public:
     serram_utils::SerialInput<IOStream> input;
 
-    SerialVAlloc(VPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
+    SerialVAllocP(VPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
 
     // only works before start() is called
@@ -65,8 +65,7 @@ public:
     }
 };
 
-template <typename, typename> class VPtr;
-template <typename T> struct TSerRAMVirtPtr { typedef VPtr<T, SerialVAlloc<typeof(Serial)> > type; };
+typedef SerialVAllocP<> SerialVAlloc; //!< Shortcut to SerialVAllocP with default template arguments
 
 }
 

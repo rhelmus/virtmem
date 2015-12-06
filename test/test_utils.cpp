@@ -113,7 +113,7 @@ TEST_F(UtilsFixture, memsetTest)
 TEST_F(UtilsFixture, memcpyLargeMultiAllocTest)
 {
     // Second allocator
-    typedef StaticVAlloc<1024*1024> Alloc2;
+    typedef StaticVAllocP<1024*1024> Alloc2;
     Alloc2 valloc2;
     valloc2.start();
 
@@ -192,6 +192,6 @@ TEST_F(UtilsFixture, strncmpTest)
     EXPECT_EQ(strncmp(vstr, str2, strsize), strcmp(vstr, str2));
     EXPECT_EQ(strncmp(str2, vstr, strsize), strcmp(str2, vstr));
 
-    VPtr<const char, StdioVAlloc<> > cvstr = vstr;
+    VPtr<const char, StdioVAlloc> cvstr = vstr;
     EXPECT_EQ(strcmp(cvstr, vstr), 0);
 }

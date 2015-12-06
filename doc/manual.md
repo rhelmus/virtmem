@@ -167,7 +167,7 @@ memory access as possible. Here is an example:
 ~~~{.cpp}
 // define virtual pointer linked to SD fat memory
 virtmem::VPtr<int, virtmem::SDVAlloc<> > vptr;
-//virtmem::SDValloc<>::TVPtr<int>::type vptr; // same, but slightly shorter syntax
+//virtmem::SDValloc::TVPtr<int>::type vptr; // same, but slightly shorter syntax
 
 vptr = valloc.alloc<int>(); // allocate memory to store integer (size automatically deduced from type)
 *vptr = 4;

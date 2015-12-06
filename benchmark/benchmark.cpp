@@ -15,11 +15,11 @@ enum
 
 int main()
 {
-    StdioVAlloc<> valloc(STDIO_POOLSIZE);
+    StdioVAlloc valloc(STDIO_POOLSIZE);
 
     valloc.start();
 
-    TStdioVirtPtr<char>::type buf = valloc.alloc<char>(STDIO_BUFSIZE);
+    StdioVAlloc::TVPtr<char>::type buf = valloc.alloc<char>(STDIO_BUFSIZE);
 
     auto time = std::chrono::high_resolution_clock::now();
     for (int i=0; i<STDIO_REPEATS; ++i)

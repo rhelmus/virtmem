@@ -7,13 +7,13 @@
 
 using namespace virtmem;
 
-typedef TStdioVirtPtr<uint8_t>::type UCharVirtPtr;
-typedef TStdioVirtPtr<char>::type CharVirtPtr;
+typedef StdioVAlloc::TVPtr<uint8_t>::type UCharVirtPtr;
+typedef StdioVAlloc::TVPtr<char>::type CharVirtPtr;
 
 class VAllocFixture: public ::testing::Test
 {
 protected:
-    StdioVAlloc<> valloc;
+    StdioVAlloc valloc;
 
 public:
     void SetUp(void) { valloc.setPoolSize(1024 * 1024 * 10); valloc.start(); }
@@ -23,7 +23,7 @@ public:
 template <typename T> class VPtrFixture: public VAllocFixture
 {
 protected:
-    typename TStdioVirtPtr<T>::type vptr;
+    typename StdioVAlloc::TVPtr<T>::type vptr;
 
 public:
     VPtrFixture(void) : vptr() { } // UNDONE: we need this for proper construction, problem?

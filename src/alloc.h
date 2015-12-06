@@ -7,6 +7,7 @@
 */
 
 #include "base_alloc.h"
+#include "config.h"
 #include "vptr.h"
 
 namespace virtmem {
@@ -193,6 +194,10 @@ public:
     }
 
     template <typename T> struct TVPtr { typedef virtmem::VPtr<T, Derived> type; };
+
+#ifdef VIRTMEM_CPP11
+    template <typename T> using VPtr = virtmem::VPtr<T, Derived>;
+#endif
 };
 
 template <typename Properties, typename Derived>

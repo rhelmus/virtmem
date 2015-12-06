@@ -75,7 +75,7 @@ TYPED_TEST(VPtrFixture, SimpleWrapTest)
     this->valloc.clearPages();
     EXPECT_EQ((TypeParam)*this->vptr, val);
 
-    typename TStdioVirtPtr<TypeParam>::type wrp2 = VAllocFixture::valloc.alloc<TypeParam>();
+    typename StdioVAlloc::TVPtr<TypeParam>::type wrp2 = VAllocFixture::valloc.alloc<TypeParam>();
     *wrp2 = *this->vptr;
     EXPECT_EQ((TypeParam)*this->vptr, (TypeParam)*wrp2);
 
@@ -91,9 +91,9 @@ TYPED_TEST(VPtrFixture, ConstWrapTest)
     memset(&val, 10, sizeof(val));
     *this->vptr = val;
 
-    typename TStdioVirtPtr<TypeParam>::type wrp2 = VAllocFixture::valloc.alloc<TypeParam>();
+    typename StdioVAlloc::TVPtr<TypeParam>::type wrp2 = VAllocFixture::valloc.alloc<TypeParam>();
     *wrp2 = *this->vptr;
-    typename TStdioVirtPtr<const TypeParam>::type cwrp2 = wrp2;
+    typename StdioVAlloc::TVPtr<const TypeParam>::type cwrp2 = wrp2;
     EXPECT_EQ((TypeParam)*wrp2, (TypeParam)*cwrp2);
     EXPECT_EQ((TypeParam)*cwrp2, (TypeParam)*wrp2);
 
@@ -112,7 +112,7 @@ TYPED_TEST(VPtrFixture, BaseWrapTest)
 
     BaseVPtr basewrp = this->vptr;
     EXPECT_EQ(basewrp, this->vptr);
-    typename TStdioVirtPtr<TypeParam>::type wrp = static_cast<typename TStdioVirtPtr<TypeParam>::type>(basewrp);
+    typename StdioVAlloc::TVPtr<TypeParam>::type wrp = static_cast<typename StdioVAlloc::TVPtr<TypeParam>::type>(basewrp);
     EXPECT_EQ(basewrp, wrp);
     EXPECT_EQ(wrp, this->vptr);
 }
@@ -137,7 +137,7 @@ TYPED_TEST(LimitedWrapFixture, ArithmeticTest)
     const int size = 10, start = 10; // Offset from zero to avoid testing to zero initialized values
 
     this->vptr = VAllocFixture::valloc.alloc<TypeParam>(size * sizeof(TypeParam));
-    typename TStdioVirtPtr<TypeParam>::type wrpp = this->vptr;
+    typename StdioVAlloc::TVPtr<TypeParam>::type wrpp = this->vptr;
     for (int i=start; i<size+start; ++i)
     {
         *wrpp = i;
@@ -159,7 +159,7 @@ TYPED_TEST(LimitedWrapFixture, ArithmeticTest)
     EXPECT_EQ(wrpp, this->vptr);
     EXPECT_EQ(*wrpp, *this->vptr);
 
-    typename TStdioVirtPtr<TypeParam>::type wrpp2 = this->vptr;
+    typename StdioVAlloc::TVPtr<TypeParam>::type wrpp2 = this->vptr;
     EXPECT_EQ(*wrpp, *(wrpp2++));
     EXPECT_EQ(*(++wrpp), *wrpp2);
     EXPECT_EQ(wrpp, wrpp2);
@@ -194,7 +194,7 @@ TYPED_TEST(LimitedWrapFixture, WrappedArithmeticTest)
     TypeParam *buf = new TypeParam[size];
     this->vptr = this->vptr.wrap(buf);
     TypeParam *bufp = buf;
-    typename TStdioVirtPtr<TypeParam>::type wrpp = this->vptr;
+    typename StdioVAlloc::TVPtr<TypeParam>::type wrpp = this->vptr;
 
     for (int i=start; i<size+start; ++i)
     {
@@ -261,7 +261,7 @@ TEST_F(ClassWrapFixture, ClassAllocTest)
 {
     ASSERT_EQ(CTestClass::constructedClasses, 0);
 
-    TStdioVirtPtr<CTestClass>::type cptr = valloc.newClass<CTestClass>();
+    StdioVAlloc::TVPtr<CTestClass>::type cptr = valloc.newClass<CTestClass>();
     EXPECT_EQ(CTestClass::constructedClasses, 1);
     valloc.deleteClass(cptr);
     EXPECT_EQ(CTestClass::constructedClasses, 0);
@@ -271,7 +271,7 @@ TEST_F(ClassWrapFixture, ClassArrayAllocTest)
 {
     const int elements = 10;
 
-    TStdioVirtPtr<CTestClass>::type cptr = valloc.newArray<CTestClass>(elements);
+    StdioVAlloc::TVPtr<CTestClass>::type cptr = valloc.newArray<CTestClass>(elements);
     EXPECT_EQ(CTestClass::constructedClasses, elements);
     valloc.deleteArray(cptr);
     EXPECT_EQ(CTestClass::constructedClasses, 0);
@@ -282,7 +282,7 @@ TEST_F(IntWrapFixture, OperatorTest)
 {
     const int start = 100;
 
-    TStdioVirtPtr<int>::type vptr = valloc.alloc<int>();
+    StdioVAlloc::TVPtr<int>::type vptr = valloc.alloc<int>();
     int i = start;
 
     EXPECT_EQ(*vptr = start, start);
@@ -344,7 +344,7 @@ TEST_F(IntWrapFixture, OperatorTest)
 TEST_F(IntWrapFixture, MultiAllocTest)
 {
     // Second allocator
-    typedef StaticVAlloc<1024*1024> Alloc2;
+    typedef StaticVAllocP<1024*1024> Alloc2;
     Alloc2 valloc2;
     valloc2.start();
 
