@@ -50,7 +50,7 @@ void setup()
     valloc.start(); // Always call this to initialize the allocator before using it
 
     // Allocate a char buffer of 10000 bytes in virtual memory and store the address to a virtual pointer
-    TSDVirtPtr<char>::type str = str.alloc(10000);
+    VPtr<char, SDVAlloc<> > str = valloc.alloc<char>(10000);
 
     // Set the first 1000 bytes to 'A'
     memset(str, 'A', 1000);
@@ -59,7 +59,7 @@ void setup()
     str[1] = 'B';
 
     // Own types (structs/classes) also work.
-    TSDVirtPtr<MyStruct>::type ms = ms.alloc(); // alloc call without parameters: use automatic size deduction
+    VPtr<MyStruct, SDVAlloc<> > ms = valloc.alloc<MyStruct>(); // alloc call without parameters: use automatic size deduction
     ms->x = 5;
     ms->y = 15;
 }
@@ -166,10 +166,10 @@ memory access as possible. Here is an example:
 
 ~~~{.cpp}
 // define virtual pointer linked to SD fat memory
-virtmem::VPtr<int, virtmem::SDVAlloc> vptr;
-// virtmem::TSDVirtPtr<int>::type vptr; // same, but slightly shorter syntax
+virtmem::VPtr<int, virtmem::SDVAlloc<> > vptr;
+//virtmem::SDValloc<>::TVPtr<int>::type vptr; // same, but slightly shorter syntax
 
-vptr = vptr.alloc(); // allocate memory to store integer (size automatically deduced from type)
+vptr = valloc.alloc<int>(); // allocate memory to store integer (size automatically deduced from type)
 *vptr = 4;
 ~~~
 
@@ -178,13 +178,12 @@ pointer variables can be done straight from virtmem::VPtr or from one of
 the shortcut helper classes (such as virtmem::TSDVirtPtr). Either do the
 same.
 
-Memory allocation ([alloc()](@ref virtmem::VPtr::alloc)) is done through a (static)
-function defined in the virtual pointer class. In the above example no
-arguments were passed to [alloc()](@ref virtmem::VPtr::alloc), which means that
-`alloc` will automatically deduce the size required for the pointer type
-(`int`). If you want to allocate a different size (for instance to use the data
-as an array) then the number of bytes should be specified as the first argument
-to `alloc`:
+Memory allocation is done through the ([alloc()](@ref virtmem::VAlloc::alloc))
+function. In the above example no arguments were passed to [alloc()](@ref
+virtmem::VAlloc::alloc), which means that `alloc` will automatically deduce the
+size required for the pointer type (`int`). If you want to allocate a different
+size (for instance to use the data as an array) then the number of bytes should
+be specified as the first argument to `alloc`:
 
 ~~~{.cpp}
 vptr = vptr.alloc(1000 * sizeof(int)); // allocate memory to store array of 1000 integers
@@ -203,7 +202,7 @@ ms->y = 15;
 ~~~
 Note that there are a few imitations when using structs (or classes) with `virtmem`. For details: see virtmem::VPtr.
 
-Finally, to free memory the [free()](@ref virtmem::VPtr::free) function can be used:
+Finally, to free memory the [free()](@ref virtmem::VAlloc::free) function can be used:
 
 ~~~{.cpp}
 vptr.free(vptr); // memory size is automatically deduced

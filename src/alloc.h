@@ -192,7 +192,7 @@ public:
         freeRaw(soffset); // soffset points at beginning of actual block
     }
 
-    template <typename T> struct VPtr { typedef virtmem::VPtr<T, Derived> type; };
+    template <typename T> struct TVPtr { typedef virtmem::VPtr<T, Derived> type; };
 };
 
 template <typename Properties, typename Derived>

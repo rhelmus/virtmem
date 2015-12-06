@@ -132,9 +132,6 @@ class MultiSPIRAMVAlloc : public VAlloc<Properties, MultiSPIRAMVAlloc<SPIChips, 
     {
         for (uint8_t i=0; i<chipAmount; ++i)
             serialRAM[i].begin(SPIChips[i].largeAddressing, SPIChips[i].chipSelect, SPIChips[i].speed);
-        Serial.print("poolsize: "); Serial.print(this->getPoolSize());
-        Serial.print(", "); Serial.print(sizeof(SPIRamConfig));
-        Serial.print(", "); Serial.println(chipAmount);
     }
 
     void doStop(void)

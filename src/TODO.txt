@@ -22,3 +22,4 @@ general:
 - Enable/disable right settings in config.h for realease
 - serial script: default to other port on Windows (COM1?)
 - remove debug texts (e.g. scripts)
+- typedef allocators with default properties to avoid <>?
