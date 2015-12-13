@@ -195,9 +195,29 @@ public:
         freeRaw(soffset); // soffset points at beginning of actual block
     }
 
+    /**
+     * @struct TVPtr
+     * @brief Generalized shortcut to virtual pointer type linked to this allocator.
+     *
+     * Example:
+     * @code{.cpp}
+     * virtmem::SDAlloc::TVPtr<int>::type vIntPtr; // virtual pointer to int, linked to SD allocator.
+     * @endcode
+     *
+     * @tparam T Type of virtual pointer
+     */
     template <typename T> struct TVPtr { typedef virtmem::VPtr<T, Derived> type; };
 
 #ifdef VIRTMEM_CPP11
+    /**
+     * Similar to TVPtr, but slightly shorter syntax (C++11 only)
+     * Example:
+     * @code{.cpp}
+     * virtmem::SDAlloc::VPtr<int> vIntPtr; // virtual pointer to int, linked to SD allocator.
+     * @endcode
+     *
+     * @tparam T Type of virtual pointer
+     */
     template <typename T> using VPtr = virtmem::VPtr<T, Derived>;
 #endif
 };

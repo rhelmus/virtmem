@@ -12,11 +12,13 @@
 
 #include <stddef.h>
 
+// @cond HIDDEN_SYMBOLS
 #ifdef VIRTMEM_CPP11
 #define EXPLICIT explicit
 #else
 #define EXPLICIT
 #endif
+// @endcond
 
 namespace virtmem {
 
@@ -117,7 +119,7 @@ public:
 #ifdef VIRTMEM_CPP11
     // Can only use these constructors on C++11, otherwise vptrs cannot be used with unions
     BaseVPtr(void) = default; // Must have this to remain union compatible
-    BaseVPtr(NILL_t) : ptr(0) { }
+    BaseVPtr(NILL_t) : ptr(0) { } //!< Construct from NILL/nullptr (C++11 only)
 #endif
 
 #ifdef VIRTMEM_WRAP_CPOINTERS

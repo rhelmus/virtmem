@@ -13,11 +13,13 @@
 
 #include <stddef.h>
 
+// @cond HIDDEN_SYMBOLS
 #ifdef VIRTMEM_CPP11
 #define EXPLICIT explicit
 #else
 #define EXPLICIT
 #endif
+// @endcond
 
 namespace virtmem {
 
@@ -97,6 +99,10 @@ public:
         template <typename, typename> friend class VPtr;
 
     public:
+        /**
+         * @name Proxy operators
+         * @{
+         */
         inline operator T(void) const { return *read(ptr); }
         template <typename T2> EXPLICIT inline operator T2(void) const { return static_cast<T2>(operator T()); } // UNDONE: explicit?
 
@@ -149,6 +155,7 @@ public:
         ValueWrapper &operator/=(int n) { T newv = operator T() / n; write(ptr, private_utils::pointerTo(newv)); return *this; }
         ValueWrapper &operator++(void) { return operator +=(1); }
         T operator++(int) { T ret = operator T(); operator++(); return ret; }
+        //! @}
     };
 
     // Based on Stroustrup's general wrapper paper (http://www.stroustrup.com/wrapper.pdf)
@@ -176,6 +183,11 @@ public:
                 getAlloc()->releaseLock(ptr);
         }
 
+        /**
+         * @name Access operators
+         * @{
+         */
+
         T *operator->(void)
         {
 #ifdef VIRTMEM_WRAP_CPOINTERS
@@ -192,12 +204,13 @@ public:
 #endif
             return static_cast<T *>(getAlloc()->makeDataLock(getPtrNum(ptr), sizeof(T), true));
         }
+        //! @}
     };
 
 #ifdef VIRTMEM_CPP11
     // Can only use these constructors on C++11, otherwise vptrs cannot be used with unions
     VPtr(void) = default; // Must have this to remain union compatible
-    VPtr(NILL_t) : BaseVPtr(nullptr) { }
+    VPtr(NILL_t) : BaseVPtr(nullptr) { } //!< Construct from NILL/nullptr (C++11 only)
 #endif
 
 #ifdef VIRTMEM_WRAP_CPOINTERS
@@ -288,12 +301,16 @@ public:
     const MemberWrapper operator->(void) const { return MemberWrapper(ptr); }
     const ValueWrapper operator[](int i) const { return ValueWrapper(ptr + (i * sizeof(T))); }
     ValueWrapper operator[](int i) { return ValueWrapper(ptr + (i * sizeof(T))); }
-    // @}
+    //! @}
 
-    // const conversion
+    /**
+     * @name Const conversion operators
+     * @{
+     */
     inline operator VPtr<const T, Allocator>(void) { VPtr<const T, Allocator> ret; ret.ptr = ptr; return ret; }
     // pointer to pointer conversion
     template <typename T2> EXPLICIT inline operator VPtr<T2, Allocator>(void) { VPtr<T2, Allocator> ret; ret.ptr = ptr; return ret; }
+    //! @}
 
     /**
       * @name Pointer arithmetic
@@ -310,7 +327,7 @@ public:
     inline ThisVPtr operator+(int n) const { return (copy() += n); }
     inline ThisVPtr operator-(int n) const { return (copy() -= n); }
     int operator-(const ThisVPtr &other) const { return (ptr - other.ptr) / sizeof(T); }
-    // @}
+    //! @}
 //    inline bool operator!=(const TVirtPtr &p) const { return ptr != p.ptr; } UNDONE: need this?
 
     /**

@@ -130,10 +130,16 @@ protected:
 
     void writeZeros(VPtrNum start, VPtrSize n); // NOTE: only call this in doStart()
 
+    /**
+     * @name Pure virtual functions
+     * The following functions should be defined by derived allocator classes.
+     * @{
+     */
     virtual void doStart(void) = 0;
     virtual void doStop(void) = 0;
     virtual void doRead(void *data, VPtrSize offset, VPtrSize size) = 0;
     virtual void doWrite(const void *data, VPtrSize offset, VPtrSize size) = 0;
+    //! @}
 
 public:
     void start(void);

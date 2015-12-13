@@ -18,12 +18,12 @@ namespace virtmem {
  * as memory pool.
  *
  * This class uses an external SRAM chip as a memory pool. Interfacing occurs through the
- * [serram library](https://github.com/rhelmus/serialram) and must be installed in order to use
+ * [serialram library](https://github.com/rhelmus/serialram) and must be installed in order to use
  * this allocator.
  *
  * @tparam Properties Allocator properties, see DefaultAllocProperties
  *
- * @note The `serram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
+ * @note The `serialram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
  * initializing this allocator.
  * @sa @ref bUsing and MultiSPIRAMVAlloc
  */
@@ -112,14 +112,23 @@ struct SPIRamConfig
  *
  * This allocator is similar to SPIRAMVAlloc, but combines multiple SRAM chips as
  * one large memory pool. Interfacing occurs through the
- * [serram library](https://github.com/rhelmus/serialram) and must be installed in order to use
- * this allocator.
+ * [serialram library](https://github.com/rhelmus/serialram) and must be installed in order to use
+ * this allocator. Every SRAM chip is configured by defining an SPIRamConfig array:
+ *
+ * @code{.cpp}
+ * // configuration for two 23LC1024 chips, connected to CS pins 9 and 10.
+ * virtmem::SPIRamConfig scfg[2] = {
+ *      { true, 1024 * 128, 9, CSerialRam::SPEED_FULL },
+ *      { true, 1024 * 128, 10, CSerialRam::SPEED_FULL } };
+ *
+ * virtmem::MultiSPIRAMVAlloc<scfg, 2> alloc;
+ * @endcode
  *
  * @tparam SPIChips An array of SPIRamConfig that is used to configure each individual SRAM chip.
  * @tparam chipAmount Amount of SRAM chips to be used.
  * @tparam Properties Allocator properties, see DefaultAllocProperties
  *
- * @note The `serram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
+ * @note The `serialram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
  * initializing this allocator.
  * @sa @ref bUsing, SPIRamConfig and SPIRAMVAlloc
  *
