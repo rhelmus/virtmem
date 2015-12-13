@@ -502,6 +502,7 @@ void BaseVAlloc::writeZeros(VPtrNum start, VPtrSize n)
  *
  * This function should always be called during initialization, i.e. in *setup()* function of your sketch.
  * If the allocator was stopped (see \ref stop()), this function should be called again before using the allocator.
+ * All used virtual memory (if any) will be cleared during initialization.
  */
 void BaseVAlloc::start()
 {

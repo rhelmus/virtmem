@@ -81,6 +81,7 @@ public:
     // C style malloc/free
     /**
      * @brief Allocates memory from the linked virtual memory allocator
+     * @tparam T The data type to allocate for.
      * @param size The number of bytes to allocate. By default this is the size of the type pointed to.
      * @return Virtual pointer pointing to allocated memory.
      *
@@ -90,7 +91,7 @@ public:
      * // allocate array of 10 integers.
      * vptr = virtmem::VPtr<int, SDVAlloc>::alloc(10 * sizeof(int));
      * @endcode
-     * @sa free, newClass, newArray, BaseVAlloc::alloc
+     * @sa free, newClass, newArray, BaseVAlloc::allocRaw
      */
     template <typename T> VPtr<T, Derived> alloc(VPtrSize size=sizeof(T))
     {
@@ -104,7 +105,7 @@ public:
      * @param p virtual pointer that points to block to be freed
      *
      * This function is the equivelant of the C `free` function. The pointer will be set to null.
-     * @sa alloc, deleteClass, deleteArray, BaseVAlloc::free
+     * @sa alloc, deleteClass, deleteArray, BaseVAlloc::freeRaw
      */
     template <typename T> void free(VPtr<T, Derived> &p)
     {
@@ -115,6 +116,7 @@ public:
     // C++ style new/delete --> call constructors (by placement new) and destructors
     /**
      * @brief Allocates memory and constructs data type
+     * @tparam T The data type to allocate for.
      * @param size The number of bytes to allocate. By default this is the size of the type pointed to.
      * @return Virtual pointer pointing to allocated memory.
      *

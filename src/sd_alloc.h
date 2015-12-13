@@ -26,7 +26,7 @@ namespace virtmem {
  *
  * @note The SD FAT library needs to be initialized (i.e. by calling SdFat::begin()) *before*
  * initializing this allocator.
- * @sa @ref bUsing, SDValloc
+ * @sa @ref bUsing, SDVAlloc
  */
 template <typename Properties=DefaultAllocProperties>
 class SDVAllocP : public VAlloc<Properties, SDVAllocP<Properties> >
@@ -87,7 +87,7 @@ public:
     void removeTempFile(void) { sdFile.remove(); }
 };
 
-typedef SDVAllocP<> SDValloc; //!< Shortcut to SDVallocP with default template arguments
+typedef SDVAllocP<> SDVAlloc; //!< Shortcut to SDVAllocP with default template arguments
 
 }
 
