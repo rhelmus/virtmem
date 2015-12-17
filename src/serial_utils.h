@@ -8,6 +8,7 @@
 
 namespace virtmem {
 
+//! @brief Contains utilities for serial allocator
 namespace serram_utils {
 
 //! @cond HIDDEN_SYMBOLS

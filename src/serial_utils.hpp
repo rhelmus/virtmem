@@ -2,6 +2,8 @@
 
 #include "serial_utils.h"
 
+//! @cond HIDDEN_SYMBOLS
+
 namespace virtmem {
 
 namespace serram_utils {
@@ -180,3 +182,5 @@ template <typename IOStream> int16_t SerialInput<IOStream>::peek()
 }
 
 }
+
+//! @endcond

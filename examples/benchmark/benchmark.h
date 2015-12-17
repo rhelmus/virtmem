@@ -36,7 +36,7 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
     typedef VPtr<char, TA> TVirtPtr;
     valloc.start();
 
-    TVirtPtr buf = buf.alloc(bufsize);
+    TVirtPtr buf = valloc.template alloc<char>(bufsize);
 
     printBenchStart(bufsize, repeats);
 

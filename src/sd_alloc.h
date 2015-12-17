@@ -13,7 +13,7 @@
 namespace virtmem {
 
 /**
- * @brief Virtual allocator class that uses SD card as virtual pool
+ * @brief Virtual memory allocator class that uses SD card as virtual pool
  *
  * This class uses a file on an FAT formatted SD card as virtual memory pool. The
  * [SD FAT library](https://github.com/greiman/SdFat) is used to interface with the SD card
@@ -76,6 +76,7 @@ class SDVAllocP : public VAlloc<Properties, SDVAllocP<Properties> >
 public:
     /** Constructs (but not initializes) the SD FAT allocator.
      * @param ps The size of the virtual memory pool
+     * @sa setPoolSize
      */
     SDVAllocP(VPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
     ~SDVAllocP(void) { doStop(); }

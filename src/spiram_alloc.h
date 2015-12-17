@@ -14,7 +14,7 @@
 namespace virtmem {
 
 /**
- * @brief Virtual allocator that uses SPI (serial) RAM (i.e. the 23LC series from Microchip)
+ * @brief Virtual memory allocator that uses SPI (serial) RAM (i.e. the 23LC series from Microchip)
  * as memory pool.
  *
  * This class uses an external SRAM chip as a memory pool. Interfacing occurs through the

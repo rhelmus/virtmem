@@ -5,8 +5,8 @@
 //#define RUN_STATICALLOC
 //#define RUN_SPIRAMALLOC
 //#define RUN_NATIVE
-//#define RUN_SERIALALLOC
-#define RUN_SDALLOC
+#define RUN_SERIALALLOC
+//#define RUN_SDALLOC
 
 // uncomment to disable a SPI select pin, useful when using ethernet shield
 #define DISABLE_SELECTPIN 10
@@ -47,8 +47,8 @@ SPIRAMVAlloc<> SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRam::SPEE
 #endif
 
 #ifdef RUN_SERIALALLOC
-#include <serram_alloc.h>
-SerialVAlloc<> serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
+#include <serial_alloc.h>
+SerialVAlloc serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
 #endif
 
 #ifdef RUN_SDALLOC

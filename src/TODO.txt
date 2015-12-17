@@ -19,5 +19,5 @@ docs:
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
 - Enable/disable right settings in config.h for realease
-- serial script: default to other port on Windows (COM1?)
+- serial script: default to other port on Windows (COM1?) --> update docs (usage etc)
 - remove debug texts (e.g. scripts)
