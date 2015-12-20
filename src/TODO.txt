@@ -15,6 +15,13 @@ docs:
 - pointer conversion
 - POD
 - Fix alloc/free/allocRaw etc refs
+- namespace
+- examples:
+    - serial alloc with input
+    - simple examples of all allocators
+    - locking
+    - wrapping
+    - configuring allocators
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)

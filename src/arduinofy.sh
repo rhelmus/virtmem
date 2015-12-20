@@ -31,3 +31,6 @@ $COPY "${PWD}"/vptr_utils.hpp "${DEST}/"
 mkdir -p "${DEST}/examples/benchmark"
 $COPY "${PWD}"/../examples/benchmark/benchmark.ino "${DEST}/examples/benchmark"
 $COPY "${PWD}"/../examples/benchmark/benchmark.h "${DEST}/examples/benchmark"
+
+mkdir -p "${DEST}/examples/serial_simple"
+$COPY "${PWD}"/../examples/serial_simple/serial_simple.ino "${DEST}/examples/serial_simple"

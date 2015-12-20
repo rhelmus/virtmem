@@ -36,14 +36,14 @@
 
 #ifdef RUN_STATICALLOC
 #include <static_alloc.h>
-StaticVAlloc<STATICALLOC_POOLSIZE> staticAlloc;
+StaticVAllocP<STATICALLOC_POOLSIZE> staticAlloc;
 #endif
 
 #ifdef RUN_SPIRAMALLOC
 #include <SPI.h>
 #include <spiram_alloc.h>
 #include <serialram.h>
-SPIRAMVAlloc<> SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRam::SPEED_FULL);
+SPIRAMVAlloc SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRam::SPEED_FULL);
 #endif
 
 #ifdef RUN_SERIALALLOC
@@ -54,7 +54,7 @@ SerialVAlloc serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
 #ifdef RUN_SDALLOC
 #include <SdFat.h>
 #include <sd_alloc.h>
-SDVAlloc<> SDRamAlloc(SD_POOLSIZE);
+SDVAlloc SDRamAlloc(SD_POOLSIZE);
 SdFat sd;
 #endif
 

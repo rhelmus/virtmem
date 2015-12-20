@@ -39,6 +39,7 @@ unix {
 OTHER_FILES += \
     ../examples/benchmark/benchmark.ino \
     ../examples/benchmark/benchmark.h \
+    ../examples/serial_simple/serial_simple.ino \
     ../Doxyfile \
     ../groups.dox
 

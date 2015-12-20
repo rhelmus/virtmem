@@ -90,7 +90,7 @@ usage: serial_host.py [-h] [-p PORT] [-b BAUD] [-l PASSDEV] [-r PASSBAUD]
  * Some examples:
  * @code{.py}
  * serial_host.py # uses default serial port and baudrate
- * serial_host.py -p COM2 # uses COM2 (Windows) as serial port, with default baudrate
+ * python serial_host.py -p COM2 # uses COM2 (Windows) as serial port, with default baudrate
  * serial_host.py -p /dev/ttyACM2 -b 9600 # uses /dev/ttyACM2 (Linux) as serial port, with 9600 baudrate
  * serial_host.py -l /dev/pts/1 # use default serial settings and pass all traffic through /dev/pts/1
  * @endcode
@@ -196,6 +196,10 @@ public:
 
 typedef SerialVAllocP<> SerialVAlloc; //!< Shortcut to SerialVAllocP with default template arguments
 
+/**
+ * @example serial_simple.ino
+ * This is a simple example sketch showing how to use the serial allocator.
+ */
 }
 
 #endif // VIRTMEM_SERIAL_ALLOC_H
