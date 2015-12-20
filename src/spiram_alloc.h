@@ -23,9 +23,7 @@ namespace virtmem {
  *
  * @tparam Properties Allocator properties, see DefaultAllocProperties
  *
- * @note The `serialram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
- * initializing this allocator.
- * @sa @ref bUsing and MultiSPIRAMVAlloc
+ * @sa @ref bUsing and MultiSPIRAMVAllocP
  */
 template <typename Properties=DefaultAllocProperties>
 class SPIRAMVAllocP : public VAlloc<Properties, SPIRAMVAllocP<Properties> >
@@ -95,7 +93,7 @@ public:
 typedef SPIRAMVAllocP<> SPIRAMVAlloc; //!< Shortcut to SPIRAMVAllocP with default template arguments
 
 /**
- * @brief This `struct` is used to configure each SRAM chip used by a MultiSPIRAMVAlloc
+ * @brief This `struct` is used to configure each SRAM chip used by a MultiSPIRAMVAllocP
  * allocator.
  */
 struct SPIRamConfig
@@ -121,7 +119,7 @@ struct SPIRamConfig
  *      { true, 1024 * 128, 9, CSerialRam::SPEED_FULL },
  *      { true, 1024 * 128, 10, CSerialRam::SPEED_FULL } };
  *
- * virtmem::MultiSPIRAMVAlloc<scfg, 2> alloc;
+ * virtmem::MultiSPIRAMVAllocP<scfg, 2> alloc;
  * @endcode
  *
  * @tparam SPIChips An array of SPIRamConfig that is used to configure each individual SRAM chip.
@@ -134,7 +132,7 @@ struct SPIRamConfig
  *
  */
 template <const SPIRamConfig *SPIChips, size_t chipAmount, typename Properties=DefaultAllocProperties>
-class MultiSPIRAMVAlloc : public VAlloc<Properties, MultiSPIRAMVAlloc<SPIChips, chipAmount, Properties> >
+class MultiSPIRAMVAllocP : public VAlloc<Properties, MultiSPIRAMVAllocP<SPIChips, chipAmount, Properties> >
 {
     CSerialRam serialRAM[chipAmount];
 
@@ -207,15 +205,23 @@ public:
      * Constructs the allocator. The pool size is automatically
      * deduced from the chip configurations.
      */
-    MultiSPIRAMVAlloc(void)
+    MultiSPIRAMVAllocP(void)
     {
         uint32_t ps = 0;
         for (uint8_t i=0; i<chipAmount; ++i)
             ps += SPIChips[i].size;
         this->setPoolSize(ps);
     }
-    ~MultiSPIRAMVAlloc(void) { doStop(); }
+    ~MultiSPIRAMVAllocP(void) { doStop(); }
 };
+
+/**
+ * @example spiram_simple.ino
+ * This is a simple example sketch showing how to use the SPI RAM allocator.
+ *
+ * @example multispiram_simple.ino
+ * This is a simple example sketch showing how to use the multi SPI RAM allocator.
+ */
 
 }
 

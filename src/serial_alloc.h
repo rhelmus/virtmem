@@ -36,7 +36,7 @@ namespace virtmem {
  * be specified:
  * @code{.cpp}
  * // Uses Serial1 with a default pool size and baudrate
- * SerialVAllocP<typeof(Serial1)> valloc(DEFAULT_POOLSIZE, 115200, &Serial1);
+ * SerialVAllocP<typeof(Serial1)> valloc(VIRTMEM_DEFAULT_POOLSIZE, 115200, &Serial1);
  * @endcode
  * The `typeof` expression used in the above example may raise some questions. We need to know
  * the type of the serial class to be used (in this case the class that defines Serial1). Since
@@ -169,7 +169,7 @@ public:
      * @param s The instance variable of the serial class that should be used (e.g. Serial, Serial1)
      * @sa setBaudRate and setPoolSize
      */
-    SerialVAllocP(VPtrSize ps=DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
+    SerialVAllocP(VPtrSize ps=VIRTMEM_DEFAULT_POOLSIZE, uint32_t baud=115200, IOStream *s=&Serial) :
         baudRate(baud), stream(s), input(stream) { this->setPoolSize(ps); }
 
     // only works before start() is called

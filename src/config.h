@@ -40,7 +40,7 @@
   * This value is used for variable sized allocators, such as SDVAlloc and
   * SerialVAlloc.
   */
-#define DEFAULT_POOLSIZE 1024l * 1024l
+#define VIRTMEM_DEFAULT_POOLSIZE 1024l * 1024l
 
 #if __cplusplus > 199711L
 #define VIRTMEM_CPP11 //!< Enabled if current platform enables C++11 support (e.g. Teensyduino, Arduino >=1.6.6)
@@ -119,7 +119,7 @@ struct DefaultAllocProperties
   @code
 // This struct contains a customized set of memory page properties.
 // While the datatype of each member does not matter, all members must be static.
-struct MyAllocProperties
+struct AllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 64;
     static const uint8_t mediumPageCount = 4, mediumPageSize = 128;
@@ -128,8 +128,10 @@ struct MyAllocProperties
 };
 
 // Create allocator with customized page properties
-SDVAlloc<MyAllocProperties> alloc;
+SDVAllocP<AllocProperties> alloc;
   @endcode
+
+  @sa @ref alloc_properties.ino example
 
   @var DefaultAllocProperties::smallPageCount
   @brief The number of *small* pages. @hideinitializer
@@ -144,6 +146,11 @@ SDVAlloc<MyAllocProperties> alloc;
   @brief The size of a *medium* page. @hideinitializer
   @var DefaultAllocProperties::bigPageSize
   @brief The size of a *big* page. @hideinitializer
+  */
+
+/**
+  * @example alloc_properties.ino
+  * This example shows the size and amount of memory pages of an allocator can be configured.
   */
 
 }

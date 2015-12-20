@@ -40,6 +40,11 @@ OTHER_FILES += \
     ../examples/benchmark/benchmark.ino \
     ../examples/benchmark/benchmark.h \
     ../examples/serial_simple/serial_simple.ino \
+    ../examples/serial_input/serial_input.ino \
+    ../examples/spiram_simple/spiram_simple.ino \
+    ../examples/multispiram_simple/multispiram_simple.ino \
+    ../examples/sd_simple/sd_simple.ino \
+    ../examples/alloc_properties/alloc_properties.ino \
     ../Doxyfile \
     ../groups.dox
 

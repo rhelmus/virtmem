@@ -34,3 +34,18 @@ $COPY "${PWD}"/../examples/benchmark/benchmark.h "${DEST}/examples/benchmark"
 
 mkdir -p "${DEST}/examples/serial_simple"
 $COPY "${PWD}"/../examples/serial_simple/serial_simple.ino "${DEST}/examples/serial_simple"
+
+mkdir -p "${DEST}/examples/serial_input"
+$COPY "${PWD}"/../examples/serial_input/serial_input.ino "${DEST}/examples/serial_input"
+
+mkdir -p "${DEST}/examples/spiram_simple"
+$COPY "${PWD}"/../examples/spiram_simple/spiram_simple.ino "${DEST}/examples/spiram_simple"
+
+mkdir -p "${DEST}/examples/multispiram_simple"
+$COPY "${PWD}"/../examples/multispiram_simple/multispiram_simple.ino "${DEST}/examples/multispiram_simple"
+
+mkdir -p "${DEST}/examples/sd_simple"
+$COPY "${PWD}"/../examples/sd_simple/sd_simple.ino "${DEST}/examples/sd_simple"
+
+mkdir -p "${DEST}/examples/alloc_properties"
+$COPY "${PWD}"/../examples/alloc_properties/alloc_properties.ino "${DEST}/examples/alloc_properties"

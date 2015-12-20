@@ -78,7 +78,7 @@ public:
      * @param ps The size of the virtual memory pool
      * @sa setPoolSize
      */
-    SDVAllocP(VPtrSize ps=DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
+    SDVAllocP(VPtrSize ps=VIRTMEM_DEFAULT_POOLSIZE) { this->setPoolSize(ps); }
     ~SDVAllocP(void) { doStop(); }
 
     /**
@@ -89,6 +89,11 @@ public:
 };
 
 typedef SDVAllocP<> SDVAlloc; //!< Shortcut to SDVAllocP with default template arguments
+
+/**
+ * @example sd_simple.ino
+ * This is a simple example sketch showing how to use the SD allocator.
+ */
 
 }
 

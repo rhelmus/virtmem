@@ -20,11 +20,13 @@ docs:
     - serial alloc with input
     - simple examples of all allocators
     - locking
-    - wrapping
+    - wrapping?
     - configuring allocators
+    - C++11?
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
 - Enable/disable right settings in config.h for realease
 - serial script: default to other port on Windows (COM1?) --> update docs (usage etc)
 - remove debug texts (e.g. scripts)
+- which sdfatlib necessary (beta or not)?

@@ -14,7 +14,7 @@
 
 namespace virtmem {
 
-template <uint32_t poolSize=DEFAULT_POOLSIZE, typename Properties=DefaultAllocProperties>
+template <uint32_t poolSize=VIRTMEM_DEFAULT_POOLSIZE, typename Properties=DefaultAllocProperties>
 class StaticVAllocP : public VAlloc<Properties, StaticVAllocP<poolSize, Properties> >
 {
     char staticData[poolSize];

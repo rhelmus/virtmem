@@ -121,7 +121,7 @@ card as a virtual memory pool.
 The `virtmem` library supports the following allocators:
 * virtmem::SDVAlloc: uses a FAT formatted SD card as memory pool
 * virtmem::SPIRAMVAlloc: uses SPI ram (Microchip's 23LC series) as memory pool
-* virtmem::MultiSPIRAMVAlloc: like virtmem::SPIRAMVAlloc, but supports multiple memory chips
+* virtmem::MultiSPIRAMVAllocP: like virtmem::SPIRAMVAlloc, but supports multiple memory chips
 * virtmem::SerialVAlloc: uses RAM from a computer connected through serial as memory pool
 * For debugging there is also virtmem::StaticVAlloc (uses regular RAM as memory pool) and virtmem::StdioVAlloc (uses files through regular stdio functions as memory pool)
 

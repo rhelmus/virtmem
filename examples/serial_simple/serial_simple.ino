@@ -13,13 +13,15 @@
 #include <virtmem.h>
 #include <serial_alloc.h>
 
+const int poolSize = 1024 * 32; // the size of the virtual memory pool (in bytes)
+
 // pull in complete virtmem namespace
 using namespace virtmem;
 
-SerialVAlloc valloc; // default settings: use Serial with 115200 baudrate
+SerialVAlloc valloc(poolSize); // default settings: use Serial with 115200 baudrate
 
 // Example for using Serial1 with 9600 baudrate
-//SerialVAllocP<typeof(Serial1)> valloc(DEFAULT_POOLSIZE, 9600, Serial1);
+//SerialVAllocP<typeof(Serial1)> valloc(poolSize, 9600, Serial1);
 
 void setup()
 {

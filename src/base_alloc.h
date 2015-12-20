@@ -149,7 +149,7 @@ public:
      * @brief Sets the total size of the memory pool.
      * @param ps size of the memory pool.
      * @note The poolsize can also be set via the constructor of most allocators.
-     * @note This function is unavailable for MultiSPIRAMVAlloc and StaticVAlloc.
+     * @note This function is unavailable for MultiSPIRAMVAllocP and StaticVAlloc.
      * @note This function should always called before \ref start().
      */
     void setPoolSize(VPtrSize ps) { poolSize = ps; }

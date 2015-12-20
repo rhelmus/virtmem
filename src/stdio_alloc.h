@@ -52,7 +52,7 @@ class StdioVAllocP : public VAlloc<Properties, StdioVAllocP<Properties> >
     }
 
 public:
-    StdioVAllocP(VPtrSize ps=DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
+    StdioVAllocP(VPtrSize ps=VIRTMEM_DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
     ~StdioVAllocP(void) { doStop(); }
 };
 
