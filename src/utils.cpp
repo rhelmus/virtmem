@@ -3,6 +3,6 @@
 
 namespace virtmem {
 
-NILL_t NILL = NILL_t(); // need empty constructor to prevent compiler error on arduino
+const NILL_t NILL = NILL_t(); // need empty constructor to prevent compiler error on arduino
 
 }

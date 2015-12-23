@@ -23,7 +23,7 @@
 
 // configuration for SD
 const int chipSelect = 9;
-const int poolSize = 1024 * 32; // the size of the virtual memory pool (in bytes)
+const uint32_t poolSize = 1024l * 32l; // the size of the virtual memory pool (in bytes)
 const int spiSpeed = SPI_FULL_SPEED;
 
 // pull in complete virtmem namespace

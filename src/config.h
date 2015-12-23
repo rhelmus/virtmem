@@ -107,16 +107,28 @@ struct DefaultAllocProperties
 #endif
 
 /**
-  @struct DefaultAllocProperties
-  @brief This struct contains default parameters for virtual memory pages.
-
-  The fields in this struct define the amount- and size of the *small*, *medium* and *big*
-  memory pages for an allocator. The defaults are platform dependend and can be changed in
-  config.h. Alternatively, page settings can be set by defining a customized structure
-  and passing this structure as a template parameter to an allocator.
-
-  Example:
-  @code
+  * @struct DefaultAllocProperties
+  * @brief This struct contains default parameters for virtual memory pages.
+  *
+  * The fields in this struct define the amount- and size of the *small*, *medium* and *big*
+  * memory pages for an allocator. The former two memory pages are only used for locking data.
+  * In general it is best to make sure that they are big enough to contain any structs/classes
+  * stored in virtual memory. The *big* memory pages are also used for data locking, but more importantly, they are used
+  * as a cache for virtual memory access (see [basics](@ref basics)).
+  *
+  * Since all memory pages reside in regular RAM, changing their size and amount greatly
+  * influences the RAM used by virtmem. Besides reducing the RAM usage by lowering the
+  * amount and/or size of memory pages, it is also interesting to increase these numbers if you
+  * have some spare RAM. In general, increasing the number of pages will enhance random access
+  * times, whereas increasing the size of memory pages will reduce costly swapping and improve
+  * sequential memory access.
+  *
+  * The default size and amount of memory pages is platform dependent, and can be changed in
+  * config.h. Alternatively, page settings can be set by defining a customized structure
+  * and passing this structure as a template parameter to an allocator.
+  *
+  * Example:
+  * @code
 // This struct contains a customized set of memory page properties.
 // While the datatype of each member does not matter, all members must be static.
 struct AllocProperties
@@ -130,22 +142,22 @@ struct AllocProperties
 // Create allocator with customized page properties
 SDVAllocP<AllocProperties> alloc;
   @endcode
-
-  @sa @ref alloc_properties.ino example
-
-  @var DefaultAllocProperties::smallPageCount
-  @brief The number of *small* pages. @hideinitializer
-  @var DefaultAllocProperties::mediumPageCount
-  @brief The number of *medium* pages. @hideinitializer
-  @var DefaultAllocProperties::bigPageCount
-  @brief The number of *big* pages. @hideinitializer
-
-  @var DefaultAllocProperties::smallPageSize
-  @brief The size of a *small* page. @hideinitializer
-  @var DefaultAllocProperties::mediumPageSize
-  @brief The size of a *medium* page. @hideinitializer
-  @var DefaultAllocProperties::bigPageSize
-  @brief The size of a *big* page. @hideinitializer
+  *
+  * @sa @ref alloc_properties.ino example
+  *
+  * @var DefaultAllocProperties::smallPageCount
+  * @brief The number of *small* pages. @hideinitializer
+  * @var DefaultAllocProperties::mediumPageCount
+  * @brief The number of *medium* pages. @hideinitializer
+  * @var DefaultAllocProperties::bigPageCount
+  * @brief The number of *big* pages. @hideinitializer
+  *
+  * @var DefaultAllocProperties::smallPageSize
+  * @brief The size of a *small* page. @hideinitializer
+  * @var DefaultAllocProperties::mediumPageSize
+  * @brief The size of a *medium* page. @hideinitializer
+  * @var DefaultAllocProperties::bigPageSize
+  * @brief The size of a *big* page. @hideinitializer
   */
 
 /**

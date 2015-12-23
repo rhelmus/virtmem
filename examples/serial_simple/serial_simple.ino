@@ -13,7 +13,7 @@
 #include <virtmem.h>
 #include <serial_alloc.h>
 
-const int poolSize = 1024 * 32; // the size of the virtual memory pool (in bytes)
+const uint32_t poolSize = 1024l * 32l; // the size of the virtual memory pool (in bytes)
 
 // pull in complete virtmem namespace
 using namespace virtmem;

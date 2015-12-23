@@ -45,6 +45,7 @@ OTHER_FILES += \
     ../examples/multispiram_simple/multispiram_simple.ino \
     ../examples/sd_simple/sd_simple.ino \
     ../examples/alloc_properties/alloc_properties.ino \
+    ../examples/locking/locking.ino \
     ../Doxyfile \
     ../groups.dox
 

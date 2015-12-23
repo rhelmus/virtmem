@@ -25,7 +25,7 @@ namespace virtmem {
  */
 
 #ifndef VIRTMEM_CPP11
-const class NILL_t
+class NILL_t
 {
     void operator&() const; // prevent taking address
 
@@ -40,7 +40,7 @@ public:
 typedef nullptr_t NILL_t;
 #endif
 
-extern NILL_t NILL;
+extern const NILL_t NILL;
 
 /**
  * @var NILL

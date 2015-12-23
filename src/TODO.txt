@@ -23,6 +23,9 @@ docs:
     - wrapping?
     - configuring allocators
     - C++11?
+- file layout
+- FAQ:
+    - take care to specify integer suffix for large numbers on <32 bit chips
 
 general:
 - switch to c++11 code? (template aliasing, removal of NILL?)
@@ -30,3 +33,4 @@ general:
 - serial script: default to other port on Windows (COM1?) --> update docs (usage etc)
 - remove debug texts (e.g. scripts)
 - which sdfatlib necessary (beta or not)?
+- make file layout Arduino compatible

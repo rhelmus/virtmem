@@ -9,6 +9,16 @@ fi
 DEST="$1"
 echo "destination: $DEST"
 
+copyExample()
+{
+    mkdir -p "${DEST}/examples/$1"
+    $COPY "$PWD/../examples/$1/$1.ino" "$DEST/examples/$1"
+
+    if [ -f "${PWD}/../examples/$1/$1.h" ]; then
+        $COPY "${PWD}/../examples/$1/$1.ino" "${DEST}/examples/$1"
+    fi
+}
+
 mkdir -p "${DEST}"
 $COPY "${PWD}"/alloc.h "${DEST}/"
 $COPY "${PWD}"/base_alloc.h "${DEST}/"
@@ -28,24 +38,11 @@ $COPY "${PWD}"/vptr.h "${DEST}/"
 $COPY "${PWD}"/vptr_utils.h "${DEST}/"
 $COPY "${PWD}"/vptr_utils.hpp "${DEST}/"
 
-mkdir -p "${DEST}/examples/benchmark"
-$COPY "${PWD}"/../examples/benchmark/benchmark.ino "${DEST}/examples/benchmark"
-$COPY "${PWD}"/../examples/benchmark/benchmark.h "${DEST}/examples/benchmark"
-
-mkdir -p "${DEST}/examples/serial_simple"
-$COPY "${PWD}"/../examples/serial_simple/serial_simple.ino "${DEST}/examples/serial_simple"
-
-mkdir -p "${DEST}/examples/serial_input"
-$COPY "${PWD}"/../examples/serial_input/serial_input.ino "${DEST}/examples/serial_input"
-
-mkdir -p "${DEST}/examples/spiram_simple"
-$COPY "${PWD}"/../examples/spiram_simple/spiram_simple.ino "${DEST}/examples/spiram_simple"
-
-mkdir -p "${DEST}/examples/multispiram_simple"
-$COPY "${PWD}"/../examples/multispiram_simple/multispiram_simple.ino "${DEST}/examples/multispiram_simple"
-
-mkdir -p "${DEST}/examples/sd_simple"
-$COPY "${PWD}"/../examples/sd_simple/sd_simple.ino "${DEST}/examples/sd_simple"
-
-mkdir -p "${DEST}/examples/alloc_properties"
-$COPY "${PWD}"/../examples/alloc_properties/alloc_properties.ino "${DEST}/examples/alloc_properties"
+copyExample benchmark
+copyExample serial_simple
+copyExample serial_input
+copyExample spiram_simple
+copyExample multispiram_simple
+copyExample sd_simple
+copyExample alloc_properties
+copyExample locking
