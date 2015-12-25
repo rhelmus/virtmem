@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS = src \
+SUBDIRS = virtmem/src \
           test \
     benchmark
 test.depends = lib

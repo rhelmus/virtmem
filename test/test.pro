@@ -13,12 +13,12 @@ HEADERS += \
 
 INCLUDEPATH += .
 
-unix:!macx: LIBS += -L$$PWD/../src/ -lvirtmem
+unix:!macx: LIBS += -L$$PWD/../virtmem/src/ -lvirtmem
 
-INCLUDEPATH += $$PWD/../src
-DEPENDPATH += $$PWD/../src
+INCLUDEPATH += $$PWD/../virtmem/src
+DEPENDPATH += $$PWD/../virtmem/src
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../src/libvirtmem.a
+unix:!macx: PRE_TARGETDEPS += $$PWD/../virtmem/src/libvirtmem.a
 
 INCLUDEPATH += ../gtest/gtest/include
 LIBS += -L$$PWD/../gtest/gtest/build -lgtest -lgtest_main

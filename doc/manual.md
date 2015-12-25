@@ -28,7 +28,7 @@ Before delving into specifics, here is a simple example to demonstrate how `virt
 #include <Arduino.h>
 #include <SdFat.h>
 #include <virtmem.h>
-#include <sd_alloc.h>
+#include <alloc/sd_alloc.h>
 
 // Simplify virtmem usage
 using namespace virtmem;

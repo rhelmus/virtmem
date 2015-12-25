@@ -1,6 +1,6 @@
 #include "virtmem.h"
-#include "static_alloc.h"
-#include "stdio_alloc.h"
+#include "alloc/static_alloc.h"
+#include "alloc/stdio_alloc.h"
 #include "test.h"
 
 using namespace virtmem;
