@@ -128,7 +128,7 @@ struct SPIRamConfig
  *
  * @note The `serialram` library needs to be initialized (i.e. by calling CSerial::begin()) *before*
  * initializing this allocator.
- * @sa @ref bUsing, SPIRamConfig and SPIRAMVAlloc
+ * @sa @ref bUsing, SPIRamConfig and SPIRAMVAllocP
  *
  */
 template <const SPIRamConfig *SPIChips, size_t chipAmount, typename Properties=DefaultAllocProperties>

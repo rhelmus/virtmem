@@ -8,7 +8,7 @@
 
 #include <Arduino.h>
 #include "internal/alloc.h"
-#include "serial_utils.h"
+#include "internal/serial_utils.h"
 
 namespace virtmem {
 
@@ -120,6 +120,8 @@ usage: serial_host.py [-h] [-p PORT] [-b BAUD] [-l PASSDEV] [-r PASSBAUD]
  * @tparam IOStream The type of serial class to use for communication. Default is the type of
  * the Serial class.
  * @tparam Properties Allocator properties, see DefaultAllocProperties
+ *
+ * @sa @ref bUsing, SerialVAlloc
  */
 template <typename IOStream=typeof(Serial), typename Properties=DefaultAllocProperties>
 class SerialVAllocP : public VAlloc<Properties, SerialVAllocP<IOStream, Properties> >

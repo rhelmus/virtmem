@@ -46,6 +46,13 @@
 #define VIRTMEM_CPP11 //!< Enabled if current platform enables C++11 support (e.g. Teensyduino, Arduino >=1.6.6)
 #endif
 
+/**
+  * @brief Used for explicit conversion operators.
+  *
+  * Officially only C++11 and later support this, but this seems to work for not too
+  * old gcc versions (>= 4.5) even if C++11 is not enabled. An empty definition will disable it.
+  */
+#define VIRTMEM_EXPLICIT explicit
 
 namespace virtmem {
 

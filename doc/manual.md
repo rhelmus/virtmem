@@ -106,7 +106,7 @@ multiple memory pages and only writing out data that was modified.
 Because memory pages reside in regular RAM, (repeated) data access to paged
 memory is quite fast.
 
-## Using virtual memory {#bUsing}
+## Using virtual memory (tutorial) {#bUsing}
 
 Virtual memory in `virtmem` is managed by a virtual memory allocator. These are
 C++ template classes which are responsible for allocating and releasing virtual
@@ -119,22 +119,25 @@ class virtmem::SDVAlloc implements an allocator that uses an SD
 card as a virtual memory pool.
 
 The `virtmem` library supports the following allocators:
-* virtmem::SDVAlloc: uses a FAT formatted SD card as memory pool
-* virtmem::SPIRAMVAlloc: uses SPI ram (Microchip's 23LC series) as memory pool
-* virtmem::MultiSPIRAMVAllocP: like virtmem::SPIRAMVAlloc, but supports multiple memory chips
-* virtmem::SerialVAlloc: uses RAM from a computer connected through serial as memory pool
-* For debugging there is also virtmem::StaticVAlloc (uses regular RAM as memory pool) and virtmem::StdioVAlloc (uses files through regular stdio functions as memory pool)
+Allocator | Description | Header
+----------|-------------|-------
+virtmem::SDVAlloc | uses a FAT formatted SD card as memory pool | \c \#include <alloc/sd_alloc.h>
+virtmem::SPIRAMVAlloc | uses SPI ram (Microchip's 23LC series) as memory pool | \c \#include <alloc/spiram_alloc.h>
+virtmem::MultiSPIRAMVAllocP | like virtmem::SPIRAMVAlloc, but supports multiple memory chips | \c \#include <alloc/spiram_alloc.h>
+virtmem::SerialVAlloc | uses RAM from a computer connected through serial as memory pool | \c \#include <alloc/serial_alloc.h>
+virtmem::StaticVAllocP | uses regular RAM as memory pool (for debugging) | \c \#include <alloc/static_alloc.h>
+virtmem::StdioVAlloc | uses files through regular stdio functions as memory pool (for debugging on PCs) | \c \#include <alloc/stdio_alloc.h>
 
-Note that all allocator classes are _singleton_,
-meaning that only one (global) instance should be defined (however, instances
-of _different_ allocators can co-exist, see @ref aMultiAlloc).
-
-After defining a (global) instance of the allocator of choice, one of the first
-things to do is to initialize it:
+The following code demonstrates how to setup a virtual memory allocator:
 
 ~~~{.cpp}
+#include <Arduino.h>
+#include <virtmem.h>
+#include <SdFat.h>
+#include <alloc/sd_alloc.h>
+
 // Create a virtual memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
-// The default memory pool size (1 MB) is used.
+// The default memory pool size (defined by VIRTMEM_DEFAULT_POOLSIZE in config.h) is used.
 virtmem::SDVAlloc valloc;
 
 // ...
@@ -149,6 +152,27 @@ void setup()
 }
 ~~~
 
+To use the `virtmem` library you should include the `virtmem.h` header file. Furthermore, the specific
+header file of the allocator has to be included (alloc/sd_alloc.h, see table above). Finally, since some allocators
+depend on other libraries, they also may need to be included (SdFat.h in this example).
+
+All classes, functions etc. of the `virtmem` library resides in the [virtmem namespace](@ref virtmem).
+If you are unfamiliar with namespaces, you can find some info [here](http://www.cplusplus.com/doc/tutorial/namespaces/).
+This is purely for 'organizational purposes', however, for small programs it may be easier to simply
+pull the `virtmem` namespace in the global namespace:
+
+~~~{.cpp}
+// as above ...
+
+using namespace virtmem; // pull in global namespace to shorten code
+SDVAlloc valloc;
+
+// as below ...
+~~~
+
+All allocator classes are _singleton_, meaning that only one (global) instance can be defined
+(however, instances of _different_ allocators can co-exist, see @ref aMultiAlloc). Before the allocator
+can be used it should be initialized by calling its [start function](@ref virtmem::BaseVAlloc::start).
 Please note that, since this example uses the SD fat lib allocator, SD fat lib has
 to be initialized prior to the allocator (see virtmem::SDVAlloc).
 
@@ -220,7 +244,12 @@ Finally, to free memory the [free()](@ref virtmem::VAlloc::free) function can be
 valloc.free(vptr); // memory size is automatically deduced
 ~~~
 
-For further info see virtmem::BaseVPtr and virtmem::VPtr.
+@sa
+* Allocator base classes: virtmem::VAlloc and virtmem::BaseVAlloc
+* Allocator classes: virtmem::SerialVAllocP, virtmem::SDVAllocP, virtmem::SPIRAMVAllocP and virtmem::MultiSPIRAMVAllocP
+* Pointer classes: virtmem::VPtr and virtmem::BaseVPtr
+* <a href="examples.html">More examples</a>
+* the rest of this manual on advanced usage
 
 # Advanced {#advanced}
 
@@ -510,6 +539,3 @@ virtmem::BaseVPtr basevptr = intvptr;
 intptr = static_cast<int *>(voidptr);
 intvptr = static_cast<virtIntPtr>(basevptr);
 ~~~
-
-
-# Examples {#examples}

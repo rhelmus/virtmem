@@ -1,21 +1,11 @@
 docs:
-- Locking
-- Make and link to examples
-- Document allocator classes
-- VPtr/BaseVPtr description
-- util functions
 - check if all references are OK
 - Check if example code is OK
 - Describe limitations of structs/classes in VPtr
 - spell checks
-- makeVirtPtrLock()
 - highlight the important things and background stuff
-- multiple SPI chips also supported
 - "class" --> "template class" for virtual pointers/allocators etc
-- pointer conversion
 - POD
-- Fix alloc/free/allocRaw etc refs
-- namespace
 - examples:
     - wrapping?
     - C++11?
@@ -24,14 +14,12 @@ docs:
     - take care to specify integer suffix for large numbers on <32 bit chips
     - casts sometimes necessary
 - NILL
-- #include allocators
 - benchmarks?
+- pointer conversion
+- C++11 support
 
 general:
-- switch to c++11 code? (template aliasing, removal of NILL?)
 - Enable/disable right settings in config.h for realease
 - serial script: default to other port on Windows (COM1?) --> update docs (usage etc)
 - remove debug texts (e.g. scripts)
 - which sdfatlib necessary (beta or not)?
-- check when EXPLICIT can be used
-

@@ -13,14 +13,6 @@
 
 #include <stddef.h>
 
-// @cond HIDDEN_SYMBOLS
-#ifdef VIRTMEM_CPP11
-#define EXPLICIT explicit
-#else
-#define EXPLICIT
-#endif
-// @endcond
-
 namespace virtmem {
 
 template <typename T, typename TA> class VPtr;
@@ -104,7 +96,7 @@ public:
          * @{
          */
         inline operator T(void) const { return *read(ptr); }
-        template <typename T2> EXPLICIT inline operator T2(void) const { return static_cast<T2>(operator T()); } // UNDONE: explicit?
+        template <typename T2> VIRTMEM_EXPLICIT inline operator T2(void) const { return static_cast<T2>(operator T()); }
 
 //        ValueWrapper &operator=(const ValueWrapper &v)
         // HACK: 'allow' non const assignment of types. In reality this makes sure we don't define
@@ -309,7 +301,7 @@ public:
      */
     inline operator VPtr<const T, Allocator>(void) { VPtr<const T, Allocator> ret; ret.ptr = ptr; return ret; }
     // pointer to pointer conversion
-    template <typename T2> EXPLICIT inline operator VPtr<T2, Allocator>(void) { VPtr<T2, Allocator> ret; ret.ptr = ptr; return ret; }
+    template <typename T2> VIRTMEM_EXPLICIT inline operator VPtr<T2, Allocator>(void) { VPtr<T2, Allocator> ret; ret.ptr = ptr; return ret; }
     //! @}
 
     /**
@@ -339,6 +331,5 @@ public:
 
 }
 
-#undef EXPLICIT
 
 #endif // VIRTMEM_VPTR_H

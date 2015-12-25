@@ -15,6 +15,15 @@
 
 namespace virtmem {
 
+/**
+ * @brief Virtual memory allocator that uses a regular file (via stdio) as memory pool.
+ *
+ * This class is meant for debugging and can only be used on systems supporting stdio (e.g. PCs).
+ *
+ * @tparam Properties Allocator properties, see DefaultAllocProperties
+ *
+ * @sa @ref bUsing
+ */
 template <typename Properties = DefaultAllocProperties>
 class StdioVAllocP : public VAlloc<Properties, StdioVAllocP<Properties> >
 {
@@ -52,6 +61,11 @@ class StdioVAllocP : public VAlloc<Properties, StdioVAllocP<Properties> >
     }
 
 public:
+    /**
+     * @brief Constructs (but not initializes) the allocator.
+     * @param ps Total amount of bytes of the memory pool.
+     * @sa setPoolSize
+     */
     StdioVAllocP(VPtrSize ps=VIRTMEM_DEFAULT_POOLSIZE) : ramFile(0) { this->setPoolSize(ps); }
     ~StdioVAllocP(void) { doStop(); }
 };

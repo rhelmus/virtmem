@@ -12,14 +12,6 @@
 
 #include <stddef.h>
 
-// @cond HIDDEN_SYMBOLS
-#ifdef VIRTMEM_CPP11
-#define EXPLICIT explicit
-#else
-#define EXPLICIT
-#endif
-// @endcond
-
 namespace virtmem {
 
 #ifndef VIRTMEM_CPP11
@@ -187,7 +179,7 @@ public:
     // Note that we could have used a copy constructor in VPtr instead, but this would make the latter
     // class non-POD
     //! Conversion operator to VPtr types.
-    template <typename T, typename A> EXPLICIT operator VPtr<T, A>(void) const { VPtr<T, A> ret; ret.ptr = ptr; return ret; }
+    template <typename T, typename A> VIRTMEM_EXPLICIT operator VPtr<T, A>(void) const { VPtr<T, A> ret; ret.ptr = ptr; return ret; }
 
     // allow checking with NULL
     /**
@@ -239,6 +231,5 @@ public:
 
 }
 
-#undef EXPLICIT
 
 #endif // VIRTMEM_BASE_VPTR_H
