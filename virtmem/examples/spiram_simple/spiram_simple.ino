@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 #include <virtmem.h>
+#include <SPI.h>
 #include <serialram.h>
 #include <alloc/spiram_alloc.h>
 
