@@ -51,6 +51,9 @@ Alloc valloc(poolSize);
 
 void setup()
 {
+    // uncomment if using the ethernet shield
+    // pinMode(10, OUTPUT); digitalWrite(10, HIGH);
+
     while (!Serial)
         ; // wait for serial to come up
 
