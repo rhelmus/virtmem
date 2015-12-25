@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['addressof',['addressOf',['../singletonvirtmem_1_1CVirtPtr.html#a7c7857eda4b49f4357a195d11c3217b5',1,'virtmem::CVirtPtr::addressOf(void) const '],['../singletonvirtmem_1_1CVirtPtr.html#ae22d1b23032c2a282e2436f8ad76c854',1,'virtmem::CVirtPtr::addressOf(void)']]],
-  ['alloc',['alloc',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a09b3ec0c1a6d61c9e791b828541c6437',1,'virtmem::CBaseVirtMemAlloc::alloc()'],['../singletonvirtmem_1_1CVirtPtr.html#affa1cd2dfa4d2fe901dc055686aff579',1,'virtmem::CVirtPtr::alloc()']]]
+  ['addressof',['addressOf',['../classvirtmem_1_1VPtr.html#af7b45b7ca853c76d2cddeb889cdca4a4',1,'virtmem::VPtr::addressOf(void) const '],['../classvirtmem_1_1VPtr.html#a4508f8a8dd53a6a5dd16c099c52ca377',1,'virtmem::VPtr::addressOf(void)']]],
+  ['alloc',['alloc',['../classvirtmem_1_1VAlloc.html#a27e55bc9a78ac416ddae6de9730010aa',1,'virtmem::VAlloc']]],
+  ['allocraw',['allocRaw',['../classvirtmem_1_1BaseVAlloc.html#a471ea15886bd3cd71364fd8ccdab9ae4',1,'virtmem::BaseVAlloc']]],
+  ['available',['available',['../classvirtmem_1_1serram__utils_1_1SerialInput.html#acba842826f48c2315714956d951fbe4a',1,'virtmem::serram_utils::SerialInput']]],
+  ['availableatleast',['availableAtLeast',['../classvirtmem_1_1serram__utils_1_1SerialInput.html#a35dc761502f2c50e4eafe9ed799c14b8',1,'virtmem::serram_utils::SerialInput']]]
 ];

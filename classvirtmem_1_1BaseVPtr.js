@@ -1,0 +1,27 @@
+var classvirtmem_1_1BaseVPtr =
+[
+    [ "PtrNum", "classvirtmem_1_1BaseVPtr.html#a55b14cd215f955d44f42ac709904c38f", null ],
+    [ "BaseVPtr", "classvirtmem_1_1BaseVPtr.html#a7085209406a058788281e142cb325f8d", null ],
+    [ "BaseVPtr", "classvirtmem_1_1BaseVPtr.html#a790c01b0e6db59f2c7af2ff58c238b0a", null ],
+    [ "getRawNum", "classvirtmem_1_1BaseVPtr.html#abe3fa93ced9deeb6d14c7cc18325ebc8", null ],
+    [ "isWrapped", "classvirtmem_1_1BaseVPtr.html#a8a9afeb9de09acb955dd9747dcbf1de4", null ],
+    [ "operator TSafeBool", "classvirtmem_1_1BaseVPtr.html#a2fc78dd0f475170ee34237cffee037b8", null ],
+    [ "operator VPtr< T, A >", "classvirtmem_1_1BaseVPtr.html#a29f6fa3ed7d9e44a19ac3f8a8b43fe8c", null ],
+    [ "operator!=", "classvirtmem_1_1BaseVPtr.html#aa854facc0aafe96e3e28a39ea36997af", null ],
+    [ "operator!=", "classvirtmem_1_1BaseVPtr.html#a99f5f7da1210aa98faeb13eade471f8e", null ],
+    [ "operator<", "classvirtmem_1_1BaseVPtr.html#a83bab83c7eab7fd8fb2481658d4a451a", null ],
+    [ "operator<=", "classvirtmem_1_1BaseVPtr.html#a4f5472926851f4fa0dd1b83029b49eaa", null ],
+    [ "operator==", "classvirtmem_1_1BaseVPtr.html#a65e0224363d7b3c7a985aa3ac9af1808", null ],
+    [ "operator==", "classvirtmem_1_1BaseVPtr.html#ad7b4ba1dece7c987c32da05fdcdee2b4", null ],
+    [ "operator>", "classvirtmem_1_1BaseVPtr.html#ad4559f33979fe701d5d69333007da889", null ],
+    [ "operator>=", "classvirtmem_1_1BaseVPtr.html#a6acf67bb9fd33e83fbf38054f818e803", null ],
+    [ "setRawNum", "classvirtmem_1_1BaseVPtr.html#a6969188dcaaaa814e1e362319971db3b", null ],
+    [ "unwrap", "classvirtmem_1_1BaseVPtr.html#a341a8e00fdf6985579d2fe5ed81abc44", null ],
+    [ "unwrap", "classvirtmem_1_1BaseVPtr.html#a10c8ebce94451606d6794cb5e6132235", null ],
+    [ "unwrap", "classvirtmem_1_1BaseVPtr.html#a440381a7e52eb5704d484af903298a87", null ],
+    [ "operator!=", "classvirtmem_1_1BaseVPtr.html#aa3a5fa323d01109bc31ed38bd426974a", null ],
+    [ "operator==", "classvirtmem_1_1BaseVPtr.html#a6a332f9d4148406ad72a7dd78b9212b3", null ],
+    [ "VPtr", "classvirtmem_1_1BaseVPtr.html#a0b5caaa70b7dddce91fbb8c1e1ff44e3", null ],
+    [ "VPtrLock", "classvirtmem_1_1BaseVPtr.html#a82af185dc6b53cadc44e11a7996b6619", null ],
+    [ "ptr", "classvirtmem_1_1BaseVPtr.html#a075aa4835bf53d903dccd1fadd142618", null ]
+];

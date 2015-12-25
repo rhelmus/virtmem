@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['newarray',['newArray',['../singletonvirtmem_1_1CVirtPtr.html#a213e56351650f1a858d0243ac216bea4',1,'virtmem::CVirtPtr']]],
-  ['newclass',['newClass',['../singletonvirtmem_1_1CVirtPtr.html#a7cbc3ef3aba009b4440ed4602af18b93',1,'virtmem::CVirtPtr']]]
+  ['lock',['lock',['../classvirtmem_1_1VPtrLock.html#a771d1587c9ee800bd1e13b215eedee1c',1,'virtmem::VPtrLock::lock(void)'],['../classvirtmem_1_1VPtrLock.html#abd5d1ff4a96c98193c3cb198c579b371',1,'virtmem::VPtrLock::lock(const TV &amp;v, VirtPageSize s, bool ro=false)']]]
 ];

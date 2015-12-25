@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['bigpagecount',['bigPageCount',['../structvirtmem_1_1SDefaultAllocProperties.html#a3dc9f19524e13929c8d5e7d610828d61',1,'virtmem::SDefaultAllocProperties']]],
-  ['bigpagesize',['bigPageSize',['../structvirtmem_1_1SDefaultAllocProperties.html#acbe48936ed3be7b6b858ba51200e00ff',1,'virtmem::SDefaultAllocProperties']]]
+  ['bigpagecount',['bigPageCount',['../structvirtmem_1_1DefaultAllocProperties.html#acf149aa9a9b350bb224a71d70d620957',1,'virtmem::DefaultAllocProperties']]],
+  ['bigpagesize',['bigPageSize',['../structvirtmem_1_1DefaultAllocProperties.html#acd15f49288f051a1f013290b419572cb',1,'virtmem::DefaultAllocProperties']]]
 ];

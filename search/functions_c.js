@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['wrap',['wrap',['../classvirtmem_1_1CBaseVirtPtr.html#a99f91d9bbcb80250f73fb1dc943480c3',1,'virtmem::CBaseVirtPtr::wrap()'],['../singletonvirtmem_1_1CVirtPtr.html#aeaa6e1f86e7ee7301163b4a58dc683be',1,'virtmem::CVirtPtr::wrap()']]],
-  ['write',['write',['../classvirtmem_1_1CBaseVirtMemAlloc.html#ace52c23506209528513472e4661e5fe7',1,'virtmem::CBaseVirtMemAlloc']]]
+  ['read',['read',['../classvirtmem_1_1BaseVAlloc.html#a85de189a8a485fc899a894070e1d8db8',1,'virtmem::BaseVAlloc::read()'],['../classvirtmem_1_1serram__utils_1_1SerialInput.html#aae7a03cb0e8e4111497419e452097230',1,'virtmem::serram_utils::SerialInput::read()']]],
+  ['readbytes',['readBytes',['../classvirtmem_1_1serram__utils_1_1SerialInput.html#a52e95d0b0427d032e442630d2b108db8',1,'virtmem::serram_utils::SerialInput']]],
+  ['removetempfile',['removeTempFile',['../classvirtmem_1_1SDVAllocP.html#a51428e847d153621bb0b64a45e17f2a8',1,'virtmem::SDVAllocP']]],
+  ['resetstats',['resetStats',['../classvirtmem_1_1BaseVAlloc.html#a5c48f582bb6f7cca48a7b81e91ad852f',1,'virtmem::BaseVAlloc']]]
 ];

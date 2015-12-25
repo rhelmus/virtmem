@@ -1,25 +1,6 @@
 var searchData=
 [
-  ['getalloc',['getAlloc',['../singletonvirtmem_1_1CVirtPtr.html#a5fc2083e856c78bd1def8a428cabc2bf',1,'virtmem::CVirtPtr']]],
-  ['getbigpagecount',['getBigPageCount',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a47109125c373d79447280219a60e529c',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getbigpagereads',['getBigPageReads',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a55545b3efaf0528f1a4fa39b5e68cdfa',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getbigpagesize',['getBigPageSize',['../classvirtmem_1_1CBaseVirtMemAlloc.html#aadb31ca1872dd8433134dc6625f0349d',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getbigpagewrites',['getBigPageWrites',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a6568e53af9c59d9f13759abf0f87324b',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getbytesread',['getBytesRead',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a0588ef150f67115f7b817d15d64557d3',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getbyteswritten',['getBytesWritten',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a9cdb54562c3e8100afc6f177f85f1dd0',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getfreebigpages',['getFreeBigPages',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a1dc329effa01b01820b40ebf36f41d8b',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getinstance',['getInstance',['../classvirtmem_1_1CVirtMemAlloc.html#a5d0fccd2bbd6eb88f4fdf480bacaacff',1,'virtmem::CVirtMemAlloc']]],
-  ['getlocksize',['getLockSize',['../classvirtmem_1_1CVirtPtrLock.html#ae9608b7742f952c443d88a2e190ffc3d',1,'virtmem::CVirtPtrLock']]],
-  ['getmaxmemused',['getMaxMemUsed',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a8d6ab6b8eeb0821b66491b04002772f9',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getmediumpagecount',['getMediumPageCount',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a406e9c55a69bc976bb12b9b398ce9464',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getmediumpagesize',['getMediumPageSize',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a19e7ceeb5192541c44225b316cb7928c',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getmemused',['getMemUsed',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a3620e539d6b32d30a1f8d0e779d6e7d7',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getpoolsize',['getPoolSize',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a228239aeff5d56b5e657b055ed5e53a8',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getrawnum',['getRawNum',['../classvirtmem_1_1CBaseVirtPtr.html#a1528a954106cd3c250ff5b29bb1b8c7e',1,'virtmem::CBaseVirtPtr']]],
-  ['getsmallpagecount',['getSmallPageCount',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a15bb14f1b3e53bf1811dc166bf5b88ad',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getsmallpagesize',['getSmallPageSize',['../classvirtmem_1_1CBaseVirtMemAlloc.html#ad54cae97a8c5c3ba41fa1a1a3ffacdab',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getunlockedbigpages',['getUnlockedBigPages',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a1df24eadecbc0f9e9219bfae66813237',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getunlockedmediumpages',['getUnlockedMediumPages',['../classvirtmem_1_1CBaseVirtMemAlloc.html#ae6b8d8e06227b79e11968ccd8b47ced9',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getunlockedsmallpages',['getUnlockedSmallPages',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a7c1b3f6e8867c24a04f7c415a4e16c5c',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['getwrapped',['getWrapped',['../classvirtmem_1_1CBaseVirtPtr.html#aaca4c76aa789a1c707fcef044101eef8',1,'virtmem::CBaseVirtPtr']]]
+  ['flush',['flush',['../classvirtmem_1_1BaseVAlloc.html#a37cb70a008aee3cde58881b3075297cb',1,'virtmem::BaseVAlloc']]],
+  ['free',['free',['../classvirtmem_1_1VAlloc.html#a9729b62eccb0d428fd0f8125da3b64c8',1,'virtmem::VAlloc']]],
+  ['freeraw',['freeRaw',['../classvirtmem_1_1BaseVAlloc.html#aaacebd2fc883528c8ad4627b80cf483c',1,'virtmem::BaseVAlloc']]]
 ];

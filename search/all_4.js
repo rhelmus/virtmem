@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['flush',['flush',['../classvirtmem_1_1CBaseVirtMemAlloc.html#aaed8c6f4732b950f52f7a6ac7fb90770',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['free',['free',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a8f2a0b52168ebe6dac8da8898e3ec888',1,'virtmem::CBaseVirtMemAlloc::free()'],['../singletonvirtmem_1_1CVirtPtr.html#aed7594b4c0f00138dd0ff24e2c99b5ef',1,'virtmem::CVirtPtr::free()']]]
+  ['flush',['flush',['../classvirtmem_1_1BaseVAlloc.html#a37cb70a008aee3cde58881b3075297cb',1,'virtmem::BaseVAlloc']]],
+  ['free',['free',['../classvirtmem_1_1VAlloc.html#a9729b62eccb0d428fd0f8125da3b64c8',1,'virtmem::VAlloc']]],
+  ['freeraw',['freeRaw',['../classvirtmem_1_1BaseVAlloc.html#aaacebd2fc883528c8ad4627b80cf483c',1,'virtmem::BaseVAlloc']]]
 ];

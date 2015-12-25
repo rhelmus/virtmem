@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['default_5fpoolsize',['DEFAULT_POOLSIZE',['../config_8h.html#ad4e0e01d21b21f91e29edca0c07f6f22',1,'config.h']]],
-  ['deletearray',['deleteArray',['../singletonvirtmem_1_1CVirtPtr.html#a91a2d9afce9db75dec693883e3783da9',1,'virtmem::CVirtPtr']]],
-  ['deleteclass',['deleteClass',['../singletonvirtmem_1_1CVirtPtr.html#a553bbec0cf7bfd033c9949547999fdb0',1,'virtmem::CVirtPtr']]]
+  ['defaultallocproperties',['DefaultAllocProperties',['../structvirtmem_1_1DefaultAllocProperties.html',1,'virtmem']]],
+  ['deletearray',['deleteArray',['../classvirtmem_1_1VAlloc.html#aadfe861e9afd3b8cd976866a3802a071',1,'virtmem::VAlloc']]],
+  ['deleteclass',['deleteClass',['../classvirtmem_1_1VAlloc.html#aa8192dac3f582705a0ee9cf6ea95ee5f',1,'virtmem::VAlloc']]]
 ];

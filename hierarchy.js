@@ -1,38 +1,35 @@
 var hierarchy =
 [
-    [ "virtmem::CBaseVirtMemAlloc", "classvirtmem_1_1CBaseVirtMemAlloc.html", [
-      [ "virtmem::CVirtMemAlloc< TProperties, CMultiSPIRAMVirtMemAlloc< SPIChips, chipAmount, TProperties > >", "classvirtmem_1_1CVirtMemAlloc.html", [
-        [ "virtmem::CMultiSPIRAMVirtMemAlloc< SPIChips, chipAmount, TProperties >", "classvirtmem_1_1CMultiSPIRAMVirtMemAlloc.html", null ]
+    [ "virtmem::BaseVAlloc", "classvirtmem_1_1BaseVAlloc.html", [
+      [ "virtmem::VAlloc< Properties, MultiSPIRAMVAllocP< SPIChips, chipAmount, Properties > >", "classvirtmem_1_1VAlloc.html", [
+        [ "virtmem::MultiSPIRAMVAllocP< SPIChips, chipAmount, Properties >", "classvirtmem_1_1MultiSPIRAMVAllocP.html", null ]
       ] ],
-      [ "virtmem::CVirtMemAlloc< TProperties, CSdfatlibVirtMemAlloc< TProperties > >", "classvirtmem_1_1CVirtMemAlloc.html", [
-        [ "virtmem::CSdfatlibVirtMemAlloc< TProperties >", "singletonvirtmem_1_1CSdfatlibVirtMemAlloc.html", null ]
+      [ "virtmem::VAlloc< Properties, SDVAllocP< Properties > >", "classvirtmem_1_1VAlloc.html", [
+        [ "virtmem::SDVAllocP< Properties >", "classvirtmem_1_1SDVAllocP.html", null ]
       ] ],
-      [ "virtmem::CVirtMemAlloc< TProperties, CSerRAMVirtMemAlloc< IOStream, TProperties > >", "classvirtmem_1_1CVirtMemAlloc.html", [
-        [ "virtmem::CSerRAMVirtMemAlloc< IOStream, TProperties >", "classvirtmem_1_1CSerRAMVirtMemAlloc.html", null ]
+      [ "virtmem::VAlloc< Properties, SerialVAllocP< IOStream, Properties > >", "classvirtmem_1_1VAlloc.html", [
+        [ "virtmem::SerialVAllocP< IOStream, Properties >", "classvirtmem_1_1SerialVAllocP.html", null ]
       ] ],
-      [ "virtmem::CVirtMemAlloc< TProperties, CSPIRAMVirtMemAlloc< TProperties > >", "classvirtmem_1_1CVirtMemAlloc.html", [
-        [ "virtmem::CSPIRAMVirtMemAlloc< TProperties >", "classvirtmem_1_1CSPIRAMVirtMemAlloc.html", null ]
+      [ "virtmem::VAlloc< Properties, SPIRAMVAllocP< Properties > >", "classvirtmem_1_1VAlloc.html", [
+        [ "virtmem::SPIRAMVAllocP< Properties >", "classvirtmem_1_1SPIRAMVAllocP.html", null ]
       ] ],
-      [ "virtmem::CVirtMemAlloc< TProperties, CStaticVirtMemAlloc< poolSize, TProperties > >", "classvirtmem_1_1CVirtMemAlloc.html", [
-        [ "virtmem::CStaticVirtMemAlloc< poolSize, TProperties >", "classvirtmem_1_1CStaticVirtMemAlloc.html", null ]
+      [ "virtmem::VAlloc< Properties, StaticVAllocP< poolSize, Properties > >", "classvirtmem_1_1VAlloc.html", [
+        [ "virtmem::StaticVAllocP< poolSize, Properties >", "classvirtmem_1_1StaticVAllocP.html", null ]
       ] ],
-      [ "virtmem::CVirtMemAlloc< TProperties, CStdioVirtMemAlloc< TProperties > >", "classvirtmem_1_1CVirtMemAlloc.html", [
-        [ "virtmem::CStdioVirtMemAlloc< TProperties >", "singletonvirtmem_1_1CStdioVirtMemAlloc.html", null ]
+      [ "virtmem::VAlloc< Properties, StdioVAllocP< Properties > >", "classvirtmem_1_1VAlloc.html", [
+        [ "virtmem::StdioVAllocP< Properties >", "classvirtmem_1_1StdioVAllocP.html", null ]
       ] ],
-      [ "virtmem::CVirtMemAlloc< TProperties, TDerived >", "classvirtmem_1_1CVirtMemAlloc.html", null ]
+      [ "virtmem::VAlloc< Properties, Derived >", "classvirtmem_1_1VAlloc.html", null ]
     ] ],
-    [ "virtmem::CBaseVirtPtr", "classvirtmem_1_1CBaseVirtPtr.html", [
-      [ "virtmem::CVirtPtr< T, TA >", "singletonvirtmem_1_1CVirtPtr.html", null ]
+    [ "virtmem::BaseVPtr", "classvirtmem_1_1BaseVPtr.html", [
+      [ "virtmem::VPtr< typename, typename >", "classvirtmem_1_1VPtr.html", null ]
     ] ],
-    [ "virtmem::CVirtPtr< T, TA >::CMemberWrapper", "classvirtmem_1_1CVirtPtr_1_1CMemberWrapper.html", null ],
-    [ "virtmem::CNILL", "classvirtmem_1_1CNILL.html", null ],
-    [ "virtmem::CVirtPtr< T, TA >::CValueWrapper", "classvirtmem_1_1CVirtPtr_1_1CValueWrapper.html", null ],
-    [ "virtmem::CVirtPtrLock< TV >", "classvirtmem_1_1CVirtPtrLock.html", null ],
-    [ "virtmem::SDefaultAllocProperties", "structvirtmem_1_1SDefaultAllocProperties.html", null ],
-    [ "virtmem::SSPIRamConfig", "structvirtmem_1_1SSPIRamConfig.html", null ],
-    [ "virtmem::TSdfatlibVirtPtr< T >", "structvirtmem_1_1TSdfatlibVirtPtr.html", null ],
-    [ "virtmem::TSerRAMVirtPtr< T >", "structvirtmem_1_1TSerRAMVirtPtr.html", null ],
-    [ "virtmem::TSPIRAMVirtPtr< T >", "structvirtmem_1_1TSPIRAMVirtPtr.html", null ],
-    [ "virtmem::TStaticVirtPtr< T >", "structvirtmem_1_1TStaticVirtPtr.html", null ],
-    [ "virtmem::TStdioVirtPtr< T >", "structvirtmem_1_1TStdioVirtPtr.html", null ]
+    [ "virtmem::DefaultAllocProperties", "structvirtmem_1_1DefaultAllocProperties.html", null ],
+    [ "virtmem::VPtr< typename, typename >::MemberWrapper", "classvirtmem_1_1VPtr_1_1MemberWrapper.html", null ],
+    [ "NILL_t", "classNILL__t.html", null ],
+    [ "virtmem::serram_utils::SerialInput< IOStream >", "classvirtmem_1_1serram__utils_1_1SerialInput.html", null ],
+    [ "virtmem::SPIRamConfig", "structvirtmem_1_1SPIRamConfig.html", null ],
+    [ "virtmem::VAlloc< Properties, Derived >::TVPtr< T >", "structvirtmem_1_1VAlloc_1_1TVPtr.html", null ],
+    [ "virtmem::VPtr< typename, typename >::ValueWrapper", "classvirtmem_1_1VPtr_1_1ValueWrapper.html", null ],
+    [ "virtmem::VPtrLock< TV >", "classvirtmem_1_1VPtrLock.html", null ]
 ];

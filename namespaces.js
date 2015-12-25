@@ -1,4 +1,4 @@
 var namespaces =
 [
-    [ "virtmem", "namespacevirtmem.html", null ]
+    [ "virtmem", "namespacevirtmem.html", "namespacevirtmem" ]
 ];

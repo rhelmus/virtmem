@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['setpoolsize',['setPoolSize',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a3d05c9d4306c78af2e5e5d574849e1f2',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['setrawnum',['setRawNum',['../classvirtmem_1_1CBaseVirtPtr.html#ab5545810b9af9022f4506ac001e2ccf1',1,'virtmem::CBaseVirtPtr']]],
-  ['start',['start',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a1682f8a05e7b5cf360c4191e5751d46c',1,'virtmem::CBaseVirtMemAlloc']]],
-  ['stop',['stop',['../classvirtmem_1_1CBaseVirtMemAlloc.html#a31a85309bb766bc9902cce6f9e96d293',1,'virtmem::CBaseVirtMemAlloc']]]
+  ['operator_20tsafebool',['operator TSafeBool',['../classvirtmem_1_1BaseVPtr.html#a2fc78dd0f475170ee34237cffee037b8',1,'virtmem::BaseVPtr']]],
+  ['operator_20vptr_3c_20t_2c_20a_20_3e',['operator VPtr&lt; T, A &gt;',['../classvirtmem_1_1BaseVPtr.html#a29f6fa3ed7d9e44a19ac3f8a8b43fe8c',1,'virtmem::BaseVPtr']]],
+  ['operator_26',['operator&amp;',['../classvirtmem_1_1VPtr.html#a26372a365a024dc326bfc7b7d75f66ab',1,'virtmem::VPtr']]],
+  ['operator_2a',['operator*',['../classvirtmem_1_1VPtrLock.html#a9139737ff6ca18c8fc647a1c594ac84d',1,'virtmem::VPtrLock']]]
 ];

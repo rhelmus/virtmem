@@ -1,7 +1,28 @@
 var searchData=
 [
-  ['wrap',['wrap',['../classvirtmem_1_1CBaseVirtPtr.html#a99f91d9bbcb80250f73fb1dc943480c3',1,'virtmem::CBaseVirtPtr::wrap()'],['../singletonvirtmem_1_1CVirtPtr.html#aeaa6e1f86e7ee7301163b4a58dc683be',1,'virtmem::CVirtPtr::wrap()']]],
-  ['wrapper_2eh',['wrapper.h',['../wrapper_8h.html',1,'']]],
-  ['wrapper_5futils_2eh',['wrapper_utils.h',['../wrapper__utils_8h.html',1,'']]],
-  ['write',['write',['../classvirtmem_1_1CBaseVirtMemAlloc.html#ace52c23506209528513472e4661e5fe7',1,'virtmem::CBaseVirtMemAlloc']]]
+  ['serram_5futils',['serram_utils',['../namespacevirtmem_1_1serram__utils.html',1,'virtmem']]],
+  ['valloc',['VAlloc',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valloc_3c_20properties_2c_20multispiramvallocp_3c_20spichips_2c_20chipamount_2c_20properties_20_3e_20_3e',['VAlloc&lt; Properties, MultiSPIRAMVAllocP&lt; SPIChips, chipAmount, Properties &gt; &gt;',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valloc_3c_20properties_2c_20sdvallocp_3c_20properties_20_3e_20_3e',['VAlloc&lt; Properties, SDVAllocP&lt; Properties &gt; &gt;',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valloc_3c_20properties_2c_20serialvallocp_3c_20iostream_2c_20properties_20_3e_20_3e',['VAlloc&lt; Properties, SerialVAllocP&lt; IOStream, Properties &gt; &gt;',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valloc_3c_20properties_2c_20spiramvallocp_3c_20properties_20_3e_20_3e',['VAlloc&lt; Properties, SPIRAMVAllocP&lt; Properties &gt; &gt;',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valloc_3c_20properties_2c_20staticvallocp_3c_20poolsize_2c_20properties_20_3e_20_3e',['VAlloc&lt; Properties, StaticVAllocP&lt; poolSize, Properties &gt; &gt;',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valloc_3c_20properties_2c_20stdiovallocp_3c_20properties_20_3e_20_3e',['VAlloc&lt; Properties, StdioVAllocP&lt; Properties &gt; &gt;',['../classvirtmem_1_1VAlloc.html',1,'virtmem']]],
+  ['valuewrapper',['ValueWrapper',['../classvirtmem_1_1VPtr_1_1ValueWrapper.html',1,'virtmem::VPtr']]],
+  ['virtmem',['virtmem',['../namespacevirtmem.html',1,'']]],
+  ['virtmem_2eh',['virtmem.h',['../virtmem_8h.html',1,'']]],
+  ['virtmem_5fdefault_5fpoolsize',['VIRTMEM_DEFAULT_POOLSIZE',['../config_8h.html#a0e65a06b23d7220dca7b918e0e764519',1,'config.h']]],
+  ['virtmem_5ftrace_5fstats',['VIRTMEM_TRACE_STATS',['../config_8h.html#add8d3a8cc9aaca16781f0abfaef2fd89',1,'config.h']]],
+  ['virtmem_5fvirt_5faddress_5foperator',['VIRTMEM_VIRT_ADDRESS_OPERATOR',['../config_8h.html#a0a4c3072c9b293219712d3291276aa98',1,'config.h']]],
+  ['virtmem_5fwrap_5fcpointers',['VIRTMEM_WRAP_CPOINTERS',['../config_8h.html#ae0a15670f90e45db1305c6b334d6199c',1,'config.h']]],
+  ['virtpagesize',['VirtPageSize',['../namespacevirtmem.html#a0c7c11e1f674eae32762b8031322ff13',1,'virtmem']]],
+  ['vptr',['VPtr',['../classvirtmem_1_1VAlloc.html#a22f26f8f88d181ea6f4c2213e4777a7a',1,'virtmem::VAlloc::VPtr()'],['../classvirtmem_1_1VPtr.html#adc9646f433358f1f9ea2e40d14a68cf8',1,'virtmem::VPtr::VPtr()']]],
+  ['vptr',['VPtr',['../classvirtmem_1_1VPtr.html',1,'virtmem']]],
+  ['vptr_2eh',['vptr.h',['../vptr_8h.html',1,'']]],
+  ['vptr_5futils_2eh',['vptr_utils.h',['../vptr__utils_8h.html',1,'']]],
+  ['vptr_5futils_2ehpp',['vptr_utils.hpp',['../vptr__utils_8hpp.html',1,'']]],
+  ['vptrlock',['VPtrLock',['../classvirtmem_1_1VPtrLock.html#a2e2036ac83b50e00398ee9bfa6d62509',1,'virtmem::VPtrLock::VPtrLock(const TV &amp;v, VirtPageSize s, bool ro=false)'],['../classvirtmem_1_1VPtrLock.html#a4804b102881167b79eaa51b0daa5d628',1,'virtmem::VPtrLock::VPtrLock(void)'],['../classvirtmem_1_1VPtrLock.html#aa579dd213dcffb2ca257d57a1a9aa9bb',1,'virtmem::VPtrLock::VPtrLock(const VPtrLock &amp;other)']]],
+  ['vptrlock',['VPtrLock',['../classvirtmem_1_1VPtrLock.html',1,'virtmem']]],
+  ['vptrnum',['VPtrNum',['../namespacevirtmem.html#a07b096d15250576bcdb604a27f7c5371',1,'virtmem']]],
+  ['vptrsize',['VPtrSize',['../namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600',1,'virtmem']]]
 ];
