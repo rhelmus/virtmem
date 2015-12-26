@@ -33,7 +33,8 @@ template <typename T> T *pointerTo(const T &val) { return (T *)&(char &)val; }
  *
  * This class provides an easy to use interface to access from virtual memory. The class provides
  * functionality such as dereferencing data, array access, memory (de)allocation and
- * pointer arithmetic.
+ * pointer arithmetic. This class is designed in such a way that it can be
+ * treated mostly as 'plain old data' (POD) and can therefore be used in an `union` as well.
  *
  * @tparam T The type of the data this pointer points to (e.g. char, int, a struct etc...)
  * @tparam TA The allocator type that contains the virtual memory pool where the pointed data resides.

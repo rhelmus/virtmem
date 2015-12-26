@@ -40,7 +40,8 @@ template <typename, typename> class VPtr;
  * @brief This is the base class of VPtr and can be used for typeless pointers.
  *
  * This base class contains all the functionality of virtual pointers which do not depend
- * on any templated code to reduce code size.
+ * on any templated code to reduce code size. This class is designed in such a way that it can be
+ * treated mostly as 'plain old data' (POD) and can therefore be used in an `union` as well.
  *
  * This class can be used for 'typeless' virtual pointers, similar as void* is used
  * for 'regular' typeless pointers.

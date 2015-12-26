@@ -1,22 +1,17 @@
 docs:
 - check if all references are OK
 - Check if example code is OK
-- Describe limitations of structs/classes in VPtr
 - spell checks
 - highlight the important things and background stuff
 - "class" --> "template class" for virtual pointers/allocators etc
-- POD
 - examples:
     - wrapping?
     - C++11?
-- file layout
+    - C utils?
 - FAQ:
     - take care to specify integer suffix for large numbers on <32 bit chips
     - casts sometimes necessary
-- NILL
 - benchmarks?
-- pointer conversion
-- C++11 support
 
 general:
 - Enable/disable right settings in config.h for realease

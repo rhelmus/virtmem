@@ -74,6 +74,8 @@ This Arduino sketch demonstrates how to use a SD card as virtual memory
 store. By using a virtual memory pointer wrapper class, using virtual memory
 becomes quite close to using data residing in 'normal' memory.
 
+More examples can be found on the <a href="examples.html">examples page</a>.
+
 # Basics {#basics}
 
 ## Virtual memory {#bVirtmem}
@@ -105,6 +107,24 @@ multiple memory pages and only writing out data that was modified.
 
 Because memory pages reside in regular RAM, (repeated) data access to paged
 memory is quite fast.
+
+## File structure {#bStructure}
+The `virtmem/` subdirectory contains all the code needed to compile Arduino sketches, and
+should therefore be copied [as any other library](https://www.arduino.cc/en/Guide/Libraries).
+The file layout follows the [new Arduino library specification](https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5:-Library-specification).
+
+Other files include documentation and code for testing the library, and are not needed for compilation.
+A summarized overview is given below.
+
+Directory | Contents
+--------- | --------
+\<root\> | Internal development and README
+benchmark/ | Internal code for benchmarking
+doc/ | Files used for Doxygen created documentation
+doc/html/ | This manual
+gtest/ and test/ | Code for internal testing
+virtmem/ | Library code
+virtmem/extras/ | Contains python scripts needed for [the serial memory allocator](@ref virtmem::SerialVAlloc).
 
 ## Using virtual memory (tutorial) {#bUsing}
 
@@ -436,6 +456,57 @@ invalid pointer address. To avoid this, the
 pointers and is therefore **disabled by default**. This feature can be enabled
 in @ref config.h.
 
+## Dealing with large data structures {#aLargeStructs}
+
+Consider the following code:
+
+~~~{.cpp}
+using namespace virtmem;
+
+struct MyStruct
+{
+    int x, y;
+    char buffer[1024];
+};
+
+// ...
+
+// allocate MyStruct in virtual memory
+VPtr<MyStruct, SDVAlloc> sptr = valloc.alloc<MyStruct>();
+sptr->buffer[512] = 'B'; // assign some random value
+~~~
+
+The size of MyStruct contains a large buffer and the total size exceeds 1 kilobyte. A good reason
+to put it in virtual memory! However, when assignment occurs in the example above,
+dereferencing the virtual pointer causes a copy of the whole data structure to a virtual page
+([more info here](@ref aAccess)). This means that the memory page must be sufficient in size. One
+option is to [configure the allocator](@ref aConfigAlloc) and make sure memory pages are big enough.
+However, since this will increase RAM usage, this may not be an option.
+
+For the example outlined above, another option may be to let MyStruct::buffer be a virtual pointer
+to a buffer in virtual memory:
+~~~{.cpp}
+using namespace virtmem;
+
+struct MyStruct
+{
+    int x, y;
+    VPtr<char, SDVAlloc> buffer;
+};
+
+// ...
+
+// allocate MyStruct in virtual memory
+VPtr<MyStruct, SDVAlloc> sptr = valloc.alloc<MyStruct>();
+
+// ... and allocate buffer
+sptr->buffer = valloc.alloc<char>(1024);
+
+sptr->buffer[512] = 'B'; // assign some random value
+~~~
+
+Since MyStruct only stores a virtual pointer, its _much_ smaller and can easily fit into a memory page.
+
 ## Multiple allocators {#aMultiAlloc}
 
 While not more than one instance of a memory allocator _type_ should be
@@ -539,3 +610,62 @@ virtmem::BaseVPtr basevptr = intvptr;
 intptr = static_cast<int *>(voidptr);
 intvptr = static_cast<virtIntPtr>(basevptr);
 ~~~
+
+## Generalized NULL pointer {#aNILL}
+
+When dealing with both regular and virtual pointers, it may be handy to use a single value that
+can set both types to zero. For this virtmem::NILL can be used:
+~~~{.cpp}
+using namespace virtmem;
+
+// ...
+
+char *a = NILL;
+VPtr<char, SDVAlloc> b = NILL;
+~~~
+
+Note that on platforms support C++11 you can simply use `nullptr` instead.
+
+## Pointer conversion {#aPConv}
+
+Similar to regular pointers, sometimes it may be necessary to convert from one pointer type to another.
+For this a simple typecast works as expected:
+~~~{.cpp}
+using namespace virtmem;
+
+// ...
+
+char buffer[128];
+VPtr<char, SDVAlloc> vbuffer = valloc.alloc<char>(128);
+
+int *ibuf = (int *)buffer; // or reinterpret_cast<int *>(buffer);
+VPtr<int, SDVAlloc> vibuf = (VPtr<int, SDValloc>)vbuffer; // or static_cast<VPtr<int, SDValloc> >(vbuffer);
+~~~
+
+## C++11 support {#aCPP11Support}
+
+Some platforms such as the latest Arduino versions (>= 1.6.6) or Teensyduino support the fairly
+recent C++11 standard. In `virtmem` you can take this to your advantage to shorten the syntax,
+for instance by using [template aliasing](http://en.cppreference.com/w/cpp/language/type_alias):
+
+~~~{.cpp}
+template <typename T> using MyVPtr = virtmem::VPtr<T, virtmem::SDVAlloc>;
+MyVPtr<int> intVPtr;
+MyVPtr<char> charVPtr;
+// etc
+~~~
+
+In fact, this feature is already used by allocator classes:
+~~~{.cpp}
+virtmem::SDVAlloc::VPtr<int> intVPtr;
+~~~
+
+The new `auto` keyword support means that we can further reduce the syntax quite a bit:
+~~~{.cpp}
+virtmem::SDVAlloc valloc;
+//...
+auto intVPtr = valloc.alloc<int>(); // automatically deduce correct type from allocation call
+~~~
+
+Another, small feature with C++11 support, is that `nullptr` can be used to assign a zero address to
+a virtual pointer.
