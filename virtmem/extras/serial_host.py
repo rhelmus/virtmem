@@ -2,6 +2,7 @@
 
 # global modules
 import argparse
+import os
 import queue
 import serial
 import sys
@@ -14,7 +15,7 @@ import serialiohandler
 
 # Values here are used for argument parsing defaults. After parsing values are replaced.
 class Config:
-    serialPort = '/dev/ttyACM0'
+    serialPort = 'COM3' if os.name == 'nt' else '/dev/ttyACM0'
     serialBaud = 115200
     serialInitValue = 0xFF
     serialPassDev = None
@@ -26,7 +27,7 @@ doQuit = False
 inputQueue = queue.Queue()
 serPassInterface = None
 
-def printPrompt()
+def printPrompt():
     print("> ", end="")
 
 def checkCommandArguments():
