@@ -4,17 +4,12 @@ docs:
 - spell checks
 - highlight the important things and background stuff
 - "class" --> "template class" for virtual pointers/allocators etc
-- examples:
-    - wrapping?
-    - C++11?
-    - C utils?
 - FAQ:
     - take care to specify integer suffix for large numbers on <32 bit chips
     - casts sometimes necessary
 - benchmarks?
 
 general:
-- Enable/disable right settings in config.h for realease
 - serial script: default to other port on Windows (COM1?) --> update docs (usage etc)
 - remove debug texts (e.g. scripts)
 - which sdfatlib necessary (beta or not)?

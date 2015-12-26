@@ -2,19 +2,30 @@
 #define VIRTMEM_CONFIG_H
 
 /**
-  @file
-  @brief This header file contains several variables that can be used to customize virtmem.
+  * @file
+  * @brief This header file contains several variables that can be used to customize virtmem.
   */
 
 #include <stdint.h>
 
-/**
-  @brief If defined, enable wrapping of regular pointers inside virtmem::VPtr.
-  @sa virtmem::VPtr::wrap
-  */
-#define VIRTMEM_WRAP_CPOINTERS
+#ifdef DOXYGEN
+// prevent double definitions for Doxygen
+#undef VIRTMEM_WRAP_CPOINTERS
+#undef VIRTMEM_VIRT_ADDRESS_OPERATOR
+#undef VIRTMEM_TRACE_STATS
+#undef VIRTMEM_CPP11
+#undef VIRTMEM_EXPLICIT
+#endif
 
 /**
+  * @def VIRTMEM_WRAP_CPOINTERS
+  * @brief If defined, enable wrapping of regular pointers inside virtmem::VPtr.
+  * @sa virtmem::VPtr::wrap
+  */
+//#define VIRTMEM_WRAP_CPOINTERS
+
+/**
+  * @def VIRTMEM_VIRT_ADDRESS_OPERATOR
   * @brief If defined, the "address of" operator (`&`) of VPtr will be overloaded to
   * return a virtual pointer that has its own address wrapped.
   *
@@ -28,11 +39,12 @@
 #define VIRTMEM_VIRT_ADDRESS_OPERATOR
 
 /**
+  * @def VIRTMEM_TRACE_STATS
   * @brief If defined, several functions in the allocator will be defined that can be used to
   * access statistics such as memory usage and page swaps.
   * @see \ref statf "Statistics functions"
   */
-#define VIRTMEM_TRACE_STATS
+//#define VIRTMEM_TRACE_STATS
 
 /**
   * @brief The default poolsize for allocators supporting a variable sized pool.
@@ -42,11 +54,16 @@
   */
 #define VIRTMEM_DEFAULT_POOLSIZE 1024l * 1024l
 
+/**
+  * @def VIRTMEM_CPP11
+  * @brief Enabled if current platform enables C++11 support (e.g. Teensyduino, Arduino >=1.6.6)
+  */
 #if __cplusplus > 199711L
-#define VIRTMEM_CPP11 //!< Enabled if current platform enables C++11 support (e.g. Teensyduino, Arduino >=1.6.6)
+#define VIRTMEM_CPP11
 #endif
 
 /**
+  * @def VIRTMEM_EXPLICIT
   * @brief Used for explicit conversion operators.
   *
   * Officially only C++11 and later support this, but this seems to work for not too
@@ -135,7 +152,7 @@ struct DefaultAllocProperties
   * and passing this structure as a template parameter to an allocator.
   *
   * Example:
-  * @code
+  * @code{.cpp}
 // This struct contains a customized set of memory page properties.
 // While the datatype of each member does not matter, all members must be static.
 struct AllocProperties
@@ -173,5 +190,24 @@ SDVAllocP<AllocProperties> alloc;
   */
 
 }
+
+#ifdef DOXYGEN
+// Define macros so Doxygen can generate documentation for normally undefined macros
+#ifndef VIRTMEM_WRAP_CPOINTERS
+#define VIRTMEM_WRAP_CPOINTERS
+#endif
+
+#ifndef VIRTMEM_VIRT_ADDRESS_OPERATOR
+#define VIRTMEM_VIRT_ADDRESS_OPERATOR
+#endif
+
+#ifndef VIRTMEM_CPP11
+#define VIRTMEM_CPP11
+#endif
+
+#ifndef VIRTMEM_TRACE_STATS
+#define VIRTMEM_TRACE_STATS
+#endif
+#endif
 
 #endif // CONFIG_H
