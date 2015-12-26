@@ -26,9 +26,8 @@ doQuit = False
 inputQueue = queue.Queue()
 serPassInterface = None
 
-def trace(frame, event, arg):
-    print("{}, {}:{}".format(event, frame.f_code.co_filename, frame.f_lineno))
-    return trace
+def printPrompt()
+    print("> ", end="")
 
 def checkCommandArguments():
     parser = argparse.ArgumentParser()
@@ -49,7 +48,6 @@ def checkCommandArguments():
     Config.serialPassBaud = args.passbaud
 
 def updateSerial():
-#    sys.settrace(trace)
     while not doQuit:
         serialiohandler.update()
         try:
@@ -67,6 +65,7 @@ def monitorInput():
         else:
             for line in sys.stdin:
                 inputQueue.put(bytearray(line, 'ascii'))
+                printPrompt()
     except KeyboardInterrupt:
         pass
 
@@ -81,6 +80,9 @@ def init():
         serialiohandler.connect(Config.serialPort, Config.serialBaud, Config.serialInitValue, serPassInterface)
     else:
         serialiohandler.connect(Config.serialPort, Config.serialBaud, Config.serialInitValue, sys.stdout.buffer)
+
+    print("Monitoring serial port {}. Press ctrl+C to quit.", Config.serialPort)
+    printPrompt()
 
     global serIOThread
     serIOThread = threading.Thread(target = updateSerial)

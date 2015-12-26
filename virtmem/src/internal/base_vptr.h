@@ -211,7 +211,7 @@ public:
       * @{
       */
     // UNDONE: _int128_t comparison sometimes fails??? Perhaps only check for ptrnums/iswrapped when on x86-64? Test this!
-#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+#if (defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)) && defined(VIRTMEM_WRAP_CPOINTERS)
     inline bool operator==(const BaseVPtr &pb) const { return getPtrNum() == pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
     inline bool operator!=(const BaseVPtr &pb) const { return getPtrNum() != pb.getPtrNum() && isWrapped() == pb.isWrapped(); }
     inline bool operator<(const BaseVPtr &pb) const { return getPtrNum() < pb.getPtrNum() && isWrapped() == pb.isWrapped(); }

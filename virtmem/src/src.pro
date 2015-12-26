@@ -54,8 +54,8 @@ QMAKE_LFLAGS += -Wl,--gc-sections
 
 OTHER_FILES += \
     arduinofy.sh \
-    ../script/serial_host.py \
-    ../script/serialiohandler.py
+    ../extras/serial_host.py \
+    ../extras/serialiohandler.py
 
 DISTFILES += \
     ../../README.md \

@@ -4,7 +4,6 @@ import struct
 import sys
 import threading
 import time
-import traceback
 
 class Commands:
     init, initPool, read, write, inputAvailable, inputRequest, inputPeek, ping = range(0, 8)
@@ -135,7 +134,6 @@ def update():
     # NOTE: catch for TypeError as workaround for indexing bug in PySerial
     except (serial.serialutil.SerialException, TypeError):
         print("Caught serial exception, port disconnected?")
-        traceback.print_exc(file=sys.stdout)
         State.initialized = False
         p, b = serInterface.port, serInterface.baudrate
         serInterface.close()
@@ -143,7 +141,7 @@ def update():
         connect(p, b, State.initValue, State.outdev)
 
 def processInput(line):
-    print("Processing input line:", line)
+#    print("Sending input line:", line)
     with State.inputLock:
         State.inputData += line
 

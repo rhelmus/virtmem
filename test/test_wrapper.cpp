@@ -117,6 +117,7 @@ TYPED_TEST(VPtrFixture, BaseWrapTest)
     EXPECT_EQ(wrp, this->vptr);
 }
 
+#ifdef VIRTMEM_WRAP_CPOINTERS
 TYPED_TEST(VPtrFixture, WrapWrapTest)
 {
     TypeParam val;
@@ -131,6 +132,7 @@ TYPED_TEST(VPtrFixture, WrapWrapTest)
     EXPECT_EQ(this->vptr.unwrap(), &val);
     EXPECT_EQ((TypeParam)*this->vptr, val);
 }
+#endif
 
 TYPED_TEST(LimitedWrapFixture, ArithmeticTest)
 {
@@ -187,6 +189,7 @@ TYPED_TEST(LimitedWrapFixture, ArithmeticTest)
     EXPECT_GE(wrpp2, wrpp);
 }
 
+#ifdef VIRTMEM_WRAP_CPOINTERS
 TYPED_TEST(LimitedWrapFixture, WrappedArithmeticTest)
 {
     const int size = 10, start = 10;
@@ -237,6 +240,7 @@ TYPED_TEST(LimitedWrapFixture, WrappedArithmeticTest)
 
     delete [] buf;
 }
+#endif
 
 TEST_F(IntWrapFixture, AlignmentTest)
 {

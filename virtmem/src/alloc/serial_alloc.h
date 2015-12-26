@@ -56,7 +56,9 @@ namespace virtmem {
  * (PC, ARM board etc.) that communicates with the Arduino code. This script allocates a
  * buffer that is sufficient in size to act as RAM for the code running `virtmem`. Both this
  * script and SerialVAlloc::start will block and wait until a connection is established between the two.
- * The serial script requires Python 3 and is stored in `script/serial_host.py`.
+ *
+ * The serial script is stored in `virtmem/extras/serial_host.py`, and requires Python 3 as well
+ * as the [pyserial module](https://pythonhosted.org/pyserial/).
  *
  * Running the script with the `-h` (or `--help`) option will display the available
  * commandline parameters for configuration:
@@ -94,6 +96,10 @@ usage: serial_host.py [-h] [-p PORT] [-b BAUD] [-l PASSDEV] [-r PASSBAUD]
  * serial_host.py -p /dev/ttyACM2 -b 9600 # uses /dev/ttyACM2 (Linux) as serial port, with 9600 baudrate
  * serial_host.py -l /dev/pts/1 # use default serial settings and pass all traffic through /dev/pts/1
  * @endcode
+ *
+ * Once the script has started it will keep monitoring the serial port until exited manually
+ * (e.g. by pressing ctrl+C). Sending text can be done by simply writing the text and pressing
+ * enter.
  *
  * __Sharing serial ports with other code__
  *
