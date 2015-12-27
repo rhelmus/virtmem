@@ -28,7 +28,7 @@ inputQueue = queue.Queue()
 serPassInterface = None
 
 def printPrompt():
-    print("> ", end="")
+    print("> ", end="", flush=True)
 
 def checkCommandArguments():
     parser = argparse.ArgumentParser()
@@ -82,7 +82,7 @@ def init():
     else:
         serialiohandler.connect(Config.serialPort, Config.serialBaud, Config.serialInitValue, sys.stdout.buffer)
 
-    print("Monitoring serial port {}. Press ctrl+C to quit.", Config.serialPort)
+    print("Monitoring serial port {}. Press ctrl+C to quit.".format(Config.serialPort))
     printPrompt()
 
     global serIOThread

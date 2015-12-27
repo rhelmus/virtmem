@@ -91,7 +91,7 @@ template <typename IOStream> bool waitForCommand(IOStream *stream, uint8_t cmd, 
     bool gotinit = false;
     while (millis() < endtime)
     {
-        if (Serial.available())
+        while (Serial.available())
         {
             const uint8_t b = stream->read();
 
@@ -120,9 +120,17 @@ template <typename IOStream> void init(IOStream *stream, uint32_t baud, uint32_t
     waitForCommand(stream, CMD_INIT);
     sendWriteCommand(stream, CMD_INIT); // reply
 #endif
-
+    
+    // Purge any remaining handshake responses from serial script. For some reason,
+    // a simple delay and then purging is not enough, we have to actually use the serial
+    // during the wait period to really get everything out.
+    const uint32_t endtime = millis() + 75;
+    while (millis() < endtime)
+        purgeSerial(stream);
+            
     sendWriteCommand(stream, CMD_INITPOOL);
     writeUInt32(stream, poolsize);
+    stream->flush();
 }
 
 
@@ -160,7 +168,7 @@ template <typename IOStream> uint32_t SerialInput<IOStream>::readBytes(char *buf
     writeUInt32(stream, count);
     stream->flush();
     count = readUInt32(stream);
-    for (; count; --count, ++buffer)
+    for (uint32_t i=0; i<count; ++i, ++buffer)
         *buffer = readUInt8(stream);
     if (availableMin > count)
         availableMin -= count;

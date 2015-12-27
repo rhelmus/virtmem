@@ -37,7 +37,7 @@ def writeInt(i):
 def sendCommand(cmd):
     serInterface.write(bytes([State.initValue]))
     serInterface.write(bytes([cmd]))
-#    print("send: ", State.initValue, "/", bytes([cmd]))
+    #print("send: ", bytes([State.initValue]), "/", bytes([cmd]))
 
 def processByte(byte, printunknown=True):
     val = ord(byte)
@@ -56,7 +56,7 @@ def processByte(byte, printunknown=True):
             State.outdev.flush()
 
 def handleCommand(command):
-#    print("command: ", command)
+    #print("command: ", command)
     if command == Commands.ping:
         sendCommand(Commands.ping)
     elif command == Commands.init:
@@ -67,14 +67,16 @@ def handleCommand(command):
         pass
     elif command == Commands.initPool:
         State.memoryPool = bytearray(readInt())
-        print("init pool:", len(State.memoryPool))
+        print("set memory pool:", len(State.memoryPool), flush=True)
     elif command == Commands.inputAvailable:
         with State.inputLock:
             writeInt(len(State.inputData))
+            #print("request count: ", len(State.inputData))
     elif command == Commands.inputRequest:
         with State.inputLock:
             count = min(readInt(), len(State.inputData))
             writeInt(count)
+            #print("Input request: {} ({})".format(State.inputData[:count], count), flush=True)
             serInterface.write(State.inputData[:count])
             del State.inputData[:count]
     elif command == Commands.inputPeek:
@@ -141,7 +143,7 @@ def update():
         connect(p, b, State.initValue, State.outdev)
 
 def processInput(line):
-#    print("Sending input line:", line)
+    #print("Sending input line:", line, flush=True)
     with State.inputLock:
         State.inputData += line
 
