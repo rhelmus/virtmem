@@ -156,8 +156,10 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual allocator that uses multiple SRAM chips (i.e. 23LC series from Microchip) as memory pool.  <a href="classvirtmem_1_1MultiSPIRAMVAllocP.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual memory allocator that uses a static array (in regular RAM) as memory pool.  <a href="classvirtmem_1_1StaticVAllocP.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvirtmem_1_1StdioVAllocP.html">StdioVAllocP</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual memory allocator that uses a regular file (via stdio) as memory pool.  <a href="classvirtmem_1_1StdioVAllocP.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structvirtmem_1_1DefaultAllocProperties.html">DefaultAllocProperties</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This struct contains default parameters for virtual memory pages.  <a href="structvirtmem_1_1DefaultAllocProperties.html#details">More...</a><br/></td></tr>
@@ -194,11 +196,11 @@ typedef <a class="el" href="classvirtmem_1_1SPIRAMVAllocP.html">SPIRAMVAllocP</a
 <tr class="separator:a8cb697a9f33876878b72e0e92116b345"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3aa483a3751589b9827acb05632a16ee"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3aa483a3751589b9827acb05632a16ee"></a>
 typedef <a class="el" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">StaticVAlloc</a></td></tr>
-<tr class="memdesc:a3aa483a3751589b9827acb05632a16ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut to <a class="el" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP</a> with default template arguments. <br/></td></tr>
+<tr class="memdesc:a3aa483a3751589b9827acb05632a16ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut to <a class="el" href="classvirtmem_1_1StaticVAllocP.html" title="Virtual memory allocator that uses a static array (in regular RAM) as memory pool. ">StaticVAllocP</a> with default template arguments. <br/></td></tr>
 <tr class="separator:a3aa483a3751589b9827acb05632a16ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adacc08cdcf0e7520363358da0c56cec9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adacc08cdcf0e7520363358da0c56cec9"></a>
 typedef <a class="el" href="classvirtmem_1_1StdioVAllocP.html">StdioVAllocP</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacevirtmem.html#adacc08cdcf0e7520363358da0c56cec9">StdioVAlloc</a></td></tr>
-<tr class="memdesc:adacc08cdcf0e7520363358da0c56cec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut to <a class="el" href="classvirtmem_1_1StdioVAllocP.html">StdioVAllocP</a> with default template arguments. <br/></td></tr>
+<tr class="memdesc:adacc08cdcf0e7520363358da0c56cec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut to <a class="el" href="classvirtmem_1_1StdioVAllocP.html" title="Virtual memory allocator that uses a regular file (via stdio) as memory pool. ">StdioVAllocP</a> with default template arguments. <br/></td></tr>
 <tr class="separator:adacc08cdcf0e7520363358da0c56cec9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -464,7 +466,8 @@ template&lt;typename T &gt; </div>
 <p>Creates a virtual lock (shortcut) </p>
 <p>This function is a shortcut for making a virtual lock: unlike using <a class="el" href="classvirtmem_1_1VPtrLock.html" title="Creates a lock to some virtual data. ">VPtrLock</a>, you don't need to specify the virtual pointer type as a template parameter. The function parameters are the same as <a class="el" href="classvirtmem_1_1VPtrLock.html#a2e2036ac83b50e00398ee9bfa6d62509" title="Constructs a virtual data lock class and creates a lock to the given data. ">VPtrLock::VPtrLock</a>. </p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classvirtmem_1_1VPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">VPtr</a> and <a class="el" href="index.html#aLocking">Locking virtual data</a> </dd></dl>
-
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="locking_8ino-example.html#a3">locking.ino</a>.</dd>
+</dl>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
@@ -494,7 +497,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevirtmem.html">virtmem</a></li>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:47 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

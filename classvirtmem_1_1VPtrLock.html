@@ -167,7 +167,8 @@ class virtmem::VPtrLock&lt; TV &gt;</h3>
 <p>This class is used to create and release locks to virtual data. The use of locks allows more efficient data handling and compatibility with code only accepting regular pointers. For more information see <a class="el" href="index.html#aLocking">Locking virtual data</a>.</p>
 <p>The class uses a RAII (resource acquisition is initialization) approach: after a lock has been acquired (usually during construction), it will be automatically released as soon as the class variable goes out of scope.</p>
 <p><a class="el" href="index.html#aWrapping">Wrapped regular pointers</a> are supported: if a given virtual pointer wraps a regular pointer, this class will not attempt to make or release a lock and <a class="el" href="classvirtmem_1_1VPtrLock.html#a9139737ff6ca18c8fc647a1c594ac84d" title="Provides access to the data. ">operator *(void)</a> will simply return the wrapped pointer. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="locking_8ino-example.html#_a2">locking.ino</a>.</dd>
+</dl></div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a2e2036ac83b50e00398ee9bfa6d62509"></a>
 <div class="memitem">
 <div class="memproto">
@@ -318,7 +319,7 @@ template&lt;typename TV&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevirtmem.html">virtmem</a></li><li class="navelem"><a class="el" href="classvirtmem_1_1VPtrLock.html">VPtrLock</a></li>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:47 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

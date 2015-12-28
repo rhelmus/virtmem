@@ -6,7 +6,8 @@ var NAVTREE =
     [ "Demonstration", "index.html#demo", null ],
     [ "Basics", "index.html#basics", [
       [ "Virtual memory", "index.html#bVirtmem", null ],
-      [ "Using virtual memory", "index.html#bUsing", null ]
+      [ "File structure", "index.html#bStructure", null ],
+      [ "Using virtual memory (tutorial)", "index.html#bUsing", null ]
     ] ],
     [ "Advanced", "index.html#advanced", [
       [ "Locking virtual data", "index.html#aLocking", [
@@ -15,13 +16,18 @@ var NAVTREE =
       ] ],
       [ "Accessing data in virtual memory", "index.html#aAccess", null ],
       [ "Wrapping regular pointers", "index.html#aWrapping", null ],
+      [ "Dealing with large data structures", "index.html#aLargeStructs", null ],
       [ "Multiple allocators", "index.html#aMultiAlloc", null ],
       [ "Configuring allocators", "index.html#aConfigAlloc", null ],
       [ "Virtual pointers to `struct`/`class` data members", "index.html#aPointStructMem", null ],
       [ "Overloads of some common C library functions for virtual pointers", "index.html#aCoverloads", null ],
-      [ "Typeless virtual pointers (analog to void*)", "index.html#aTypeless", null ]
+      [ "Typeless virtual pointers (analog to void*)", "index.html#aTypeless", null ],
+      [ "Generalized NULL pointer", "index.html#aNILL", null ],
+      [ "Pointer conversion", "index.html#aPConv", null ],
+      [ "C++11 support", "index.html#aCPP11Support", null ]
     ] ],
-    [ "Examples", "index.html#examples", null ],
+    [ "FAQ", "index.html#FAQ", null ],
+    [ "License", "index.html#license", null ],
     [ "Namespaces", null, [
       [ "Namespace List", "namespaces.html", "namespaces" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -56,7 +62,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "alloc_8h.html",
-"structvirtmem_1_1DefaultAllocProperties.html"
+"spiram__alloc_8h.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

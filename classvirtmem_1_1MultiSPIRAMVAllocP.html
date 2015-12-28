@@ -277,8 +277,8 @@ class virtmem::MultiSPIRAMVAllocP&lt; SPIChips, chipAmount, Properties &gt;</h3>
 <p>This allocator is similar to SPIRAMVAlloc, but combines multiple SRAM chips as one large memory pool. Interfacing occurs through the <a href="https://github.com/rhelmus/serialram">serialram library</a> and must be installed in order to use this allocator. Every SRAM chip is configured by defining an <a class="el" href="structvirtmem_1_1SPIRamConfig.html" title="This struct is used to configure each SRAM chip used by a MultiSPIRAMVAllocP allocator. ">SPIRamConfig</a> array:</p>
 <div class="fragment"><div class="line"><span class="comment">// configuration for two 23LC1024 chips, connected to CS pins 9 and 10.</span></div>
 <div class="line"><a class="code" href="structvirtmem_1_1SPIRamConfig.html">virtmem::SPIRamConfig</a> scfg[2] = {</div>
-<div class="line">     { <span class="keyword">true</span>, 1024 * 128, 9, CSerialRam::SPEED_FULL },</div>
-<div class="line">     { <span class="keyword">true</span>, 1024 * 128, 10, CSerialRam::SPEED_FULL } };</div>
+<div class="line">     { <span class="keyword">true</span>, 1024 * 128, 9, SerialRam::SPEED_FULL },</div>
+<div class="line">     { <span class="keyword">true</span>, 1024 * 128, 10, SerialRam::SPEED_FULL } };</div>
 <div class="line"></div>
 <div class="line"><a class="code" href="classvirtmem_1_1MultiSPIRAMVAllocP.html">virtmem::MultiSPIRAMVAllocP&lt;scfg, 2&gt;</a> <a class="code" href="classvirtmem_1_1VAlloc.html#a27e55bc9a78ac416ddae6de9730010aa">alloc</a>;</div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
@@ -290,7 +290,7 @@ class virtmem::MultiSPIRAMVAllocP&lt; SPIChips, chipAmount, Properties &gt;</h3>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>The <code>serialram</code> library needs to be initialized (i.e. by calling CSerial::begin()) <em>before</em> initializing this allocator. </dd></dl>
-<dl class="section see"><dt>See Also</dt><dd><a class="el" href="index.html#bUsing">Using virtual memory</a>, <a class="el" href="structvirtmem_1_1SPIRamConfig.html" title="This struct is used to configure each SRAM chip used by a MultiSPIRAMVAllocP allocator. ">SPIRamConfig</a> and <a class="el" href="namespacevirtmem.html#a8cb697a9f33876878b72e0e92116b345" title="Shortcut to SPIRAMVAllocP with default template arguments. ">SPIRAMVAlloc</a> </dd></dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="index.html#bUsing">Using virtual memory (tutorial)</a>, <a class="el" href="structvirtmem_1_1SPIRamConfig.html" title="This struct is used to configure each SRAM chip used by a MultiSPIRAMVAllocP allocator. ">SPIRamConfig</a> and <a class="el" href="classvirtmem_1_1SPIRAMVAllocP.html" title="Virtual memory allocator that uses SPI (serial) RAM (i.e. the 23LC series from Microchip) as memory p...">SPIRAMVAllocP</a> </dd></dl>
 <dl><dt><b>Examples: </b></dt><dd><a class="el" href="multispiram_simple_8ino-example.html#_a1">multispiram_simple.ino</a>.</dd>
 </dl></div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a5cb7411ef06a3759f67c8951ba25974c"></a>
@@ -329,7 +329,7 @@ template&lt;const SPIRamConfig * SPIChips, size_t chipAmount, typename Propertie
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevirtmem.html">virtmem</a></li><li class="navelem"><a class="el" href="classvirtmem_1_1MultiSPIRAMVAllocP.html">MultiSPIRAMVAllocP</a></li>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:47 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

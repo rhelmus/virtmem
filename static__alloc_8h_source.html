@@ -118,49 +118,50 @@ $(document).ready(function(){initNavTree('static__alloc_8h_source.html','');});
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">namespace </span>virtmem {</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>32_t poolSize=VIRTMEM_DEFAULT_POOLSIZE, <span class="keyword">typename</span> Properties=DefaultAllocProperties&gt;</div>
-<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="classvirtmem_1_1StaticVAllocP.html">   18</a></span>&#160;<span class="keyword">class </span><a class="code" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP</a> : <span class="keyword">public</span> <a class="code" href="classvirtmem_1_1VAlloc.html">VAlloc</a>&lt;Properties, StaticVAllocP&lt;poolSize, Properties&gt; &gt;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;{</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keywordtype">char</span> staticData[poolSize];</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">void</span> doStart(<span class="keywordtype">void</span>) { }</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keywordtype">void</span> doSuspend(<span class="keywordtype">void</span>) { }</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keywordtype">void</span> doStop(<span class="keywordtype">void</span>) { }</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">void</span> doRead(<span class="keywordtype">void</span> *data, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> offset, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> size)</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    {</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        ::memcpy(data, &amp;staticData[offset], size);</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    }</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordtype">void</span> doWrite(<span class="keyword">const</span> <span class="keywordtype">void</span> *data, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> offset, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> size)</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    {</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        ::memcpy(&amp;staticData[offset], data, size);</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    }</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>32_t poolSize=VIRTMEM_DEFAULT_POOLSIZE, <span class="keyword">typename</span> Properties=DefaultAllocProperties&gt;</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classvirtmem_1_1StaticVAllocP.html">   32</a></span>&#160;<span class="keyword">class </span><a class="code" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP</a> : <span class="keyword">public</span> <a class="code" href="classvirtmem_1_1VAlloc.html">VAlloc</a>&lt;Properties, StaticVAllocP&lt;poolSize, Properties&gt; &gt;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;{</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">char</span> staticData[poolSize];</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">using</span> <a class="code" href="classvirtmem_1_1BaseVAlloc.html#aeb998127b094fb34b4ff3e2f09722c4d">BaseVAlloc::setPoolSize</a>;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP</a>(<span class="keywordtype">void</span>) { this-&gt;<a class="code" href="classvirtmem_1_1BaseVAlloc.html#aeb998127b094fb34b4ff3e2f09722c4d">setPoolSize</a>(poolSize); }</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;};</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">   42</a></span>&#160;<span class="keyword">typedef</span> <a class="code" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP&lt;&gt;</a> <a class="code" href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">StaticVAlloc</a>; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#endif // VIRTMEM_STATIC_ALLOC_H</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">void</span> doStart(<span class="keywordtype">void</span>) { }</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">void</span> doSuspend(<span class="keywordtype">void</span>) { }</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordtype">void</span> doStop(<span class="keywordtype">void</span>) { }</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordtype">void</span> doRead(<span class="keywordtype">void</span> *data, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> offset, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> size)</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        ::memcpy(data, &amp;staticData[offset], size);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    }</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keywordtype">void</span> doWrite(<span class="keyword">const</span> <span class="keywordtype">void</span> *data, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> offset, <a class="code" href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">VPtrSize</a> size)</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    {</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        ::memcpy(&amp;staticData[offset], data, size);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    }</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keyword">using</span> <a class="code" href="classvirtmem_1_1BaseVAlloc.html#aeb998127b094fb34b4ff3e2f09722c4d">BaseVAlloc::setPoolSize</a>;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classvirtmem_1_1StaticVAllocP.html#a5aeaa77a5713b46936563aa10e1d87aa">   53</a></span>&#160;    <a class="code" href="classvirtmem_1_1StaticVAllocP.html#a5aeaa77a5713b46936563aa10e1d87aa">StaticVAllocP</a>(<span class="keywordtype">void</span>) { this-&gt;<a class="code" href="classvirtmem_1_1BaseVAlloc.html#aeb998127b094fb34b4ff3e2f09722c4d">setPoolSize</a>(poolSize); } </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;};</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
+<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">   56</a></span>&#160;<span class="keyword">typedef</span> <a class="code" href="classvirtmem_1_1StaticVAllocP.html">StaticVAllocP&lt;&gt;</a> <a class="code" href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">StaticVAlloc</a>; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;}</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif // VIRTMEM_STATIC_ALLOC_H</span></div>
 <div class="ttc" id="classvirtmem_1_1VAlloc_html"><div class="ttname"><a href="classvirtmem_1_1VAlloc.html">virtmem::VAlloc</a></div><div class="ttdoc">Base template class for virtual memory allocators. </div><div class="ttdef"><b>Definition:</b> alloc.h:28</div></div>
 <div class="ttc" id="classvirtmem_1_1BaseVAlloc_html_aeb998127b094fb34b4ff3e2f09722c4d"><div class="ttname"><a href="classvirtmem_1_1BaseVAlloc.html#aeb998127b094fb34b4ff3e2f09722c4d">virtmem::BaseVAlloc::setPoolSize</a></div><div class="ttdeci">void setPoolSize(VPtrSize ps)</div><div class="ttdoc">Sets the total size of the memory pool. </div><div class="ttdef"><b>Definition:</b> base_alloc.h:155</div></div>
 <div class="ttc" id="alloc_8h_html"><div class="ttname"><a href="alloc_8h.html">alloc.h</a></div><div class="ttdoc">virtual memory class header </div></div>
 <div class="ttc" id="namespacevirtmem_html_a54758a831c5327e92a9ff3d46117b600"><div class="ttname"><a href="namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600">virtmem::VPtrSize</a></div><div class="ttdeci">uint32_t VPtrSize</div><div class="ttdoc">Numeric type used to store the size of a virtual memory block. </div><div class="ttdef"><b>Definition:</b> base_alloc.h:22</div></div>
-<div class="ttc" id="namespacevirtmem_html_a3aa483a3751589b9827acb05632a16ee"><div class="ttname"><a href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">virtmem::StaticVAlloc</a></div><div class="ttdeci">StaticVAllocP StaticVAlloc</div><div class="ttdoc">Shortcut to StaticVAllocP with default template arguments. </div><div class="ttdef"><b>Definition:</b> static_alloc.h:42</div></div>
-<div class="ttc" id="classvirtmem_1_1StaticVAllocP_html"><div class="ttname"><a href="classvirtmem_1_1StaticVAllocP.html">virtmem::StaticVAllocP</a></div><div class="ttdef"><b>Definition:</b> static_alloc.h:18</div></div>
+<div class="ttc" id="classvirtmem_1_1StaticVAllocP_html_a5aeaa77a5713b46936563aa10e1d87aa"><div class="ttname"><a href="classvirtmem_1_1StaticVAllocP.html#a5aeaa77a5713b46936563aa10e1d87aa">virtmem::StaticVAllocP::StaticVAllocP</a></div><div class="ttdeci">StaticVAllocP(void)</div><div class="ttdoc">Constructs (but not initializes) the allocator. </div><div class="ttdef"><b>Definition:</b> static_alloc.h:53</div></div>
+<div class="ttc" id="namespacevirtmem_html_a3aa483a3751589b9827acb05632a16ee"><div class="ttname"><a href="namespacevirtmem.html#a3aa483a3751589b9827acb05632a16ee">virtmem::StaticVAlloc</a></div><div class="ttdeci">StaticVAllocP StaticVAlloc</div><div class="ttdoc">Shortcut to StaticVAllocP with default template arguments. </div><div class="ttdef"><b>Definition:</b> static_alloc.h:56</div></div>
+<div class="ttc" id="classvirtmem_1_1StaticVAllocP_html"><div class="ttname"><a href="classvirtmem_1_1StaticVAllocP.html">virtmem::StaticVAllocP</a></div><div class="ttdoc">Virtual memory allocator that uses a static array (in regular RAM) as memory pool. </div><div class="ttdef"><b>Definition:</b> static_alloc.h:32</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0a282dda276d9c52325ab51994dbac19.html">virtmem</a></li><li class="navelem"><a class="el" href="dir_260a6b478e53b3ae44dccf66a2f5ab15.html">src</a></li><li class="navelem"><a class="el" href="dir_88a25d9a4b11cbfaa66952a0631e2789.html">alloc</a></li><li class="navelem"><a class="el" href="static__alloc_8h.html">static_alloc.h</a></li>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:46 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

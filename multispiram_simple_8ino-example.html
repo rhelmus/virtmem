@@ -115,6 +115,7 @@ $(document).ready(function(){initNavTree('multispiram_simple_8ino-example.html',
 <div class="line"></div>
 <div class="line"><span class="preprocessor">#include &lt;Arduino.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="virtmem_8h.html">virtmem.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;SPI.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;serialram.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="spiram__alloc_8h.html">alloc/spiram_alloc.h</a>&gt;</span></div>
 <div class="line"></div>
@@ -125,8 +126,8 @@ $(document).ready(function(){initNavTree('multispiram_simple_8ino-example.html',
 <div class="line"><a name="_a0"></a><a class="code" href="structvirtmem_1_1SPIRamConfig.html">SPIRamConfig</a> scfg[2] =</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">// format: &lt;large adressing&gt; (true if &gt; 512 kbit), &lt;size of the chip&gt;, &lt;CS pin&gt;, &lt;SPI speed&gt;</span></div>
-<div class="line">    { <span class="keyword">true</span>, 1024 * 128, 9, CSerialRam::SPEED_FULL },</div>
-<div class="line">    { <span class="keyword">true</span>, 1024 * 128, 10, CSerialRam::SPEED_FULL }</div>
+<div class="line">    { <span class="keyword">true</span>, 1024 * 128, 9, SerialRam::SPEED_FULL },</div>
+<div class="line">    { <span class="keyword">true</span>, 1024 * 128, 10, SerialRam::SPEED_FULL }</div>
 <div class="line">};</div>
 <div class="line"></div>
 <div class="line"><span class="keyword">typedef</span> <a name="_a1"></a><a class="code" href="classvirtmem_1_1MultiSPIRAMVAllocP.html">MultiSPIRAMVAllocP&lt;scfg, 2&gt;</a> Alloc; <span class="comment">// shortcut</span></div>
@@ -160,7 +161,7 @@ $(document).ready(function(){initNavTree('multispiram_simple_8ino-example.html',
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:46 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

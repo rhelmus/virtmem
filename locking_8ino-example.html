@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>virtmem: spiram_simple.ino</title>
+<title>virtmem: locking.ino</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -79,7 +79,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('spiram_simple_8ino-example.html','');});
+$(document).ready(function(){initNavTree('locking_8ino-example.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -98,57 +98,96 @@ $(document).ready(function(){initNavTree('spiram_simple_8ino-example.html','');}
 
 <div class="header">
   <div class="headertitle">
-<div class="title">spiram_simple.ino</div>  </div>
+<div class="title">locking.ino</div>  </div>
 </div><!--header-->
 <div class="contents">
-<p>This is a simple example sketch showing how to use the SPI RAM allocator.</p>
+<p>This example shows how to lock virtual data within regular RAM.</p>
 <div class="fragment"><div class="line"><span class="comment">/*</span></div>
-<div class="line"><span class="comment"> * Minimal example showing how to use the SPI RAM virtual memory allocator</span></div>
-<div class="line"><span class="comment"> * (SPIRAMVAlloc/SPIRAMVAllocP). The 23LC series from Microchip are supported.</span></div>
+<div class="line"><span class="comment"> * Example showing how to use virtual data locks. When a lock is made a portion of virtual memory</span></div>
+<div class="line"><span class="comment"> * is kept within a virtual memory page until the lock is released. Locking data can significantly</span></div>
+<div class="line"><span class="comment"> * improve performance since data can be accessed through a regular pointer, and helps dealing</span></div>
+<div class="line"><span class="comment"> * with code that only accepts regular pointers. The latter is demonstarted in this example.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * This example uses the SD allocator, however, any other allocator could be used as well.</span></div>
 <div class="line"><span class="comment"> *</span></div>
 <div class="line"><span class="comment"> * Requirements:</span></div>
-<div class="line"><span class="comment"> *  - the serialram library should be installed (https://github.com/rhelmus/serialram)</span></div>
-<div class="line"><span class="comment"> *  - the SRAM chip should be properly connected with SPI (the CS pin is configured below)</span></div>
+<div class="line"><span class="comment"> *  - the SdFat library should be installed (https://github.com/greiman/SdFat)</span></div>
+<div class="line"><span class="comment"> *  - an FAT formatted SD card</span></div>
+<div class="line"><span class="comment"> *  - a connection to the SD card via SPI</span></div>
 <div class="line"><span class="comment"> */</span></div>
-<div class="line"></div>
 <div class="line"></div>
 <div class="line"><span class="preprocessor">#include &lt;Arduino.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="virtmem_8h.html">virtmem.h</a>&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;SPI.h&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;serialram.h&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="spiram__alloc_8h.html">alloc/spiram_alloc.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;SdFat.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="sd__alloc_8h.html">alloc/sd_alloc.h</a>&gt;</span></div>
 <div class="line"></div>
-<div class="line"><span class="comment">// configuration of SRAM chip: a 23LC1024 chip is assumed here which has CS connected to pin 9</span></div>
-<div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> chipSelect = 9;</div>
-<div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> chipSize = 1024 * 128; <span class="comment">// 128 kB (=1 mbit)</span></div>
-<div class="line"><span class="keyword">const</span> <span class="keywordtype">bool</span> largeAddressing = <span class="keyword">true</span>; <span class="comment">// false if chipsize &lt;1 mbit</span></div>
-<div class="line"><span class="keyword">const</span> SerialRam::ESPISpeed spiSpeed = SerialRam::SPEED_FULL;</div>
+<div class="line"><span class="comment">// configuration for SD</span></div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> chipSelect = 4;</div>
+<div class="line"><span class="keyword">const</span> uint32_t poolSize = 1024l * 328l; <span class="comment">// the size of the virtual memory pool (in bytes)</span></div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> spiSpeed = SPI_FULL_SPEED;</div>
 <div class="line"></div>
 <div class="line"><span class="comment">// pull in complete virtmem namespace</span></div>
 <div class="line"><span class="keyword">using namespace </span>virtmem;</div>
 <div class="line"></div>
-<div class="line"><a name="_a0"></a><a class="code" href="classvirtmem_1_1SPIRAMVAllocP.html">SPIRAMVAlloc</a> valloc(chipSize, largeAddressing, chipSelect, spiSpeed);</div>
+<div class="line">SdFat sd;</div>
+<div class="line"><a name="_a0"></a><a class="code" href="classvirtmem_1_1SDVAllocP.html">SDVAlloc</a> valloc(poolSize);</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> setup()</div>
 <div class="line">{</div>
+<div class="line">    <span class="comment">// uncomment if using the ethernet shield</span></div>
+<div class="line">    <span class="comment">// pinMode(10, OUTPUT); digitalWrite(10, HIGH);</span></div>
+<div class="line"></div>
 <div class="line">    <span class="keywordflow">while</span> (!Serial)</div>
 <div class="line">        ; <span class="comment">// wait for serial to come up</span></div>
 <div class="line"></div>
 <div class="line">    Serial.begin(115200);</div>
+<div class="line"></div>
+<div class="line">    <span class="comment">// initialize SdFat library: this should be done before starting the allocator!</span></div>
+<div class="line">    <span class="keywordflow">if</span> (!sd.begin(chipSelect, spiSpeed))</div>
+<div class="line">        sd.initErrorHalt();</div>
+<div class="line"></div>
 <div class="line">    valloc.start();</div>
 <div class="line"></div>
 <div class="line">    delay(3000); <span class="comment">// add some delay so the user can connect with a serial terminal</span></div>
+<div class="line"></div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;Initialized!&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> loop()</div>
 <div class="line">{</div>
-<div class="line">    <span class="comment">// allocate some integer on virtual memory</span></div>
-<div class="line">    <a name="_a1"></a><a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;int, SPIRAMVAlloc&gt;</a> vpi = valloc.alloc&lt;<span class="keywordtype">int</span>&gt;();</div>
+<div class="line">    <span class="comment">// allocate a string in virtual memory</span></div>
+<div class="line">    <a name="_a1"></a><a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;char, SDVAlloc&gt;</a> vstr = valloc.alloc&lt;<span class="keywordtype">char</span>&gt;(128);</div>
 <div class="line"></div>
-<div class="line">    *vpi = 42; <span class="comment">// assign some value, just like a regular pointer!</span></div>
-<div class="line">    Serial.print(<span class="stringliteral">&quot;*vpi = &quot;</span>); Serial.println(*vpi);</div>
+<div class="line">    strcpy(vstr, <span class="stringliteral">&quot;hello (virtual) world!&quot;</span>);</div>
 <div class="line"></div>
-<div class="line">    valloc.free(vpi); <span class="comment">// And free the virtual memory</span></div>
+<div class="line">    <span class="comment">// print the string: for this we want to use Serial.print(), however, this function</span></div>
+<div class="line">    <span class="comment">// only accepts &#39;regular&#39; strings. Hence, we have to lock the data first.</span></div>
+<div class="line"></div>
+<div class="line">    <span class="keywordtype">int</span> size = strlen(vstr) + 1; <span class="comment">// size to lock (including string zero terminator)</span></div>
+<div class="line">    <a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;char, SDVAlloc&gt;</a> p = vstr;</div>
+<div class="line">    <span class="keywordflow">while</span> (size)</div>
+<div class="line">    {</div>
+<div class="line">        <span class="comment">// Make the lock: the last argument specifies the lock should be read-only (more efficient)</span></div>
+<div class="line">        <span class="comment">// Since we only have to print the string we set this to true.</span></div>
+<div class="line">        <a name="_a2"></a><a class="code" href="classvirtmem_1_1VPtrLock.html">VPtrLock&lt;VPtr&lt;char, SDVAlloc&gt;</a> &gt; lock = <a name="a3"></a><a class="code" href="namespacevirtmem.html#a0c0be70ab651fb0513afd31d1b0ceb2e">makeVirtPtrLock</a>(p, size, <span class="keyword">true</span>);</div>
+<div class="line"></div>
+<div class="line">        <span class="comment">// Get the actual size of the lock. This is important, because it can happen that</span></div>
+<div class="line">        <span class="comment">// the complete data could not be locked at once.</span></div>
+<div class="line">        <span class="keyword">const</span> <span class="keywordtype">int</span> lockedsize = lock.<a name="a4"></a><a class="code" href="classvirtmem_1_1VPtrLock.html#a9461c0c077cddcd05c87cb2c0c31f8f3">getLockSize</a>();</div>
+<div class="line"></div>
+<div class="line">        <span class="comment">// dereferencing the lock (*lock) will return a regular pointer to the data</span></div>
+<div class="line">        Serial.write(*lock, lockedsize);</div>
+<div class="line"></div>
+<div class="line">        size -= lockedsize;</div>
+<div class="line">        p += lockedsize;</div>
+<div class="line"></div>
+<div class="line">        <span class="comment">// in case lockedsize was smaller than size, the above code will be called again using the</span></div>
+<div class="line">        <span class="comment">// remaining string.</span></div>
+<div class="line">    }</div>
+<div class="line"></div>
+<div class="line">    Serial.println(<span class="stringliteral">&quot;&quot;</span>); <span class="comment">// end with a newline</span></div>
+<div class="line"></div>
+<div class="line">    valloc.free(vstr); <span class="comment">// And free the virtual memory</span></div>
 <div class="line"></div>
 <div class="line">    delay(1000); <span class="comment">// keep doing this with 1 second pauses inbetween...</span></div>
 <div class="line">}</div>

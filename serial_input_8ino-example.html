@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>virtmem: Namespace Members</title>
+<title>virtmem: serial_input.ino</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -45,7 +45,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li class="current"><a href="namespaces.html"><span>Namespaces</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li><a href="examples.html"><span>Examples</span></a></li>
@@ -67,20 +67,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-  <div id="navrow2" class="tabs2">
-    <ul class="tablist">
-      <li><a href="namespaces.html"><span>Namespace&#160;List</span></a></li>
-      <li class="current"><a href="namespacemembers.html"><span>Namespace&#160;Members</span></a></li>
-    </ul>
-  </div>
-  <div id="navrow3" class="tabs2">
-    <ul class="tablist">
-      <li><a href="namespacemembers.html"><span>All</span></a></li>
-      <li class="current"><a href="namespacemembers_func.html"><span>Functions</span></a></li>
-      <li><a href="namespacemembers_vars.html"><span>Variables</span></a></li>
-      <li><a href="namespacemembers_type.html"><span>Typedefs</span></a></li>
-    </ul>
-  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -93,7 +79,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('namespacemembers_func.html','');});
+$(document).ready(function(){initNavTree('serial_input_8ino-example.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -110,16 +96,68 @@ $(document).ready(function(){initNavTree('namespacemembers_func.html','');});
 </iframe>
 </div>
 
+<div class="header">
+  <div class="headertitle">
+<div class="title">serial_input.ino</div>  </div>
+</div><!--header-->
 <div class="contents">
-&#160;<ul>
-<li>getMembrPtr()
-: <a class="el" href="namespacevirtmem.html#a1bb6896d8881e005bbf5949e410bffdc">virtmem</a>
-</li>
-<li>makeVirtPtrLock()
-: <a class="el" href="namespacevirtmem.html#a0c0be70ab651fb0513afd31d1b0ceb2e">virtmem</a>
-</li>
-</ul>
-</div><!-- contents -->
+<p>This example shows how to use serial input over a port shared with the serial allocator.</p>
+<div class="fragment"><div class="line"><span class="comment">/*</span></div>
+<div class="line"><span class="comment"> * This example shows how to handle serial input when using the serial virtual memory allocator</span></div>
+<div class="line"><span class="comment"> * (SerialValloc/SerialVallocP) with a &#39;shared&#39; serial port. In this example the default serial port,</span></div>
+<div class="line"><span class="comment"> * (&#39;Serial&#39;) is used.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * The only requirement is that a so called &#39;RAM host&#39; (for instance a PC) is</span></div>
+<div class="line"><span class="comment"> * connected via the default serial port (Serial). The RAM host should run the</span></div>
+<div class="line"><span class="comment"> * &#39;script/serial_host.py&#39; Python script.</span></div>
+<div class="line"><span class="comment"> */</span></div>
+<div class="line"></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;Arduino.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="virtmem_8h.html">virtmem.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="serial__alloc_8h.html">alloc/serial_alloc.h</a>&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="keyword">const</span> uint32_t poolSize = 1024l * 32l; <span class="comment">// the size of the virtual memory pool (in bytes)</span></div>
+<div class="line"></div>
+<div class="line"><span class="comment">// pull in complete virtmem namespace</span></div>
+<div class="line"><span class="keyword">using namespace </span>virtmem;</div>
+<div class="line"></div>
+<div class="line"><a name="_a0"></a><a class="code" href="classvirtmem_1_1SerialVAllocP.html">SerialVAlloc</a> valloc(poolSize); <span class="comment">// default settings: use Serial with 115200 baudrate</span></div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> setup()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">while</span> (!Serial)</div>
+<div class="line">        ; <span class="comment">// wait for serial to come up</span></div>
+<div class="line"></div>
+<div class="line">    valloc.start();</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> loop()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (valloc.input.availableAtLeast() &gt; 0) <span class="comment">// some input available?</span></div>
+<div class="line">    {</div>
+<div class="line">        <span class="comment">// get the amount of bytes available.</span></div>
+<div class="line">        <span class="comment">// NOTE: this function is the more &#39;expensive&#39;, but accurate version of</span></div>
+<div class="line">        <span class="comment">// availableAtLeast().</span></div>
+<div class="line">        <span class="keywordtype">int</span> bytes = valloc.input.available();</div>
+<div class="line"></div>
+<div class="line">        Serial.print(<span class="stringliteral">&quot;read single byte: &quot;</span>); Serial.println(valloc.input.read());</div>
+<div class="line">        --bytes;</div>
+<div class="line"></div>
+<div class="line">        <span class="keywordflow">if</span> (bytes &gt; 0) <span class="comment">// more input?</span></div>
+<div class="line">        {</div>
+<div class="line">            <span class="comment">// read it in a buffer: reading it in one go is much faster</span></div>
+<div class="line">            <span class="keywordtype">char</span> buffer[128];</div>
+<div class="line"></div>
+<div class="line">            bytes = max(bytes, 127); <span class="comment">// make sure we don&#39;t read too much</span></div>
+<div class="line"></div>
+<div class="line">            <span class="keyword">const</span> <span class="keywordtype">int</span> readbytes = valloc.input.readBytes(buffer, bytes);</div>
+<div class="line">            buffer[readbytes] = 0; <span class="comment">// make sure the string is null terminated</span></div>
+<div class="line">            Serial.print(<span class="stringliteral">&quot;read string: &quot;</span>); Serial.println(buffer);</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

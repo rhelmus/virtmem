@@ -9,7 +9,7 @@ var classvirtmem_1_1VPtr =
     [ "addressOf", "classvirtmem_1_1VPtr.html#af7b45b7ca853c76d2cddeb889cdca4a4", null ],
     [ "addressOf", "classvirtmem_1_1VPtr.html#a4508f8a8dd53a6a5dd16c099c52ca377", null ],
     [ "operator VPtr< const T, Allocator >", "classvirtmem_1_1VPtr.html#a95f431f24187c91a845146d7d80591eb", null ],
-    [ "operator VPtr< T2, Allocator >", "classvirtmem_1_1VPtr.html#a26c60d7b1fd9315f678fe3ffc7a726bd", null ],
+    [ "operator VPtr< T2, Allocator >", "classvirtmem_1_1VPtr.html#ada3d66280cdbf18291e7a1ae5e382402", null ],
     [ "operator&", "classvirtmem_1_1VPtr.html#a26372a365a024dc326bfc7b7d75f66ab", null ],
     [ "operator*", "classvirtmem_1_1VPtr.html#aa3aa5fe9861bd51b87da0df1ef7f71e5", null ],
     [ "operator+", "classvirtmem_1_1VPtr.html#aba1a7c55d658ac06cf461c97353b977b", null ],

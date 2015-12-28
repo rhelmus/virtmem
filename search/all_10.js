@@ -11,7 +11,9 @@ var searchData=
   ['valuewrapper',['ValueWrapper',['../classvirtmem_1_1VPtr_1_1ValueWrapper.html',1,'virtmem::VPtr']]],
   ['virtmem',['virtmem',['../namespacevirtmem.html',1,'']]],
   ['virtmem_2eh',['virtmem.h',['../virtmem_8h.html',1,'']]],
+  ['virtmem_5fcpp11',['VIRTMEM_CPP11',['../config_8h.html#a678372536d3e60a8faf75a6c6b2e12ee',1,'config.h']]],
   ['virtmem_5fdefault_5fpoolsize',['VIRTMEM_DEFAULT_POOLSIZE',['../config_8h.html#a0e65a06b23d7220dca7b918e0e764519',1,'config.h']]],
+  ['virtmem_5fexplicit',['VIRTMEM_EXPLICIT',['../config_8h.html#ad3421d3c6b6d0841217c4a6c360b1d38',1,'config.h']]],
   ['virtmem_5ftrace_5fstats',['VIRTMEM_TRACE_STATS',['../config_8h.html#add8d3a8cc9aaca16781f0abfaef2fd89',1,'config.h']]],
   ['virtmem_5fvirt_5faddress_5foperator',['VIRTMEM_VIRT_ADDRESS_OPERATOR',['../config_8h.html#a0a4c3072c9b293219712d3291276aa98',1,'config.h']]],
   ['virtmem_5fwrap_5fcpointers',['VIRTMEM_WRAP_CPOINTERS',['../config_8h.html#ae0a15670f90e45db1305c6b334d6199c',1,'config.h']]],
@@ -21,8 +23,8 @@ var searchData=
   ['vptr_2eh',['vptr.h',['../vptr_8h.html',1,'']]],
   ['vptr_5futils_2eh',['vptr_utils.h',['../vptr__utils_8h.html',1,'']]],
   ['vptr_5futils_2ehpp',['vptr_utils.hpp',['../vptr__utils_8hpp.html',1,'']]],
-  ['vptrlock',['VPtrLock',['../classvirtmem_1_1VPtrLock.html#a2e2036ac83b50e00398ee9bfa6d62509',1,'virtmem::VPtrLock::VPtrLock(const TV &amp;v, VirtPageSize s, bool ro=false)'],['../classvirtmem_1_1VPtrLock.html#a4804b102881167b79eaa51b0daa5d628',1,'virtmem::VPtrLock::VPtrLock(void)'],['../classvirtmem_1_1VPtrLock.html#aa579dd213dcffb2ca257d57a1a9aa9bb',1,'virtmem::VPtrLock::VPtrLock(const VPtrLock &amp;other)']]],
   ['vptrlock',['VPtrLock',['../classvirtmem_1_1VPtrLock.html',1,'virtmem']]],
+  ['vptrlock',['VPtrLock',['../classvirtmem_1_1VPtrLock.html#a2e2036ac83b50e00398ee9bfa6d62509',1,'virtmem::VPtrLock::VPtrLock(const TV &amp;v, VirtPageSize s, bool ro=false)'],['../classvirtmem_1_1VPtrLock.html#a4804b102881167b79eaa51b0daa5d628',1,'virtmem::VPtrLock::VPtrLock(void)'],['../classvirtmem_1_1VPtrLock.html#aa579dd213dcffb2ca257d57a1a9aa9bb',1,'virtmem::VPtrLock::VPtrLock(const VPtrLock &amp;other)']]],
   ['vptrnum',['VPtrNum',['../namespacevirtmem.html#a07b096d15250576bcdb604a27f7c5371',1,'virtmem']]],
   ['vptrsize',['VPtrSize',['../namespacevirtmem.html#a54758a831c5327e92a9ff3d46117b600',1,'virtmem']]]
 ];

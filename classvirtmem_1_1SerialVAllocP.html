@@ -298,27 +298,29 @@ class virtmem::SerialVAllocP&lt; IOStream, Properties &gt;</h3>
 <div class="fragment"><div class="line">SoftwareSerial sserial(10, 11);</div>
 <div class="line">SerialVAllocP&lt;SoftwareSerial&gt; valloc(SERIALRAM_POOLSIZE, 115200, &amp;sserial);</div>
 </div><!-- fragment --><p><b>Communication with the RAM host</b></p>
-<p>A special <a href="https://www.python.org/">Python</a> script needs to be run on the RAM host (PC, ARM board etc.) that communicates with the Arduino code. This script allocates a buffer that is sufficient in size to act as RAM for the code running <code>virtmem</code>. Both this script and <a class="el" href="classvirtmem_1_1BaseVAlloc.html#aace59bf9d420566604bc0a78c70f7b7f" title="Starts the allocator. ">SerialVAlloc::start</a> will block and wait until a connection is established between the two. The serial script requires Python 3 and is stored in <code>script/serial_host.py</code>.</p>
+<p>A special <a href="https://www.python.org/">Python</a> script needs to be run on the RAM host (PC, ARM board etc.) that communicates with the Arduino code. This script allocates a buffer that is sufficient in size to act as RAM for the code running <code>virtmem</code>. Both this script and <a class="el" href="classvirtmem_1_1BaseVAlloc.html#aace59bf9d420566604bc0a78c70f7b7f" title="Starts the allocator. ">SerialVAlloc::start</a> will block and wait until a connection is established between the two.</p>
+<p>The serial script is stored in <code>virtmem/extras/serial_host.py</code>, and requires Python 3 as well as the <a href="https://pythonhosted.org/pyserial/">pyserial module</a>.</p>
 <p>Running the script with the <code>-h</code> (or <code>--help</code>) option will display the available commandline parameters for configuration: </p>
 <pre class="fragment">usage: serial_host.py [-h] [-p PORT] [-b BAUD] [-l PASSDEV] [-r PASSBAUD]
 
  optional arguments:
  -h, --help            show this help message and exit
  -p PORT, --port PORT  serial device connected to the arduino. Default:
-                       /dev/ttyACM0
+                       COM3 (Windows) or /dev/ttyACM0 (other OS)
  -b BAUD, --baud BAUD  Serial baudrate. Default: 115200
  -l PASSDEV, --pass PASSDEV
                        serial pass through device
  -r PASSBAUD, --passbaud PASSBAUD
                        baud rate of serial port pass through device. Default:
-                       115200</pre><p> The port (<code>-p</code> or <code>--port</code> option) should be set to the serial port connected to the MCU running <code>virtmem</code> (e.g. /dev/ttyACM0, COM1 etc). The baudrate (<code>-b</code> or <code>--baud</code> option) should match the configured baudrate of the allocator (see <a class="el" href="classvirtmem_1_1SerialVAllocP.html#a597d0fd7f01409ecaf9561a5e9122c5f" title="Constructs (but not initializes) the serial allocator. ">SerialVAlloc::SerialVAllocP</a> and <a class="el" href="classvirtmem_1_1SerialVAllocP.html#a54114f61ec52147abc4d08ef0fbe2ec5" title="Sets the baud rate. ">SerialVAlloc::setBaudRate</a>).</p>
+                       115200</pre><p> The port (<code>-p</code> or <code>--port</code> option) should be set to the serial port connected to the MCU running <code>virtmem</code> (e.g. /dev/ttyACM0, COM3 etc). The baudrate (<code>-b</code> or <code>--baud</code> option) should match the configured baudrate of the allocator (see <a class="el" href="classvirtmem_1_1SerialVAllocP.html#a597d0fd7f01409ecaf9561a5e9122c5f" title="Constructs (but not initializes) the serial allocator. ">SerialVAlloc::SerialVAllocP</a> and <a class="el" href="classvirtmem_1_1SerialVAllocP.html#a54114f61ec52147abc4d08ef0fbe2ec5" title="Sets the baud rate. ">SerialVAlloc::setBaudRate</a>).</p>
 <p>The <code>serial_host.py</code> script allows to act as a serial bridge and can 'pass through' all communication to and from the MCU to another (virtual) serial port. By setting up a 'virtual serial port' (e.g. via <a href="http://www.dest-unreach.org/socat">socat</a> or <a href="http://com0com.sourceforge.net">com0com</a>) and connecting <code>serial_host.py</code> to it, other software is still able to communicate with your MCU. The (virtual) serial port and its baudrate is set by the <code>-l</code> (or <code>--pass</code>) and <code>-r</code> (or <code>--passbaud</code>) options, respectively.</p>
 <p>Some examples: </p>
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;serial_host.py <span class="comment"># uses default serial port and baudrate</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;python serial_host.py -p COM2 <span class="comment"># uses COM2 (Windows) as serial port, with default baudrate</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;serial_host.py -p /dev/ttyACM2 -b 9600 <span class="comment"># uses /dev/ttyACM2 (Linux) as serial port, with 9600 baudrate</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;serial_host.py -l /dev/pts/1 <span class="comment"># use default serial settings and pass all traffic through /dev/pts/1</span></div>
-</div><!-- fragment --><p><b>Sharing serial ports with other code</b></p>
+</div><!-- fragment --><p>Once the script has started it will keep monitoring the serial port until exited manually (e.g. by pressing ctrl+C). Sending text can be done by simply writing the text and pressing enter.</p>
+<p><b>Sharing serial ports with other code</b></p>
 <p>Sometimes it may be desired to use the serial port used by <code><a class="el" href="classvirtmem_1_1SerialVAllocP.html" title="Virtual memory allocator that uses external memory via a serial connection as memory pool...">SerialVAllocP</a></code> for other purposes. Even when a port is 'shared', simply writing to it is no problem and dealt with by <code>serial_host.py</code>. For instance, when <code>Serial.print()</code> is called (and Serial is bound to <a class="el" href="classvirtmem_1_1SerialVAllocP.html" title="Virtual memory allocator that uses external memory via a serial connection as memory pool...">SerialVAllocP</a>), the text is simply printed to the terminal running <code>serial_host.py</code>.</p>
 <p>Dealing with user input, however, is more tricky. Any text that is typed in the terminal running <code>serial_host.py</code> is still sent to the MCU running <code>virtmem</code>. To retrieve it, the <a class="el" href="classvirtmem_1_1SerialVAllocP.html#a33ba7cc2f29c94c16e45d16eb28ef31d" title="Handles input of shared serial connections. ">SerialVAllocP::input</a> class must be used: </p>
 <div class="fragment"><div class="line"><a class="code" href="namespacevirtmem.html#aa13e0f633019e43279f4985e6a625933">SerialVAlloc</a> valloc;</div>
@@ -332,11 +334,12 @@ class virtmem::SerialVAllocP&lt; IOStream, Properties &gt;</h3>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">IOStream</td><td>The type of serial class to use for communication. Default is the type of the Serial class. </td></tr>
-    <tr><td class="paramname">Properties</td><td>Allocator properties, see <a class="el" href="structvirtmem_1_1DefaultAllocProperties.html" title="This struct contains default parameters for virtual memory pages. ">DefaultAllocProperties</a> </td></tr>
+    <tr><td class="paramname">Properties</td><td>Allocator properties, see <a class="el" href="structvirtmem_1_1DefaultAllocProperties.html" title="This struct contains default parameters for virtual memory pages. ">DefaultAllocProperties</a></td></tr>
   </table>
   </dd>
 </dl>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="serial_simple_8ino-example.html#_a0">serial_simple.ino</a>.</dd>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="index.html#bUsing">Using virtual memory (tutorial)</a>, <a class="el" href="namespacevirtmem.html#aa13e0f633019e43279f4985e6a625933" title="Shortcut to SerialVAllocP with default template arguments. ">SerialVAlloc</a> </dd></dl>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="serial_input_8ino-example.html#_a0">serial_input.ino</a>, and <a class="el" href="serial_simple_8ino-example.html#_a0">serial_simple.ino</a>.</dd>
 </dl></div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a597d0fd7f01409ecaf9561a5e9122c5f"></a>
 <div class="memitem">
@@ -483,7 +486,7 @@ template&lt;typename IOStream  = typeof(Serial), typename Properties  = DefaultA
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevirtmem.html">virtmem</a></li><li class="navelem"><a class="el" href="classvirtmem_1_1SerialVAllocP.html">SerialVAllocP</a></li>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:47 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

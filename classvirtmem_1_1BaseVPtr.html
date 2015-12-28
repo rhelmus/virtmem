@@ -166,11 +166,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a440381a7e52eb5704d484af903298a87"><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classvirtmem_1_1BaseVPtr.html#a440381a7e52eb5704d484af903298a87">unwrap</a> (void) const </td></tr>
 <tr class="memdesc:a440381a7e52eb5704d484af903298a87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provide access to wrapped regular pointer (non static const version).  <a href="#a440381a7e52eb5704d484af903298a87">More...</a><br/></td></tr>
 <tr class="separator:a440381a7e52eb5704d484af903298a87"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29f6fa3ed7d9e44a19ac3f8a8b43fe8c"><td class="memTemplParams" colspan="2"><a class="anchor" id="a29f6fa3ed7d9e44a19ac3f8a8b43fe8c"></a>
+<tr class="memitem:a5d6519eb3ee858dc4b25342c2373f0b9"><td class="memTemplParams" colspan="2"><a class="anchor" id="a5d6519eb3ee858dc4b25342c2373f0b9"></a>
 template&lt;typename T , typename A &gt; </td></tr>
-<tr class="memitem:a29f6fa3ed7d9e44a19ac3f8a8b43fe8c"><td class="memTemplItemLeft" align="right" valign="top">EXPLICIT&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvirtmem_1_1BaseVPtr.html#a29f6fa3ed7d9e44a19ac3f8a8b43fe8c">operator VPtr&lt; T, A &gt;</a> (void) const </td></tr>
-<tr class="memdesc:a29f6fa3ed7d9e44a19ac3f8a8b43fe8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversion operator to <a class="el" href="classvirtmem_1_1VPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">VPtr</a> types. <br/></td></tr>
-<tr class="separator:a29f6fa3ed7d9e44a19ac3f8a8b43fe8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d6519eb3ee858dc4b25342c2373f0b9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="config_8h.html#ad3421d3c6b6d0841217c4a6c360b1d38">VIRTMEM_EXPLICIT</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classvirtmem_1_1BaseVPtr.html#a5d6519eb3ee858dc4b25342c2373f0b9">operator VPtr&lt; T, A &gt;</a> (void) const </td></tr>
+<tr class="memdesc:a5d6519eb3ee858dc4b25342c2373f0b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversion operator to <a class="el" href="classvirtmem_1_1VPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">VPtr</a> types. <br/></td></tr>
+<tr class="separator:a5d6519eb3ee858dc4b25342c2373f0b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Pointer comparison operators.</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>The following operators are used for comparing two virtual pointers. Comparing two wrapped regulared pointers is supported. Comparing wrapped and non wrapped pointers is undefined. </p>
 </div></td></tr>
@@ -246,7 +246,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator!=</b> (const
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This is the base class of <a class="el" href="classvirtmem_1_1VPtr.html" title="Virtual pointer class that provides an interface to access virtual much like &#39;regular pointers&#39;...">VPtr</a> and can be used for typeless pointers. </p>
-<p>This base class contains all the functionality of virtual pointers which do not depend on any templated code to reduce code size.</p>
+<p>This base class contains all the functionality of virtual pointers which do not depend on any templated code to reduce code size. This class is designed in such a way that it can be treated mostly as 'plain old data' (POD) and can therefore be used in an <code>union</code> as well.</p>
 <p>This class can be used for 'typeless' virtual pointers, similar as void* is used for 'regular' typeless pointers. </p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="index.html#aTypeless">Typeless virtual pointers (analog to void*)</a> </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -536,7 +536,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator!=</b> (const
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacevirtmem.html">virtmem</a></li><li class="navelem"><a class="el" href="classvirtmem_1_1BaseVPtr.html">BaseVPtr</a></li>
-    <li class="footer">Generated on Fri Dec 25 2015 14:59:47 for virtmem by
+    <li class="footer">Generated on Mon Dec 28 2015 21:03:15 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

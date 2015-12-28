@@ -6,7 +6,7 @@ var classvirtmem_1_1BaseVPtr =
     [ "getRawNum", "classvirtmem_1_1BaseVPtr.html#abe3fa93ced9deeb6d14c7cc18325ebc8", null ],
     [ "isWrapped", "classvirtmem_1_1BaseVPtr.html#a8a9afeb9de09acb955dd9747dcbf1de4", null ],
     [ "operator TSafeBool", "classvirtmem_1_1BaseVPtr.html#a2fc78dd0f475170ee34237cffee037b8", null ],
-    [ "operator VPtr< T, A >", "classvirtmem_1_1BaseVPtr.html#a29f6fa3ed7d9e44a19ac3f8a8b43fe8c", null ],
+    [ "operator VPtr< T, A >", "classvirtmem_1_1BaseVPtr.html#a5d6519eb3ee858dc4b25342c2373f0b9", null ],
     [ "operator!=", "classvirtmem_1_1BaseVPtr.html#aa854facc0aafe96e3e28a39ea36997af", null ],
     [ "operator!=", "classvirtmem_1_1BaseVPtr.html#a99f5f7da1210aa98faeb13eade471f8e", null ],
     [ "operator<", "classvirtmem_1_1BaseVPtr.html#a83bab83c7eab7fd8fb2481658d4a451a", null ],
