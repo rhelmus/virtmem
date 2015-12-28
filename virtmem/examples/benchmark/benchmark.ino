@@ -43,7 +43,7 @@ StaticVAllocP<STATICALLOC_POOLSIZE> staticAlloc;
 #include <SPI.h>
 #include <alloc/spiram_alloc.h>
 #include <serialram.h>
-SPIRAMVAlloc SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, CSerialRam::SPEED_FULL);
+SPIRAMVAlloc SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, SerialRam::SPEED_FULL);
 #endif
 
 #ifdef RUN_SERIALALLOC

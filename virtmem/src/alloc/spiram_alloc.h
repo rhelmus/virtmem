@@ -30,8 +30,8 @@ class SPIRAMVAllocP : public VAlloc<Properties, SPIRAMVAllocP<Properties> >
 {
     bool largeAddressing;
     uint8_t chipSelect;
-    CSerialRam::ESPISpeed SPISpeed;
-    CSerialRam serialRAM;
+    SerialRam::ESPISpeed SPISpeed;
+    SerialRam serialRAM;
 
     void doStart(void)
     {
@@ -63,11 +63,11 @@ public:
      * @param ps Total amount of bytes of the memory pool (i.e. the size of the SRAM chip)
      * @param la `true` if large addressing (chipsize >= 1mbit) should be used
      * @param cs Chip select (CS) pin connected to the SRAM chip
-     * @param s SPI speed (CSerialRam::SPEED_FULL, CSerialRam::SPEED_HALF or
-     * CSerialRam::SPEED_QUARTER)
+     * @param s SPI speed (SerialRam::SPEED_FULL, SerialRam::SPEED_HALF or
+     * SerialRam::SPEED_QUARTER)
      * @sa setSettings and setPoolSize
      */
-    SPIRAMVAllocP(VPtrSize ps, bool la, uint8_t cs, CSerialRam::ESPISpeed s) :
+    SPIRAMVAllocP(VPtrSize ps, bool la, uint8_t cs, SerialRam::ESPISpeed s) :
         largeAddressing(la), chipSelect(cs), SPISpeed(s) { this->setPoolSize(ps); }
     /**
      * @brief Constructs (but not initializes) the allocator.
@@ -84,7 +84,7 @@ public:
      * See SPIRAMVAlloc::SPIRAMVAlloc for a description of the parameters.
      * @note This function should only be called if the allocator is not initialized.
      */
-    void setSettings(bool la, uint8_t cs, CSerialRam::ESPISpeed s)
+    void setSettings(bool la, uint8_t cs, SerialRam::ESPISpeed s)
     {
         largeAddressing = la; chipSelect = cs; SPISpeed = s;
     }
@@ -101,7 +101,7 @@ struct SPIRamConfig
     bool largeAddressing; //!< Does this chip needs large addressing (`true` if size >= 1 Mbit)
     uint32_t size; //!< Amount of bytes this chip can hold
     uint8_t chipSelect; //!< Pin assigned as chip select (CS) for this chip
-    CSerialRam::ESPISpeed speed; //!< SPI speed to be used: CSerialRam::SPEED_FULL, CSerialRam::SPEED_HALF or CSerialRam::SPEED_QUARTER
+    SerialRam::ESPISpeed speed; //!< SPI speed to be used: SerialRam::SPEED_FULL, SerialRam::SPEED_HALF or SerialRam::SPEED_QUARTER
 };
 
 /**
@@ -116,8 +116,8 @@ struct SPIRamConfig
  * @code{.cpp}
  * // configuration for two 23LC1024 chips, connected to CS pins 9 and 10.
  * virtmem::SPIRamConfig scfg[2] = {
- *      { true, 1024 * 128, 9, CSerialRam::SPEED_FULL },
- *      { true, 1024 * 128, 10, CSerialRam::SPEED_FULL } };
+ *      { true, 1024 * 128, 9, SerialRam::SPEED_FULL },
+ *      { true, 1024 * 128, 10, SerialRam::SPEED_FULL } };
  *
  * virtmem::MultiSPIRAMVAllocP<scfg, 2> alloc;
  * @endcode
@@ -134,7 +134,7 @@ struct SPIRamConfig
 template <const SPIRamConfig *SPIChips, size_t chipAmount, typename Properties=DefaultAllocProperties>
 class MultiSPIRAMVAllocP : public VAlloc<Properties, MultiSPIRAMVAllocP<SPIChips, chipAmount, Properties> >
 {
-    CSerialRam serialRAM[chipAmount];
+    SerialRam serialRAM[chipAmount];
 
     void doStart(void)
     {

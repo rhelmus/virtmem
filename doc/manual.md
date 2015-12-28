@@ -118,12 +118,12 @@ A summarized overview is given below.
 
 Directory | Contents
 --------- | --------
-\<root\> | Internal development and README
+\<root\> | Internal development and some docs
 benchmark/ | Internal code for benchmarking
 doc/ | Files used for Doxygen created documentation
 doc/html/ | This manual
 gtest/ and test/ | Code for internal testing
-virtmem/ | Library code
+virtmem/ | Library code. **This directory needs to be copied to your libraries folder**.
 virtmem/extras/ | Contains python scripts needed for [the serial memory allocator](@ref virtmem::SerialVAlloc).
 
 ## Using virtual memory (tutorial) {#bUsing}
@@ -669,3 +669,47 @@ auto intVPtr = valloc.alloc<int>(); // automatically deduce correct type from al
 
 Another, small feature with C++11 support, is that `nullptr` can be used to assign a zero address to
 a virtual pointer.
+
+# FAQ {#FAQ}
+
+## Shouldn't I be worried about wear leveling when using the SD allocator?
+Maybe, possibly not. A quick google reveales that most SD cards should have something called 'wear
+leveling', meaning that you probably don't have to worry about it. In any case, `virtmem` tries to
+reduce writes whenever possible. Furthermore, to get an indication of how much is written, have a
+look at the [statistics functions](@ref statf).
+
+## How can I speed things up?
+Several factors may influence the speed.
+
+In general the fastest allocator is the [SPI RAM allocator](@ref virtmem::SPIRAMVAllocP),
+followed by the [multi SPI RAM allocator](@ref virtmem::MultiSPIRAMVAllocP),
+[SD allocator](@ref virtmem::SDVAllocP) and [serial allocator](@ref virtmem::SerialVAllocP).
+
+The speed of the first three all largely depend on SPI speeds. These are typically much higher on
+ARM based boards (e.g. Teensy 3.X) compared to AVR boards (e.g. Arduino Uno).
+
+The speed of the [serial allocator](@ref virtmem::SerialVAllocP) depends mainly on the baudrate.
+Increasing this number will signficantly improve read and write speeds. Note that even the AVR based
+boards can handle speeds much higher than the 115200 kbps that is sometimes marked as maximum speed.
+Also note that some boards, like Teensy 3.X and Arduino Due, have 'virtual serial ports', which are
+only limited by USB transfer speeds -- not baudrates.
+
+Finally, the convenience of virtual pointers will add some overhead compared to accessing data in
+regular memory. Beeing a software solution, more steps have to be performed for data access. Using
+[virtual data locks](@ref aLocking) can signifcantly reduce this overhead.
+
+## I'm getting compile errors about ambiguous types!?
+When accessing virtual data, a [proxy class is returned](@ref aAccess). This class behaves as much
+as the data as possbile, but sometimes the compiler needs some help. Simply casting it to the right
+type should be enough:
+~~~{.cpp}
+int a = static_cast<int>(*vptr);
+~~~
+
+## I am using the serial allocator and my sketch seems to be stuck!?
+The serial allocator needs to be connected with a computer which runs a script (`virtmem/extras/serial_host.py`).
+During initialization of the allocator it will wait for an connection indefinitely.
+For more information, please see the documentation about the [serial alloactor](@ref virtmem::SerialVAllocP).
+
+# License {#license}
+@verbinclude LICENSE.txt

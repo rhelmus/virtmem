@@ -73,7 +73,7 @@ typedef bool (*RawCopier)(char *, const char *, VPtrSize);
 
 // Generalized copy for memcpy and strncpy
 template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, VPtrSize size,
-                                               RawCopier copier, bool checknull)
+                                               RawCopier copier)
 {
     if (size == 0 || ptrEqual(dest, src))
         return dest;
@@ -92,11 +92,11 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, VPtrSize size,
     }
     else if (TVirtPtrTraits<T1>::isWrapped(dest))
     {
-        rawCopy(TVirtPtrTraits<T1>::unwrap(dest), src, size, copier, checknull);
+        rawCopy(TVirtPtrTraits<T1>::unwrap(dest), src, size, copier);
         return dest;
     }
     else if (TVirtPtrTraits<T2>::isWrapped(src))
-        return rawCopy(dest, TVirtPtrTraits<T2>::unwrap(src), size, copier, checknull);
+        return rawCopy(dest, TVirtPtrTraits<T2>::unwrap(src), size, copier);
 #endif
 
     VPtrSize sizeleft = size;
@@ -128,8 +128,7 @@ template <typename T1, typename T2> T1 rawCopy(T1 dest, T2 src, VPtrSize size,
 typedef int (*RawComparator)(const char *, const char *, VPtrSize, bool &);
 
 // Generalized compare for memcmp/strncmp
-template <typename T1, typename T2> int rawCompare(T1 p1, T2 p2, VPtrSize n, RawComparator comparator,
-                                                   bool checknull)
+template <typename T1, typename T2> int rawCompare(T1 p1, T2 p2, VPtrSize n, RawComparator comparator)
 {
     if (n == 0 || ptrEqual(p1, p2))
         return 0;
@@ -145,9 +144,9 @@ template <typename T1, typename T2> int rawCompare(T1 p1, T2 p2, VPtrSize n, Raw
     else if (TVirtPtrTraits<T1>::isWrapped(p1) && TVirtPtrTraits<T2>::isWrapped(p2))
         return comparator(TVirtPtrTraits<T1>::unwrap(p1), TVirtPtrTraits<T2>::unwrap(p2), n, done);
     else if (TVirtPtrTraits<T1>::isWrapped(p1))
-        return rawCompare(TVirtPtrTraits<T1>::unwrap(p1), p2, n, comparator, checknull);
+        return rawCompare(TVirtPtrTraits<T1>::unwrap(p1), p2, n, comparator);
     else if (TVirtPtrTraits<T2>::isWrapped(p2))
-        return rawCompare(p1, TVirtPtrTraits<T2>::unwrap(p2), n, comparator, checknull);
+        return rawCompare(p1, TVirtPtrTraits<T2>::unwrap(p2), n, comparator);
 #endif
 
     VPtrSize sizeleft = n;
@@ -246,7 +245,7 @@ VPtr<T1, A1> memcpy(VPtr<T1, A1> dest, const VPtr<T2, A2> src, VPtrSize size)
     return static_cast<VPtr<T1, A1> >(
                 private_utils::rawCopy(static_cast<VPtr<char, A1> >(dest),
                                        static_cast<const VPtr<const char, A2> >(src), size,
-                                       private_utils::memCopier, false));
+                                       private_utils::memCopier));
 }
 
 template <typename T, typename A> VPtr<T, A> memcpy(VPtr<T, A> dest, const void *src, VPtrSize size)
@@ -254,14 +253,14 @@ template <typename T, typename A> VPtr<T, A> memcpy(VPtr<T, A> dest, const void 
     return static_cast<VPtr<T, A> >(
                 private_utils::rawCopy(static_cast<VPtr<char, A> >(dest),
                                        static_cast<const char *>(src), size,
-                                       private_utils::memCopier, false));
+                                       private_utils::memCopier));
 }
 
 template <typename T, typename A> void *memcpy(void *dest, VPtr<T, A> src, VPtrSize size)
 {
     return private_utils::rawCopy(static_cast<char *>(dest),
                                   static_cast<const VPtr<const char, A> >(src), size,
-                                  private_utils::memCopier, false);
+                                  private_utils::memCopier);
 }
 
 template <typename A> VPtr<char, A> memset(VPtr<char, A> dest, int c, VPtrSize size)
@@ -306,65 +305,65 @@ template <typename T1, typename A1, typename T2, typename A2> int memcmp(VPtr<T1
 #endif
 
     return private_utils::rawCompare(static_cast<VPtr<const char, A1> >(s1),
-                                     static_cast<VPtr<const char, A2> >(s2), n, private_utils::memComparator, false);
+                                     static_cast<VPtr<const char, A2> >(s2), n, private_utils::memComparator);
 }
 
 template <typename T, typename A> int memcmp(VPtr<T, A> s1, const void *s2, VPtrSize n)
 {
     return private_utils::rawCompare(static_cast<VPtr<const char, A> >(s1),
-                                     static_cast<const char *>(s2), n, private_utils::memComparator, false);
+                                     static_cast<const char *>(s2), n, private_utils::memComparator);
 }
 
 template <typename T, typename A> int memcmp(const void *s1, const VPtr<T, A> s2, VPtrSize n)
 {
     return private_utils::rawCompare(static_cast<const char *>(s1),
-                                     static_cast<VPtr<const char, A> >(s2), n, private_utils::memComparator, false);
+                                     static_cast<VPtr<const char, A> >(s2), n, private_utils::memComparator);
 }
 
 template <typename A1, typename A2> VPtr<char, A1> strncpy(VPtr<char, A1> dest, const VPtr<const char, A2> src,
                                                               VPtrSize n)
 {
-    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier, true);
+    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier);
 }
 
 template <typename A> VPtr<char, A> strncpy(VPtr<char, A> dest, const char *src, VPtrSize n)
 {
-    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier, true);
+    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier);
 }
 
 template <typename A> char *strncpy(char *dest, const VPtr<const char, A> src, VPtrSize n)
 {
-    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier, true);
+    return private_utils::rawCopy(dest, src, n, private_utils::strnCopier);
 }
 
 template <typename A1, typename A2> VPtr<char, A1> strcpy(VPtr<char, A1> dest, const VPtr<const char, A2> src)
 {
-    return private_utils::rawCopy(dest, src, (VPtrSize)-1, private_utils::strCopier, true);
+    return private_utils::rawCopy(dest, src, (VPtrSize)-1, private_utils::strCopier);
 }
 
 template <typename A> VPtr<char, A> strcpy(VPtr<char, A> dest, const char *src)
 {
-    return private_utils::rawCopy(dest, src, (VPtrSize)-1, private_utils::strCopier, true);
+    return private_utils::rawCopy(dest, src, (VPtrSize)-1, private_utils::strCopier);
 }
 
 template <typename A> char *strcpy(char *dest, const VPtr<const char, A> src)
 {
-    return private_utils::rawCopy(dest, src, (VPtrSize)-1, private_utils::strCopier, true);
+    return private_utils::rawCopy(dest, src, (VPtrSize)-1, private_utils::strCopier);
 }
 
 template <typename A1, typename A2> int strncmp(VPtr<const char, A1> dest, VPtr<const char, A2> src, VPtrSize n)
-{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator, true);}
+{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator);}
 template <typename A> int strncmp(VPtr<const char, A> dest, const char *src, VPtrSize n)
-{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator, true); }
+{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator); }
 template <typename A> int strncmp(const char *dest, VPtr<const char, A> src, VPtrSize n)
-{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator, true); }
+{ return private_utils::rawCompare(dest, src, n, private_utils::strnComparator); }
 
 template <typename A1, typename A2> int strcmp(VPtr<const char, A1> dest, VPtr<const char, A2> src)
-{ return private_utils::rawCompare(dest, src, (VPtrSize)-1, private_utils::strComparator, true); }
+{ return private_utils::rawCompare(dest, src, (VPtrSize)-1, private_utils::strComparator); }
 template <typename A> int strcmp(const char *dest, VPtr<const char, A> src)
-{ return private_utils::rawCompare(dest, src, (VPtrSize)-1, private_utils::strComparator, true); }
+{ return private_utils::rawCompare(dest, src, (VPtrSize)-1, private_utils::strComparator); }
 template <typename A> int strcmp(VPtr<const char, A> dest, const char *src)
-{ return private_utils::rawCompare(dest, src, (VPtrSize)-1, private_utils::strComparator, true); }
+{ return private_utils::rawCompare(dest, src, (VPtrSize)-1, private_utils::strComparator); }
 
 template <typename A> int strlen(VPtr<const char, A> str)
 {

@@ -11,10 +11,63 @@ this _virtual memory_ closely resembles working with data from 'normal' memory.
 
 # Features
 * Extend the available memory with kilobytes, megabytes or even gigabytes
-* Supports SPI RAM (23LC series from Microchip), SD cards and RAM from a computer connected through serial.
-* Easy C++ interface that closely resembles regular data access.
+* Supports SPI RAM (23LC series from Microchip), SD cards and RAM from a computer connected through serial
+* Easy C++ interface that closely resembles regular data access
+* Memory page system to speed up access to virtual memory
 * New memory interfaces can be added easily
-* Easily ported to other plaforms (x86 port exists for debugging)
+* Code is mostly platform independent and can fairly easy be ported to other
+plaforms (x86 port exists for debugging)
+
+# Demonstration
+~~~{.cpp}
+#include <Arduino.h>
+#include <SdFat.h>
+#include <virtmem.h>
+#include <alloc/sd_alloc.h>
+
+// Simplify virtmem usage
+using namespace virtmem;
+
+// Create virtual a memory allocator that uses SD card (with FAT filesystem) as virtual memory pool
+// The default memory pool size (1 MB) is used.
+SDVAlloc valloc;
+
+SdFat sd;
+
+struct MyStruct { int x, y; };
+
+void setup()
+{
+    // Initialize SdFatlib
+    if (!sd.begin(9, SPI_FULL_SPEED))
+        sd.initErrorHalt();
+
+    valloc.start(); // Always call this to initialize the allocator before using it
+
+    // Allocate a char buffer of 10000 bytes in virtual memory and store the address to a virtual pointer
+    VPtr<char, SDVAlloc> str = valloc.alloc<char>(10000);
+
+    // Set the first 1000 bytes to 'A'
+    memset(str, 'A', 1000);
+
+    // array access
+    str[1] = 'B';
+
+    // Own types (structs/classes) also work.
+    VPtr<MyStruct, SDVAlloc> ms = valloc.alloc<MyStruct>(); // alloc call without parameters: use automatic size deduction
+    ms->x = 5;
+    ms->y = 15;
+}
+
+void loop()
+{
+    // ...
+}
+~~~
+
+This Arduino sketch demonstrates how to use a SD card as virtual memory
+store. By using a virtual memory pointer wrapper class, using virtual memory
+becomes quite close to using data residing in 'normal' memory.
 
 # Manual
 The manual [can be found here](http://rhelmus.github.io/virtmem/index.html).

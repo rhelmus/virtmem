@@ -158,6 +158,11 @@ public:
     VirtPageSize getLockSize(void) const { return lockSize; }
 };
 
+/**
+  * @example locking.ino
+  * This example shows how to lock virtual data within regular RAM.
+  */
+
 // Shortcut
 /**
  * @brief Creates a virtual lock (shortcut)

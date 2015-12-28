@@ -87,7 +87,7 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
             lsize = l.getLockSize();
             char *b = *l;
             for (uint16_t j=0; j<lsize; ++j)
-                b[j] = counter++;
+                b[j] = (char)counter++;
             p += lsize; sizeleft -= lsize;
         }
     }
@@ -113,7 +113,7 @@ template <typename TA> void runBenchmarks(TA &valloc, uint32_t bufsize, uint8_t 
             char *b = *l;
             for (uint16_t j=0; j<lsize; ++j, ++counter)
             {
-                if (b[j] != counter)
+                if (b[j] != (char)counter)
                 {
                     Serial.print("Mismatch! index/value/actual: "); Serial.print(j);
                     Serial.print("/"); Serial.print((int)counter);

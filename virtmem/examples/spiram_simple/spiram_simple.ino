@@ -18,7 +18,7 @@
 const int chipSelect = 9;
 const int chipSize = 1024 * 128; // 128 kB (=1 mbit)
 const bool largeAddressing = true; // false if chipsize <1 mbit
-const CSerialRam::ESPISpeed spiSpeed = CSerialRam::SPEED_FULL;
+const SerialRam::ESPISpeed spiSpeed = SerialRam::SPEED_FULL;
 
 // pull in complete virtmem namespace
 using namespace virtmem;

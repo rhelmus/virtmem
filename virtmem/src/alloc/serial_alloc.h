@@ -68,7 +68,7 @@ usage: serial_host.py [-h] [-p PORT] [-b BAUD] [-l PASSDEV] [-r PASSBAUD]
  optional arguments:
  -h, --help            show this help message and exit
  -p PORT, --port PORT  serial device connected to the arduino. Default:
-                       /dev/ttyACM0
+                       COM3 (Windows) or /dev/ttyACM0 (other OS)
  -b BAUD, --baud BAUD  Serial baudrate. Default: 115200
  -l PASSDEV, --pass PASSDEV
                        serial pass through device
@@ -77,7 +77,7 @@ usage: serial_host.py [-h] [-p PORT] [-b BAUD] [-l PASSDEV] [-r PASSBAUD]
                        115200
  @endverbatim
  * The port (`-p` or `--port` option) should be set to the serial port connected
- * to the MCU running `virtmem` (e.g. /dev/ttyACM0, COM1 etc). The baudrate
+ * to the MCU running `virtmem` (e.g. /dev/ttyACM0, COM3 etc). The baudrate
  * (`-b` or `--baud` option) should match the configured baudrate of the allocator
  * (see SerialVAlloc::SerialVAllocP and SerialVAlloc::setBaudRate).
  *
@@ -207,6 +207,9 @@ typedef SerialVAllocP<> SerialVAlloc; //!< Shortcut to SerialVAllocP with defaul
 /**
  * @example serial_simple.ino
  * This is a simple example sketch showing how to use the serial allocator.
+ *
+ * @example serial_input.ino
+ * This example shows how to use serial input over a port shared with the serial allocator.
  */
 }
 
