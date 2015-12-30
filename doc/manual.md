@@ -108,7 +108,7 @@ multiple memory pages and only writing out data that was modified.
 Because memory pages reside in regular RAM, (repeated) data access to paged
 memory is quite fast.
 
-## File structure {#bStructure}
+## Installation and File structure {#bStructure}
 The `virtmem/` subdirectory contains all the code needed to compile Arduino sketches, and
 should therefore be copied [as any other library](https://www.arduino.cc/en/Guide/Libraries).
 The file layout follows the [new Arduino library specification](https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5:-Library-specification).
@@ -536,7 +536,7 @@ virtmem::DefaultAllocProperties.
 
 It might be necessary to obtain a pointer to a member of a structure (or class)
 which resides in virtual memory. The way to obtain such a pointer with
-'regular' memory is by using the address-of operator ('`@`'):
+'regular' memory is by using the address-of operator ('`&`'):
 
 ~~~{.cpp}
 int *p = &mystruct->x;
@@ -624,7 +624,7 @@ char *a = NILL;
 VPtr<char, SDVAlloc> b = NILL;
 ~~~
 
-Note that on platforms support C++11 you can simply use `nullptr` instead.
+Note that on platforms that support C++11 you can simply use `nullptr` instead.
 
 ## Pointer conversion {#aPConv}
 

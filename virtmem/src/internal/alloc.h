@@ -71,7 +71,7 @@ public:
      * unique template parameters. For example:
      * @code{.cpp}
      * virtmem::SDVAlloc alloc1; // allocator with default template parameters
-     * virtmem::SDVAlloc<mysettings> alloc2; // allocator with custom template parameter
+     * virtmem::SDVAllocP<mysettings> alloc2; // allocator with custom template parameter
      * @endcode
      * In this case, `alloc1` and `alloc2` are variables with a *different* type, hence getInstance()
      * will return a different instance for both classes.
