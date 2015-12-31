@@ -1,7 +1,6 @@
 docs:
 - check if all references are OK
 - spell checks
-- benchmarks?
 
 general:
 

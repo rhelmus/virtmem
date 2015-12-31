@@ -141,12 +141,12 @@ card as a virtual memory pool.
 The `virtmem` library supports the following allocators:
 Allocator | Description | Header
 ----------|-------------|-------
-virtmem::SDVAlloc | uses a FAT formatted SD card as memory pool | \c \#include <alloc/sd_alloc.h>
-virtmem::SPIRAMVAlloc | uses SPI ram (Microchip's 23LC series) as memory pool | \c \#include <alloc/spiram_alloc.h>
+virtmem::SDVAllocP | uses a FAT formatted SD card as memory pool | \c \#include <alloc/sd_alloc.h>
+virtmem::SPIRAMVAllocP | uses SPI ram (Microchip's 23LC series) as memory pool | \c \#include <alloc/spiram_alloc.h>
 virtmem::MultiSPIRAMVAllocP | like virtmem::SPIRAMVAlloc, but supports multiple memory chips | \c \#include <alloc/spiram_alloc.h>
-virtmem::SerialVAlloc | uses RAM from a computer connected through serial as memory pool | \c \#include <alloc/serial_alloc.h>
+virtmem::SerialVAllocP | uses RAM from a computer connected through serial as memory pool | \c \#include <alloc/serial_alloc.h>
 virtmem::StaticVAllocP | uses regular RAM as memory pool (for debugging) | \c \#include <alloc/static_alloc.h>
-virtmem::StdioVAlloc | uses files through regular stdio functions as memory pool (for debugging on PCs) | \c \#include <alloc/stdio_alloc.h>
+virtmem::StdioVAllocP | uses files through regular stdio functions as memory pool (for debugging on PCs) | \c \#include <alloc/stdio_alloc.h>
 
 The following code demonstrates how to setup a virtual memory allocator:
 
@@ -698,6 +698,8 @@ Finally, the convenience of virtual pointers will add some overhead compared to 
 regular memory. Beeing a software solution, more steps have to be performed for data access. Using
 [virtual data locks](@ref aLocking) can signifcantly reduce this overhead.
 
+@sa @ref bench
+
 ## I'm getting compile errors about ambiguous types!?
 When accessing virtual data, a [proxy class is returned](@ref aAccess). This class behaves as much
 as the data as possbile, but sometimes the compiler needs some help. Simply casting it to the right
@@ -710,6 +712,70 @@ int a = static_cast<int>(*vptr);
 The serial allocator needs to be connected with a computer which runs a script (`virtmem/extras/serial_host.py`).
 During initialization of the allocator it will wait for an connection indefinitely.
 For more information, please see the documentation about the [serial alloactor](@ref virtmem::SerialVAllocP).
+
+# Benchmarks {#bench}
+Some benchmarking results are shown below. Note that these numbers are generated with very simple,
+and possibly not so accurate tests, hence they should only be used as a rough indication (source
+code can be found in `virtmem/examples/benchmark`).
+
+<table>
+    <tr>
+        <th rowspan="2" valign="top">Allocator
+        <th colspan="2">Teensy 3.2 (96 MHz)
+        <th colspan="2">Teensy 3.2 (144 MHz)
+        <th colspan="2">Arduino Uno
+    <tr>
+        <td align="center">Read / Write (kB/s)
+        <td align="center">Read / Write locks (kB/s)
+        <td align="center">Read / Write (kB/s)
+        <td align="center">Read / Write locks (kB/s)
+        <td align="center">Read / Write (kB/s)
+        <td align="center">Read / Write locks (kB/s)
+    <tr>
+        <td>Native (write only)
+        <td colspan="2" align="center">13333
+        <td colspan="2" align="center">20000
+        <td colspan="2" align="center">970
+    <tr>
+        <td>virtmem::StaticVAllocP
+        <td align="center">333 / 228
+        <td align="center">6000 / 7900
+        <td align="center">458 / 313
+        <td align="center">8905 / 11607
+        <td align="center">25 / 22
+        <td align="center">265 / 357
+    <tr>
+        <td>virtmem::SerialVAllocP
+        <td align="center">227 / 152
+        <td align="center">500 / 373
+        <td align="center">250 / 182
+        <td align="center">496 / 378
+        <td align="center">5 / 2 (<i>14 / 9</i>)
+        <td align="center">6 / 4 (<i>30 / 20</i>)
+    <tr>
+        <td>virtmem::SDVAllocP
+        <td align="center">266 / 70
+        <td align="center">1107 / 98
+        <td align="center">347 / 72
+        <td align="center">1102 / 91
+        <td align="center">23 / 15
+        <td align="center">156 / 44
+    <tr>
+        <td>virtmem::SPIRAMVAllocP
+        <td align="center">284 / 193
+        <td align="center">1887 / 1159
+        <td align="center">380 / 253
+        <td align="center">2083 / 1207
+        <td align="center">23 / 19
+        <td align="center">150 / 118
+</table>
+
+Some notes:
+- Native: Write speeds using a simple loop with a buffer. These results can be seen
+as a reference when regular (non virtual) data is used.
+- Data from static allocator is useful to measure overhead from virtual pointers.
+- Serial Arduino baudrates: 115200 bps and 1000000 bps (<i>italic</i>)
+- SD/SPI RAM: measured at maximum SPI speeds. For SPI RAM a 23LCV1024 chip was used.
 
 # License {#license}
 @verbinclude LICENSE.txt
