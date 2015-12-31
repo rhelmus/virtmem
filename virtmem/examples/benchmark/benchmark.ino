@@ -5,32 +5,35 @@
 //#define RUN_STATICALLOC
 //#define RUN_SPIRAMALLOC
 //#define RUN_NATIVE
-#define RUN_SERIALALLOC
-//#define RUN_SDALLOC
+//#define RUN_SERIALALLOC
+#define RUN_SDALLOC
 
 // uncomment to disable a SPI select pin, useful when using ethernet shield
-#define DISABLE_SELECTPIN 10
+#define DISABLE_SELECTPIN1 7
+#define DISABLE_SELECTPIN2 8
+#define DISABLE_SELECTPIN3 9
+#define DISABLE_SELECTPIN4 10
 
-#define NATIVE_BUFSIZE 1024 * 4
+#define NATIVE_BUFSIZE 1024 * 1
 #define NATIVE_REPEATS 100
 
-#define STATICALLOC_POOLSIZE 1024 * 32 + 128 // plus some size overhead
-#define STATICALLOC_BUFSIZE 1024 * 32
+#define STATICALLOC_POOLSIZE 1024l * 1l + 128l // plus some size overhead
+#define STATICALLOC_BUFSIZE 1024l * 127l
 #define STATICALLOC_REPEATS 100
 
-#define SPIRAM_POOLSIZE 1024 * 128
-#define SPIRAM_BUFSIZE 1024 * 127
+#define SPIRAM_POOLSIZE 1024l * 128l
+#define SPIRAM_BUFSIZE 1024l * 12l
 #define SPIRAM_REPEATS 5
 #define SPIRAM_CSPIN 9
 
 #define SERIALRAM_POOLSIZE 1024l * 1024l
-#define SERIALRAM_BUFSIZE 1024l * 128l
+#define SERIALRAM_BUFSIZE 1024l * 12l
 #define SERIALRAM_REPEATS 5
 
 #define SD_POOLSIZE 1024l * 1024l
-#define SD_BUFSIZE 1024l * 128l
+#define SD_BUFSIZE 1024l * 12l
 #define SD_REPEATS 5
-#define SD_CSPIN 9
+#define SD_CSPIN 4
 #define SD_SPISPEED SPI_FULL_SPEED
 
 
@@ -48,7 +51,7 @@ SPIRAMVAlloc SPIRamAlloc(SPIRAM_POOLSIZE, true, SPIRAM_CSPIN, SerialRam::SPEED_F
 
 #ifdef RUN_SERIALALLOC
 #include <alloc/serial_alloc.h>
-SerialVAlloc serialRamAlloc(SERIALRAM_POOLSIZE, 115200);
+SerialVAlloc serialRamAlloc(SERIALRAM_POOLSIZE, /*115200*/1000000);
 #endif
 
 #ifdef RUN_SDALLOC
@@ -77,12 +80,28 @@ void runNativeBenchmark(uint32_t bufsize, uint8_t repeats)
 }
 #endif
 
+void disableCSPin(uint8_t pin)
+{
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, HIGH);
+}
 
 void setup()
 {
-#ifdef DISABLE_SELECTPIN
-    pinMode(DISABLE_SELECTPIN, OUTPUT);
-    digitalWrite(DISABLE_SELECTPIN, HIGH);
+#ifdef DISABLE_SELECTPIN1
+    disableCSPin(DISABLE_SELECTPIN1);
+#endif
+
+#ifdef DISABLE_SELECTPIN2
+    disableCSPin(DISABLE_SELECTPIN2);
+#endif
+
+#ifdef DISABLE_SELECTPIN3
+    disableCSPin(DISABLE_SELECTPIN3);
+#endif
+
+#ifdef DISABLE_SELECTPIN4
+    disableCSPin(DISABLE_SELECTPIN4);
 #endif
 
 #ifndef RUN_SERIALALLOC

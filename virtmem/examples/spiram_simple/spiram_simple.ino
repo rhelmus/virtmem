@@ -16,7 +16,7 @@
 
 // configuration of SRAM chip: a 23LC1024 chip is assumed here which has CS connected to pin 9
 const int chipSelect = 9;
-const int chipSize = 1024 * 128; // 128 kB (=1 mbit)
+const int chipSize = 1024l * 128l; // 128 kB (=1 mbit)
 const bool largeAddressing = true; // false if chipsize <1 mbit
 const SerialRam::ESPISpeed spiSpeed = SerialRam::SPEED_FULL;
 

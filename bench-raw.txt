@@ -1,0 +1,1562 @@
+================= T3.2 144 MHz =================
+---------- SPI ------------
+
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 2497 ms
+Speed: 253 kB/s
+Reading data
+Finished in 1667 ms
+Speed: 380 kB/s
+Repeating tests with locks...
+Finished in 525 ms
+Speed: 1208 kB/s
+Reading data
+Finished in 305 ms
+Speed: 2081 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 2497 ms
+Speed: 253 kB/s
+Reading data
+Finished in 1667 ms
+Speed: 380 kB/s
+Repeating tests with locks...
+Finished in 526 ms
+Speed: 1207 kB/s
+Reading data
+Finished in 304 ms
+Speed: 2087 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 2496 ms
+Speed: 253 kB/s
+Reading data
+Finished in 1667 ms
+Speed: 380 kB/s
+Repeating tests with locks...
+Finished in 526 ms
+Speed: 1207 kB/s
+Reading data
+Finished in 305 ms
+Speed: 2081 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 2497 ms
+Speed: 253 kB/s
+Reading data
+Finished in 1667 ms
+Speed: 380 kB/s
+Repeating tests with locks...
+Finished in 525 ms
+Speed: 1208 kB/s
+Reading data
+Finished in 305 ms
+Speed: 2081 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 2497 ms
+Speed: 253 kB/s
+Reading data
+Finished in 1667 ms
+Speed: 380 kB/s
+Repeating tests with locks...
+Finished in 526 ms
+Speed: 1207 kB/s
+Reading data
+Finished in 304 ms
+Speed: 2087 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 2496 ms
+Speed: 253 kB/s
+Reading data
+Finished in 1668 ms
+Speed: 379 kB/s
+Repeating tests with locks...
+Finished in 525 ms
+Speed: 1208 kB/s
+Reading data
+Finished in 305 ms
+Speed: 2081 kB/s
+
+Done!
+
+
+---------- Serial ------------
+
+
+riting 5 x 131072 bytes
+Finished in 3492 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2544 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1689 ms
+Speed: 378 kB/s
+Reading data
+Finished in 1280 ms
+Speed: 500 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3515 ms
+Speed: 181 kB/s
+Reading data
+Finished in 2542 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1691 ms
+Speed: 377 kB/s
+Reading data
+Finished in 1307 ms
+Speed: 489 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3495 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2542 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1688 ms
+Speed: 378 kB/s
+Reading data
+Finished in 1276 ms
+Speed: 500 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3496 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2545 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1691 ms
+Speed: 377 kB/s
+Reading data
+Finished in 1245 ms
+Speed: 513 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3494 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2541 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1702 ms
+Speed: 375 kB/s
+Reading data
+Finished in 1259 ms
+Speed: 507 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3502 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2541 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1688 ms
+Speed: 378 kB/s
+Reading data
+Finished in 1273 ms
+Speed: 501 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3493 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2542 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1702 ms
+Speed: 375 kB/s
+Reading data
+Finished in 1274 ms
+Speed: 501 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3505 ms
+Speed: 181 kB/s
+Reading data
+Finished in 2544 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1691 ms
+Speed: 377 kB/s
+Reading data
+Finished in 1272 ms
+Speed: 502 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3495 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2540 ms
+Speed: 251 kB/s
+Repeating tests with locks...
+Finished in 1709 ms
+Speed: 374 kB/s
+Reading data
+Finished in 1268 ms
+Speed: 503 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3496 ms
+Speed: 182 kB/s
+Reading data
+Finished in 2546 ms
+Speed: 250 kB/s
+Repeating tests with locks...
+Finished in 1669 ms
+Speed: 382 kB/s
+Reading data
+Finished in 1273 ms
+Speed: 501 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 3508 ms
+Speed: 181 kB/s
+Reading data
+Finished in 2540 ms
+Speed: 251 kB/s
+Repeating tests with locks...
+Finished in 1688 ms
+Speed: 378 kB/s
+Reading data
+Finished in 1270 ms
+Speed: 503 kB/s
+
+Done!
+
+
+---------- Native ------------
+
+
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 19 ms
+Speed: 21051 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 20 ms
+Speed: 20000 kB/s
+
+Done!
+
+
+---------- Static ------------
+
+
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 10208 ms
+Speed: 313 kB/s
+Reading data
+Finished in 6986 ms
+Speed: 458 kB/s
+Repeating tests with locks...
+Finished in 275 ms
+Speed: 11635 kB/s
+Reading data
+Finished in 360 ms
+Speed: 8888 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 10208 ms
+Speed: 313 kB/s
+Reading data
+Finished in 6986 ms
+Speed: 458 kB/s
+Repeating tests with locks...
+Finished in 276 ms
+Speed: 11593 kB/s
+Reading data
+Finished in 359 ms
+Speed: 8913 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 10209 ms
+Speed: 312 kB/s
+Reading data
+Finished in 6985 ms
+Speed: 458 kB/s
+Repeating tests with locks...
+Finished in 276 ms
+Speed: 11593 kB/s
+Reading data
+Finished in 359 ms
+Speed: 8913 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 10209 ms
+Speed: 312 kB/s
+Reading data
+Finished in 6986 ms
+Speed: 458 kB/s
+Repeating tests with locks...
+Finished in 275 ms
+Speed: 11635 kB/s
+Reading data
+Finished in 360 ms
+Speed: 8888 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 10208 ms
+Speed: 313 kB/s
+Reading data
+Finished in 6986 ms
+Speed: 458 kB/s
+Repeating tests with locks...
+Finished in 275 ms
+Speed: 11635 kB/s
+Reading data
+Finished in 360 ms
+Speed: 8888 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+
+
+
+---------- SD ------------
+
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8703 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1824 ms
+Speed: 347 kB/s
+Repeating tests with locks...
+Finished in 6858 ms
+Speed: 91 kB/s
+Reading data
+Finished in 578 ms
+Speed: 1097 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8699 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1827 ms
+Speed: 346 kB/s
+Repeating tests with locks...
+Finished in 6854 ms
+Speed: 91 kB/s
+Reading data
+Finished in 576 ms
+Speed: 1101 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8687 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1821 ms
+Speed: 348 kB/s
+Repeating tests with locks...
+Finished in 6872 ms
+Speed: 91 kB/s
+Reading data
+Finished in 573 ms
+Speed: 1107 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8661 ms
+Speed: 73 kB/s
+Reading data
+Finished in 1823 ms
+Speed: 347 kB/s
+Repeating tests with locks...
+Finished in 6841 ms
+Speed: 92 kB/s
+Reading data
+Finished in 575 ms
+Speed: 1103 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8676 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1825 ms
+Speed: 347 kB/s
+Repeating tests with locks...
+Finished in 6843 ms
+Speed: 92 kB/s
+Reading data
+Finished in 579 ms
+Speed: 1096 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8727 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1825 ms
+Speed: 347 kB/s
+Repeating tests with locks...
+Finished in 6871 ms
+Speed: 91 kB/s
+Reading data
+Finished in 576 ms
+Speed: 1101 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8678 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1822 ms
+Speed: 347 kB/s
+Repeating tests with locks...
+Finished in 6844 ms
+Speed: 92 kB/s
+Reading data
+Finished in 575 ms
+Speed: 1103 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8633 ms
+Speed: 73 kB/s
+Reading data
+Finished in 1819 ms
+Speed: 348 kB/s
+Repeating tests with locks...
+Finished in 6847 ms
+Speed: 91 kB/s
+Reading data
+Finished in 575 ms
+Speed: 1103 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8675 ms
+Speed: 72 kB/s
+Reading data
+Finished in 1826 ms
+Speed: 347 kB/s
+Repeating tests with locks...
+Finished in 6855 ms
+Speed: 91 kB/s
+Reading data
+Finished in 577 ms
+Speed: 1099 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+
+
+
+
+
+================= T3.2 96 MHz =================
+---------- Static ------------
+
+
+
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 13981 ms
+Speed: 228 kB/s
+Reading data
+Finished in 9600 ms
+Speed: 333 kB/s
+Repeating tests with locks...
+Finished in 405 ms
+Speed: 7900 kB/s
+Reading data
+Finished in 533 ms
+Speed: 6002 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 13981 ms
+Speed: 228 kB/s
+Reading data
+Finished in 9600 ms
+Speed: 333 kB/s
+Repeating tests with locks...
+Finished in 405 ms
+Speed: 7900 kB/s
+Reading data
+Finished in 533 ms
+Speed: 6002 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+Finished in 13981 ms
+Speed: 228 kB/s
+Reading data
+Finished in 9600 ms
+Speed: 333 kB/s
+Repeating tests with locks...
+Finished in 406 ms
+Speed: 7880 kB/s
+Reading data
+Finished in 532 ms
+Speed: 6014 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 32768 bytes
+
+
+
+---------- Native ------------
+
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 29 ms
+Speed: 13792 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 29 ms
+Speed: 13792 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 4096 bytes
+Finished in 30 ms
+Speed: 13333 kB/s
+
+Done!
+
+
+
+---------- SPIRAM ------------
+
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 3268 ms
+Speed: 193 kB/s
+Reading data
+Finished in 2228 ms
+Speed: 284 kB/s
+Repeating tests with locks...
+Finished in 548 ms
+Speed: 1158 kB/s
+Reading data
+Finished in 336 ms
+Speed: 1889 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 3268 ms
+Speed: 193 kB/s
+Reading data
+Finished in 2228 ms
+Speed: 284 kB/s
+Repeating tests with locks...
+Finished in 548 ms
+Speed: 1158 kB/s
+Reading data
+Finished in 336 ms
+Speed: 1889 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 3268 ms
+Speed: 193 kB/s
+Reading data
+Finished in 2228 ms
+Speed: 284 kB/s
+Repeating tests with locks...
+Finished in 547 ms
+Speed: 1160 kB/s
+Reading data
+Finished in 337 ms
+Speed: 1883 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 130048 bytes
+Finished in 3268 ms
+Speed: 193 kB/s
+Reading data
+Finished in 2228 ms
+Speed: 284 kB/s
+Repeating tests with locks...
+Finished in 547 ms
+Speed: 1160 kB/s
+Reading data
+Finished in 337 ms
+Speed: 1883 kB/s
+
+Done!
+
+
+---------- Serial ------------
+
+Writing 5 x 131072 bytes
+Finished in 4178 ms
+Speed: 152 kB/s
+Reading data
+Finished in 2808 ms
+Speed: 227 kB/s
+Repeating tests with locks...
+Finished in 1712 ms
+Speed: 373 kB/s
+Reading data
+Finished in 1274 ms
+Speed: 501 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 4190 ms
+Speed: 152 kB/s
+Reading data
+Finished in 2808 ms
+Speed: 227 kB/s
+Repeating tests with locks...
+Finished in 1705 ms
+Speed: 375 kB/s
+Reading data
+Finished in 1297 ms
+Speed: 493 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 4189 ms
+Speed: 152 kB/s
+Reading data
+Finished in 2810 ms
+Speed: 227 kB/s
+Repeating tests with locks...
+Finished in 1717 ms
+Speed: 372 kB/s
+Reading data
+Finished in 1262 ms
+Speed: 506 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 131072 bytes
+Finished in 4167 ms
+Speed: 153 kB/s
+Reading data
+Finished in 2818 ms
+Speed: 226 kB/s
+Repeating tests with locks...
+Finished in 1704 ms
+Speed: 375 kB/s
+Reading data
+Finished in 1279 ms
+Speed: 500 kB/s
+
+
+---------- SD ------------
+
+
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 9030 ms
+Speed: 70 kB/s
+Reading data
+Finished in 2378 ms
+Speed: 266 kB/s
+Repeating tests with locks...
+Finished in 6402 ms
+Speed: 98 kB/s
+Reading data
+Finished in 572 ms
+Speed: 1109 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8949 ms
+Speed: 70 kB/s
+Reading data
+Finished in 2381 ms
+Speed: 266 kB/s
+Repeating tests with locks...
+Finished in 6393 ms
+Speed: 98 kB/s
+Reading data
+Finished in 574 ms
+Speed: 1105 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 130048 bytes
+Finished in 8990 ms
+Speed: 70 kB/s
+Reading data
+Finished in 2375 ms
+Speed: 266 kB/s
+Repeating tests with locks...
+
+
+
+
+
+================= Arduino Uno =================
+---------- Static ------------
+
+Running static allocator...
+
+Writing 100 x 1024 bytes
+Finished in 4379 ms
+Speed: 22 kB/s
+Reading data
+Finished in 3915 ms
+Speed: 25 kB/s
+Repeating tests with locks...
+Finished in 279 ms
+Speed: 358 kB/s
+Reading data
+Finished in 377 ms
+Speed: 264 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 1024 bytes
+Finished in 4379 ms
+Speed: 22 kB/s
+Reading data
+Finished in 3916 ms
+Speed: 25 kB/s
+Repeating tests with locks...
+Finished in 280 ms
+Speed: 356 kB/s
+Reading data
+Finished in 376 ms
+Speed: 265 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 1024 bytes
+Finished in 4380 ms
+Speed: 22 kB/s
+Reading data
+Finished in 3916 ms
+Speed: 25 kB/s
+Repeating tests with locks...
+Finished in 279 ms
+Speed: 358 kB/s
+Reading data
+Finished in 376 ms
+Speed: 265 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 1024 bytes
+Finished in 4380 ms
+Speed: 22 kB/s
+Reading data
+Finished in 3916 ms
+Speed: 25 kB/s
+Repeating tests with locks...
+Finished in 278 ms
+Speed: 359 kB/s
+Reading data
+Finished in 377 ms
+Speed: 264 kB/s
+
+Done!
+Running static allocator...
+
+Writing 100 x 1024 bytes
+Finished in 4380 ms
+Speed: 22 kB/s
+Reading data
+Finished in 3915 ms
+Speed: 25 kB/s
+Repeating tests with locks...
+Finished in 280 ms
+Speed: 356 kB/s
+Reading data
+Finished in 376 ms
+Speed: 265 kB/s
+
+Done!
+Running static allocator.
+
+
+
+---------- Native ------------
+
+
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 103 ms
+Speed: 970 kB/s
+
+Done!
+Running native...
+
+Writing 100 x 1024 bytes
+Finished in 104 ms
+Speed: 960 kB/s
+
+Done!
+
+
+
+---------- SPI RAM ------------
+
+Running SPI ram allocator...
+
+Writing 5 x 12288 bytes
+Finished in 2964 ms
+Speed: 19 kB/s
+Reading data
+Finished in 2519 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 504 ms
+Speed: 118 kB/s
+Reading data
+Finished in 397 ms
+Speed: 150 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 12288 bytes
+Finished in 2965 ms
+Speed: 19 kB/s
+Reading data
+Finished in 2520 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 504 ms
+Speed: 118 kB/s
+Reading data
+Finished in 395 ms
+Speed: 151 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 12288 bytes
+Finished in 2965 ms
+Speed: 19 kB/s
+Reading data
+Finished in 2520 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 502 ms
+Speed: 119 kB/s
+Reading data
+Finished in 397 ms
+Speed: 150 kB/s
+
+Done!
+Running SPI ram allocator...
+
+Writing 5 x 12288 bytes
+Finished in 2964 ms
+Speed: 19 kB/s
+Reading data
+Finished in 2520 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 504 ms
+Speed: 118 kB/s
+Reading data
+Finished in 396 ms
+Speed: 151 kB/s
+
+Done!
+
+
+---------- Serial @ 115200 bps ------------
+
+Writing 5 x 12288 bytes
+Finished in 15743 ms
+Speed: 2 kB/s
+Reading data
+Finished in 9846 ms
+Speed: 5 kB/s
+Repeating tests with locks...
+Finished in 11827 ms
+Speed: 4 kB/s
+Reading data
+Finished in 7675 ms
+Speed: 7 kB/s
+
+Done!
+Runn���serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 12288 bytes
+Finished in 15741 ms
+Speed: 2 kB/s
+Reading data
+Finished in 9843 ms
+Speed: 5 kB/s
+Repeating tests with locks...
+Finished in 11805 ms
+Speed: 4 kB/s
+Reading data
+Finished in 7692 ms
+Speed: 6 kB/s
+
+Done!
+Runn���serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 12288 bytes
+Finished in 15746 ms
+Speed: 2 kB/s
+Reading data
+Finished in 9843 ms
+Speed: 5 kB/s
+Repeating tests with locks...
+Finished in 11810 ms
+Speed: 4 kB/s
+Reading data
+Finished in 7740 ms
+Speed: 6 kB/s
+
+
+
+---------- Serial @ 1000000 bps ------------
+
+
+Writing 5 x 12288 bytes
+Finished in 5819 ms
+Speed: 9 kB/s
+Reading data
+Finished in 3936 ms
+Speed: 14 kB/s
+Repeating tests with locks...
+Finished in 2817 ms
+Speed: 20 kB/s
+Reading data
+Finished in 1973 ms
+Speed: 30 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 12288 bytes
+Finished in 5839 ms
+Speed: 9 kB/s
+Reading data
+Finished in 3943 ms
+Speed: 14 kB/s
+Repeating tests with locks...
+Finished in 2833 ms
+Speed: 20 kB/s
+Reading data
+Finished in 1968 ms
+Speed: 30 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 12288 bytes
+Finished in 5860 ms
+Speed: 9 kB/s
+Reading data
+Finished in 3936 ms
+Speed: 14 kB/s
+Repeating tests with locks...
+Finished in 2833 ms
+Speed: 20 kB/s
+Reading data
+Finished in 1968 ms
+Speed: 30 kB/s
+
+Done!
+Running serial ram allocator...
+
+set memory pool: 1048576
+Writing 5 x 12288 bytes
+Finished in 5838 ms
+Speed: 9 kB/s
+Reading data
+Finished in 3944 ms
+Speed: 14 kB/s
+Repeating tests with locks...
+Finished in 2834 ms
+Speed: 20 kB/s
+Reading data
+Finished in 1976 ms
+Speed: 30 kB/s
+
+
+
+---------- SPI RAM ------------
+
+Running sd fat allocator...
+
+Writing 5 x 12288 bytes
+Finished in 3782 ms
+Speed: 15 kB/s
+Reading data
+Finished in 2507 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 1314 ms
+Speed: 44 kB/s
+Reading data
+Finished in 385 ms
+Speed: 155 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 12288 bytes
+Finished in 3772 ms
+Speed: 15 kB/s
+Reading data
+Finished in 2507 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 1315 ms
+Speed: 44 kB/s
+Reading data
+Finished in 381 ms
+Speed: 157 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 12288 bytes
+Finished in 3774 ms
+Speed: 15 kB/s
+Reading data
+Finished in 2508 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 1315 ms
+Speed: 44 kB/s
+Reading data
+Finished in 386 ms
+Speed: 155 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 12288 bytes
+Finished in 3767 ms
+Speed: 15 kB/s
+Reading data
+Finished in 2507 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 1317 ms
+Speed: 44 kB/s
+Reading data
+Finished in 382 ms
+Speed: 156 kB/s
+
+Done!
+Running sd fat allocator...
+
+Writing 5 x 12288 bytes
+Finished in 3775 ms
+Speed: 15 kB/s
+Reading data
+Finished in 2507 ms
+Speed: 23 kB/s
+Repeating tests with locks...
+Finished in 1311 ms
+Speed: 44 kB/s
+Reading data
+Finished in 385 ms
+Speed: 155 kB/s
+
+Done!

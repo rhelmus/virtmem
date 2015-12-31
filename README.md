@@ -71,3 +71,27 @@ becomes quite close to using data residing in 'normal' memory.
 
 # Manual
 The manual [can be found here](http://rhelmus.github.io/virtmem/index.html).
+
+# Benchmark
+Some benchmarking results are shown below. Note that these numbers are generated with very simple,
+and possibly not so accurate tests, hence they should only be used as a rough indication.
+
+<table>
+<caption id="multi_row">Simple Benchmarks</caption>
+<tr><th rowspan="2" valign="top">Allocator<th colspan="2">Teensy 3.2 (96 MHz)<th colspan="2">Teensy 3.2 (144 MHz)<th colspan="2">Arduino Uno
+<tr><td>R/W (kB/s)<td>R/W locks (kB/s)<td>R/W (kB/s)<td>R/W locks (kB/s)<td>R/W (kB/s)<td>R/W locks (kB/s)
+<tr><td>Native<td>13333<td><td>20000<td><td>970
+<tr><td>Static<td>333/228<td>6000/7900<td>458/313<td>8905/11607<td>25/22<td>265/357
+<tr><td>Serial (virtual)<td>227/152<td>500/373<td>250/182<td>496/378<td><td>
+<tr><td>Serial (115200 bps)<td><td><td><td><td>5/2<td>6/4
+<tr><td>Serial (1000000 bps)<td><td><td><td><td>14/9<td>30/20
+<tr><td>SD<td>266/70<td>1107/98<td>347/72<td>1102/91<td>23/15<td>156/44
+<tr><td>SPI RAM<td>284/193<td>1887/1159<td>380/253<td>2083/1207<td>23/19<td>150/118
+</table>
+
+Some notes:
+- Native: Write speeds using a simple loop with a (volatile static) buffer. These results can be seen
+as a reference when regular (non virtual) data is used.
+- Static: Virtual memory allocator using regular RAM: usefull to measure overhead from virtual pointers.
+- Serial: Virtual means that a USB serial connection is used, which is only limited by USB speeds.
+- SD/SPI RAM: measured at maximum SPI speeds. For SPI RAM a 23LCV1024 chip was used.

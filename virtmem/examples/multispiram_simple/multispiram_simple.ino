@@ -22,8 +22,8 @@ using namespace virtmem;
 SPIRamConfig scfg[2] =
 {
     // format: <large adressing> (true if > 512 kbit), <size of the chip>, <CS pin>, <SPI speed>
-    { true, 1024 * 128, 9, SerialRam::SPEED_FULL },
-    { true, 1024 * 128, 10, SerialRam::SPEED_FULL }
+    { true, 1024l * 128l, 9, SerialRam::SPEED_FULL },
+    { true, 1024l * 128l, 10, SerialRam::SPEED_FULL }
 };
 
 typedef MultiSPIRAMVAllocP<scfg, 2> Alloc; // shortcut
