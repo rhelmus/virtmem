@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['getalloc',['getAlloc',['../classvirtmem_1_1VPtr.html#a9ee67ece32e42b2ad086965cb2b1d666',1,'virtmem::VPtr']]],
+  ['getalloc',['getAlloc',['../classvirtmem_1_1VPtr.html#a13572c0312a49bcf97dceb198f365b1b',1,'virtmem::VPtr']]],
   ['getbigpagecount',['getBigPageCount',['../classvirtmem_1_1BaseVAlloc.html#a743f2eff53803d55a6b44f1fef27d1bd',1,'virtmem::BaseVAlloc']]],
   ['getbigpagereads',['getBigPageReads',['../classvirtmem_1_1BaseVAlloc.html#ab52c8736831988f41067b9ff70ad6455',1,'virtmem::BaseVAlloc']]],
   ['getbigpagesize',['getBigPageSize',['../classvirtmem_1_1BaseVAlloc.html#a9dc706b0acbc0470dd4f02bb603b7cbc',1,'virtmem::BaseVAlloc']]],

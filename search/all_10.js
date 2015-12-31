@@ -18,7 +18,7 @@ var searchData=
   ['virtmem_5fvirt_5faddress_5foperator',['VIRTMEM_VIRT_ADDRESS_OPERATOR',['../config_8h.html#a0a4c3072c9b293219712d3291276aa98',1,'config.h']]],
   ['virtmem_5fwrap_5fcpointers',['VIRTMEM_WRAP_CPOINTERS',['../config_8h.html#ae0a15670f90e45db1305c6b334d6199c',1,'config.h']]],
   ['virtpagesize',['VirtPageSize',['../namespacevirtmem.html#a0c7c11e1f674eae32762b8031322ff13',1,'virtmem']]],
-  ['vptr',['VPtr',['../classvirtmem_1_1VAlloc.html#a22f26f8f88d181ea6f4c2213e4777a7a',1,'virtmem::VAlloc::VPtr()'],['../classvirtmem_1_1VPtr.html#adc9646f433358f1f9ea2e40d14a68cf8',1,'virtmem::VPtr::VPtr()']]],
+  ['vptr',['VPtr',['../classvirtmem_1_1VAlloc.html#a22f26f8f88d181ea6f4c2213e4777a7a',1,'virtmem::VAlloc::VPtr()'],['../classvirtmem_1_1VPtr.html#ab94c9e4755c89d93628d79c4d19ba3d8',1,'virtmem::VPtr::VPtr()']]],
   ['vptr',['VPtr',['../classvirtmem_1_1VPtr.html',1,'virtmem']]],
   ['vptr_2eh',['vptr.h',['../vptr_8h.html',1,'']]],
   ['vptr_5futils_2eh',['vptr_utils.h',['../vptr__utils_8h.html',1,'']]],

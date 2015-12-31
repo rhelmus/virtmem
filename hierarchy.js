@@ -22,14 +22,14 @@ var hierarchy =
       [ "virtmem::VAlloc< Properties, Derived >", "classvirtmem_1_1VAlloc.html", null ]
     ] ],
     [ "virtmem::BaseVPtr", "classvirtmem_1_1BaseVPtr.html", [
-      [ "virtmem::VPtr< typename, typename >", "classvirtmem_1_1VPtr.html", null ]
+      [ "virtmem::VPtr< T, TA >", "classvirtmem_1_1VPtr.html", null ]
     ] ],
     [ "virtmem::DefaultAllocProperties", "structvirtmem_1_1DefaultAllocProperties.html", null ],
-    [ "virtmem::VPtr< typename, typename >::MemberWrapper", "classvirtmem_1_1VPtr_1_1MemberWrapper.html", null ],
+    [ "virtmem::VPtr< T, TA >::MemberWrapper", "classvirtmem_1_1VPtr_1_1MemberWrapper.html", null ],
     [ "NILL_t", "classNILL__t.html", null ],
     [ "virtmem::serram_utils::SerialInput< IOStream >", "classvirtmem_1_1serram__utils_1_1SerialInput.html", null ],
     [ "virtmem::SPIRamConfig", "structvirtmem_1_1SPIRamConfig.html", null ],
     [ "virtmem::VAlloc< Properties, Derived >::TVPtr< T >", "structvirtmem_1_1VAlloc_1_1TVPtr.html", null ],
-    [ "virtmem::VPtr< typename, typename >::ValueWrapper", "classvirtmem_1_1VPtr_1_1ValueWrapper.html", null ],
+    [ "virtmem::VPtr< T, TA >::ValueWrapper", "classvirtmem_1_1VPtr_1_1ValueWrapper.html", null ],
     [ "virtmem::VPtrLock< TV >", "classvirtmem_1_1VPtrLock.html", null ]
 ];
