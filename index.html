@@ -237,17 +237,17 @@ Using virtual memory (tutorial)</h2>
 <tr>
 <th>Allocator </th><th>Description </th><th>Header  </th></tr>
 <tr>
-<td><a class="el" href="classvirtmem_1_1SDVAllocP.html" title="Virtual memory allocator class that uses SD card as virtual pool. ">virtmem::SDVAllocP</a> </td><td>uses a FAT formatted SD card as memory pool </td><td><code>#include</code> &lt;<a class="el" href="sd__alloc_8h.html" title="This file contains the SD fat virtual memory allocator. ">alloc/sd_alloc.h</a>&gt; </td></tr>
+<td><a class="el" href="classvirtmem_1_1SDVAllocP.html" title="Virtual memory allocator class that uses SD card as virtual pool. ">virtmem::SDVAllocP</a> </td><td>Uses a FAT formatted SD card as memory pool. Requires <a href="https://github.com/greiman/SdFat">SD fat library</a>. </td><td><code>#include</code> &lt;<a class="el" href="sd__alloc_8h.html" title="This file contains the SD fat virtual memory allocator. ">alloc/sd_alloc.h</a>&gt; </td></tr>
 <tr>
-<td><a class="el" href="classvirtmem_1_1SPIRAMVAllocP.html" title="Virtual memory allocator that uses SPI (serial) RAM (i.e. the 23LC series from Microchip) as memory p...">virtmem::SPIRAMVAllocP</a> </td><td>uses SPI ram (Microchip's 23LC series) as memory pool </td><td><code>#include</code> &lt;<a class="el" href="spiram__alloc_8h.html" title="This file contains the SPI RAM virtual memory allocator. ">alloc/spiram_alloc.h</a>&gt; </td></tr>
+<td><a class="el" href="classvirtmem_1_1SPIRAMVAllocP.html" title="Virtual memory allocator that uses SPI (serial) RAM (i.e. the 23LC series from Microchip) as memory p...">virtmem::SPIRAMVAllocP</a> </td><td>Uses SPI ram (Microchip's 23LC series) as memory pool. Requires <a href="https://github.com/rhelmus/serialram">serialram library</a>. </td><td><code>#include</code> &lt;<a class="el" href="spiram__alloc_8h.html" title="This file contains the SPI RAM virtual memory allocator. ">alloc/spiram_alloc.h</a>&gt; </td></tr>
 <tr>
-<td><a class="el" href="classvirtmem_1_1MultiSPIRAMVAllocP.html" title="Virtual allocator that uses multiple SRAM chips (i.e. 23LC series from Microchip) as memory pool...">virtmem::MultiSPIRAMVAllocP</a> </td><td>like <a class="el" href="namespacevirtmem.html#a8cb697a9f33876878b72e0e92116b345" title="Shortcut to SPIRAMVAllocP with default template arguments. ">virtmem::SPIRAMVAlloc</a>, but supports multiple memory chips </td><td><code>#include</code> &lt;<a class="el" href="spiram__alloc_8h.html" title="This file contains the SPI RAM virtual memory allocator. ">alloc/spiram_alloc.h</a>&gt; </td></tr>
+<td><a class="el" href="classvirtmem_1_1MultiSPIRAMVAllocP.html" title="Virtual allocator that uses multiple SRAM chips (i.e. 23LC series from Microchip) as memory pool...">virtmem::MultiSPIRAMVAllocP</a> </td><td>Like <a class="el" href="namespacevirtmem.html#a8cb697a9f33876878b72e0e92116b345" title="Shortcut to SPIRAMVAllocP with default template arguments. ">virtmem::SPIRAMVAlloc</a>, but supports multiple memory chips. </td><td><code>#include</code> &lt;<a class="el" href="spiram__alloc_8h.html" title="This file contains the SPI RAM virtual memory allocator. ">alloc/spiram_alloc.h</a>&gt; </td></tr>
 <tr>
-<td><a class="el" href="classvirtmem_1_1SerialVAllocP.html" title="Virtual memory allocator that uses external memory via a serial connection as memory pool...">virtmem::SerialVAllocP</a> </td><td>uses RAM from a computer connected through serial as memory pool </td><td><code>#include</code> &lt;<a class="el" href="serial__alloc_8h.html" title="This file contains the serial virtual memory allocator. ">alloc/serial_alloc.h</a>&gt; </td></tr>
+<td><a class="el" href="classvirtmem_1_1SerialVAllocP.html" title="Virtual memory allocator that uses external memory via a serial connection as memory pool...">virtmem::SerialVAllocP</a> </td><td>Uses RAM from a computer connected through serial as memory pool. The computer should run the <code>virtmem/extras/serial_host.py</code> Python script. </td><td><code>#include</code> &lt;<a class="el" href="serial__alloc_8h.html" title="This file contains the serial virtual memory allocator. ">alloc/serial_alloc.h</a>&gt; </td></tr>
 <tr>
-<td><a class="el" href="classvirtmem_1_1StaticVAllocP.html" title="Virtual memory allocator that uses a static array (in regular RAM) as memory pool. ">virtmem::StaticVAllocP</a> </td><td>uses regular RAM as memory pool (for debugging) </td><td><code>#include</code> &lt;<a class="el" href="static__alloc_8h.html" title="This file contains the static virtual memory allocator (for debug) ">alloc/static_alloc.h</a>&gt; </td></tr>
+<td><a class="el" href="classvirtmem_1_1StaticVAllocP.html" title="Virtual memory allocator that uses a static array (in regular RAM) as memory pool. ">virtmem::StaticVAllocP</a> </td><td>Uses regular RAM as memory pool (for debugging). </td><td><code>#include</code> &lt;<a class="el" href="static__alloc_8h.html" title="This file contains the static virtual memory allocator (for debug) ">alloc/static_alloc.h</a>&gt; </td></tr>
 <tr>
-<td><a class="el" href="classvirtmem_1_1StdioVAllocP.html" title="Virtual memory allocator that uses a regular file (via stdio) as memory pool. ">virtmem::StdioVAllocP</a> </td><td>uses files through regular stdio functions as memory pool (for debugging on PCs) </td><td><code>#include</code> &lt;<a class="el" href="stdio__alloc_8h.html" title="This file contains the stdio virtual memory allocator (for debug) ">alloc/stdio_alloc.h</a>&gt; </td></tr>
+<td><a class="el" href="classvirtmem_1_1StdioVAllocP.html" title="Virtual memory allocator that uses a regular file (via stdio) as memory pool. ">virtmem::StdioVAllocP</a> </td><td>Uses files through regular stdio functions as memory pool (for debugging purposes on PCs). </td><td><code>#include</code> &lt;<a class="el" href="stdio__alloc_8h.html" title="This file contains the stdio virtual memory allocator (for debug) ">alloc/stdio_alloc.h</a>&gt; </td></tr>
 </table>
 <p>The following code demonstrates how to setup a virtual memory allocator:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;Arduino.h&gt;</span></div>
@@ -326,14 +326,14 @@ Note on memory pages</h3>
 <h3><a class="anchor" id="alUsing"></a>
 Using virtual data locks</h3>
 <p>To create a lock to virtual memory the <a class="el" href="classvirtmem_1_1VPtrLock.html" title="Creates a lock to some virtual data. ">virtmem::VPtrLock</a> class is used:</p>
-<div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code" href="classvirtmem_1_1VPtr.html">virtmem::VPtr&lt;char, virtmem::SDValloc&gt;</a> virtCharPtr; <span class="comment">// shortcut</span></div>
+<div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code" href="classvirtmem_1_1VPtr.html">virtmem::VPtr&lt;char, virtmem::SDVAlloc&gt;</a> virtCharPtr; <span class="comment">// shortcut</span></div>
 <div class="line">virtCharPtr vptr = valloc.<a class="code" href="classvirtmem_1_1VAlloc.html#a27e55bc9a78ac416ddae6de9730010aa">alloc</a>&lt;<span class="keywordtype">char</span>&gt;(100); <span class="comment">// allocate some virtual memory</span></div>
 <div class="line"><a class="code" href="classvirtmem_1_1VPtrLock.html">virtmem::VPtrLock&lt;virtCharPtr&gt;</a> lock = <a class="code" href="namespacevirtmem.html#a0c0be70ab651fb0513afd31d1b0ceb2e">virtmem::makeVirtPtrLock</a>(vptr, 100, <span class="keyword">false</span>);</div>
 <div class="line">memset(*lock, 10, 100); <span class="comment">// set all bytes to &#39;10&#39;</span></div>
 </div><!-- fragment --><p>The <a class="el" href="namespacevirtmem.html#a0c0be70ab651fb0513afd31d1b0ceb2e" title="Creates a virtual lock (shortcut) ">virtmem::makeVirtPtrLock</a> function is used to create a lock. The last parameter to this function (optional, by default <code>false</code>) tells whether the locked data should be treated as read-only: if set to <code>false</code> the data will be written back to the virtual memory (even if unchanged) after the lock has been released. If you know the data will not be changed (or you don't care about changes), then it is more efficient to pass <code>true</code> instead.</p>
 <p>Accessing locked data is simply done by dereferencing the lock variable (i.e. <code>*lock</code>).</p>
 <p>Sometimes it is not possible to completely lock the memory region that was requested. For instance, there may not be sufficient space available to lock the complete data to a memory page or there will be overlap with another locked memory region. For this reason, it is <b>important to always check the <em>actual size</em> that was locked</b>. After a lock has been made, the effective size of the locked region can be requested by the <a class="el" href="classvirtmem_1_1VPtrLock.html#a9461c0c077cddcd05c87cb2c0c31f8f3" title="Returns the actual size locked. ">virtmem::VPtrLock::getLockSize()</a> function. Because it is rather unpredictable whether the requested data can be locked in one go, it is best create a loop that iteratively creates locks until all bytes have been dealt with:</p>
-<div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code" href="classvirtmem_1_1VPtr.html">virtmem::VPtr&lt;char, virtmem::SDValloc&gt;</a> virtCharPtr; <span class="comment">// shortcut</span></div>
+<div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code" href="classvirtmem_1_1VPtr.html">virtmem::VPtr&lt;char, virtmem::SDVAlloc&gt;</a> virtCharPtr; <span class="comment">// shortcut</span></div>
 <div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> size = 10000;</div>
 <div class="line"><span class="keywordtype">int</span> sizeleft = size;</div>
 <div class="line"></div>
@@ -504,7 +504,7 @@ Pointer conversion</h2>
 <div class="line"><a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;char, SDVAlloc&gt;</a> vbuffer = valloc.<a class="code" href="classvirtmem_1_1VAlloc.html#a27e55bc9a78ac416ddae6de9730010aa">alloc</a>&lt;<span class="keywordtype">char</span>&gt;(128);</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">int</span> *ibuf = (<span class="keywordtype">int</span> *)buffer; <span class="comment">// or reinterpret_cast&lt;int *&gt;(buffer);</span></div>
-<div class="line"><a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;int, SDVAlloc&gt;</a> vibuf = (<a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;int, SDValloc&gt;</a>)vbuffer; <span class="comment">// or static_cast&lt;VPtr&lt;int, SDValloc&gt; &gt;(vbuffer);</span></div>
+<div class="line"><a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;int, SDVAlloc&gt;</a> vibuf = (<a class="code" href="classvirtmem_1_1VPtr.html">VPtr&lt;int, SDVAlloc&gt;</a>)vbuffer; <span class="comment">// or static_cast&lt;VPtr&lt;int, SDVAlloc&gt; &gt;(vbuffer);</span></div>
 </div><!-- fragment --><h2><a class="anchor" id="aCPP11Support"></a>
 C++11 support</h2>
 <p>Some platforms such as the latest Arduino versions (&gt;= 1.6.6) or Teensyduino support the fairly recent C++11 standard. In <code>virtmem</code> you can take this to your advantage to shorten the syntax, for instance by using <a href="http://en.cppreference.com/w/cpp/language/type_alias">template aliasing</a>:</p>
@@ -532,6 +532,12 @@ FAQ</h1>
 <p>When accessing virtual data, a <a class="el" href="index.html#aAccess">proxy class is returned</a>. This class behaves as much as the data as possbile, but sometimes the compiler needs some help. Simply casting it to the right type should be enough: </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> a = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(*vptr);</div>
 </div><!-- fragment --><h2>I am using the serial allocator and my sketch seems to be stuck!?</h2>
 <p>The serial allocator needs to be connected with a computer which runs a script (<code>virtmem/extras/serial_host.py</code>). During initialization of the allocator it will wait for an connection indefinitely. For more information, please see the documentation about the <a class="el" href="classvirtmem_1_1SerialVAllocP.html">serial alloactor</a>.</p>
+<h2>What's the deal with SerialVAllocP vs SerialVAlloc, SDVAllocP vs SDVAlloc etc.?</h2>
+<p>All allocators are <a href="https://isocpp.org/wiki/faq/templates">template classes</a>. This was mainly done so that memory page settings <a class="el" href="index.html#aConfigAlloc">can be configured</a>, for instance: </p><div class="fragment"><div class="line"><a class="code" href="classvirtmem_1_1SDVAllocP.html">virtmem::SDVAllocP&lt;AllocProperties&gt;</a> valloc;</div>
+</div><!-- fragment --><p>However, often we don't need to configure anything, and the default is fine: </p><div class="fragment"><div class="line"><a class="code" href="classvirtmem_1_1SDVAllocP.html">virtmem::SDVAllocP&lt;virtmem::DefaultAllocProperties&gt;</a> valloc; <span class="comment">// default</span></div>
+</div><!-- fragment --><p>We don't actually have to specify <a class="el" href="structvirtmem_1_1DefaultAllocProperties.html" title="This struct contains default parameters for virtual memory pages. ">virtmem::DefaultAllocProperties</a> to stay with defaults: </p><div class="fragment"><div class="line"><a class="code" href="classvirtmem_1_1SDVAllocP.html">virtmem::SDVAllocP&lt;&gt;</a> valloc; <span class="comment">// as above</span></div>
+</div><!-- fragment --><p>To shorten it further, the 'non P' allocator shortcuts were made: </p><div class="fragment"><div class="line"><a class="code" href="classvirtmem_1_1SDVAllocP.html">virtmem::SDVAlloc</a> valloc; <span class="comment">// as above, but no need for &#39;&lt;&gt;&#39;</span></div>
+</div><!-- fragment --><p>Note that allocators such as <a class="el" href="classvirtmem_1_1MultiSPIRAMVAllocP.html" title="Virtual allocator that uses multiple SRAM chips (i.e. 23LC series from Microchip) as memory pool...">virtmem::MultiSPIRAMVAllocP</a> always require template parameters, hence, only a 'P version' exists.</p>
 <h1><a class="anchor" id="bench"></a>
 Benchmarks</h1>
 <p>Some benchmarking results are shown below. Note that these numbers are generated with very simple, and possibly not so accurate tests, hence they should only be used as a rough indication (source code can be found in <code>virtmem/examples/benchmark</code>).</p>
@@ -552,6 +558,7 @@ Benchmarks</h1>
 <td><a class="el" href="classvirtmem_1_1SPIRAMVAllocP.html" title="Virtual memory allocator that uses SPI (serial) RAM (i.e. the 23LC series from Microchip) as memory p...">virtmem::SPIRAMVAllocP</a> </td><td align="center">284 / 193 </td><td align="center">1887 / 1159 </td><td align="center">380 / 253 </td><td align="center">2083 / 1207 </td><td align="center">23 / 19 </td><td align="center">150 / 118 </td></tr>
 </table>
 <p>Some notes:</p><ul>
+<li>Tests were performed with- and without <a class="el" href="index.html#aLocking">virtual data locks</a>.</li>
 <li>Native: Write speeds using a simple loop with a buffer. These results can be seen as a reference when regular (non virtual) data is used.</li>
 <li>Data from static allocator is useful to measure overhead from virtual pointers.</li>
 <li>Serial Arduino baudrates: 115200 bps and 1000000 bps (<em>italic</em>)</li>
@@ -587,7 +594,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Dec 31 2015 20:23:59 for virtmem by
+    <li class="footer">Generated on Fri Jan 1 2016 13:01:52 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

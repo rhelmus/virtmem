@@ -106,12 +106,12 @@ $(document).ready(function(){initNavTree('serial_input_8ino-example.html','');})
 <p>This example shows how to use serial input over a port shared with the serial allocator.</p>
 <div class="fragment"><div class="line"><span class="comment">/*</span></div>
 <div class="line"><span class="comment"> * This example shows how to handle serial input when using the serial virtual memory allocator</span></div>
-<div class="line"><span class="comment"> * (SerialValloc/SerialVallocP) with a &#39;shared&#39; serial port. In this example the default serial port,</span></div>
+<div class="line"><span class="comment"> * (SerialVAlloc/SerialVAllocP) with a &#39;shared&#39; serial port. In this example the default serial port,</span></div>
 <div class="line"><span class="comment"> * (&#39;Serial&#39;) is used.</span></div>
 <div class="line"><span class="comment"> *</span></div>
 <div class="line"><span class="comment"> * The only requirement is that a so called &#39;RAM host&#39; (for instance a PC) is</span></div>
 <div class="line"><span class="comment"> * connected via the default serial port (Serial). The RAM host should run the</span></div>
-<div class="line"><span class="comment"> * &#39;script/serial_host.py&#39; Python script.</span></div>
+<div class="line"><span class="comment"> * &#39;virtmem/extras/serial_host.py&#39; Python script.</span></div>
 <div class="line"><span class="comment"> */</span></div>
 <div class="line"></div>
 <div class="line"></div>
@@ -143,6 +143,7 @@ $(document).ready(function(){initNavTree('serial_input_8ino-example.html','');})
 <div class="line">        <span class="comment">// availableAtLeast().</span></div>
 <div class="line">        <span class="keywordtype">int</span> bytes = valloc.input.available();</div>
 <div class="line"></div>
+<div class="line">        <span class="comment">// read a single byte first</span></div>
 <div class="line">        Serial.print(<span class="stringliteral">&quot;read single byte: &quot;</span>); Serial.println(valloc.input.read());</div>
 <div class="line">        --bytes;</div>
 <div class="line"></div>
@@ -164,7 +165,7 @@ $(document).ready(function(){initNavTree('serial_input_8ino-example.html','');})
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Dec 31 2015 20:23:59 for virtmem by
+    <li class="footer">Generated on Fri Jan 1 2016 13:01:52 for virtmem by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>
