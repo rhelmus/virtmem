@@ -1,4 +1,4 @@
-Copyright (c) 2015, Rick Helmus
+Copyright (c) 2015-2016, Rick Helmus
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
