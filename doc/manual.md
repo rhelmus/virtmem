@@ -140,13 +140,14 @@ card as a virtual memory pool.
 
 The `virtmem` library supports the following allocators:
 Allocator | Description | Header
-----------|-------------|-------
-virtmem::SDVAllocP | uses a FAT formatted SD card as memory pool | \c \#include <alloc/sd_alloc.h>
-virtmem::SPIRAMVAllocP | uses SPI ram (Microchip's 23LC series) as memory pool | \c \#include <alloc/spiram_alloc.h>
-virtmem::MultiSPIRAMVAllocP | like virtmem::SPIRAMVAlloc, but supports multiple memory chips | \c \#include <alloc/spiram_alloc.h>
-virtmem::SerialVAllocP | uses RAM from a computer connected through serial as memory pool | \c \#include <alloc/serial_alloc.h>
-virtmem::StaticVAllocP | uses regular RAM as memory pool (for debugging) | \c \#include <alloc/static_alloc.h>
-virtmem::StdioVAllocP | uses files through regular stdio functions as memory pool (for debugging on PCs) | \c \#include <alloc/stdio_alloc.h>
+----------|-------------|--------
+virtmem::SDVAllocP | Uses a FAT formatted SD card as memory pool. Requires [SD fat library](https://github.com/greiman/SdFat). | \c \#include <alloc/sd_alloc.h>
+virtmem::SPIRAMVAllocP | Uses SPI ram (Microchip's 23LC series) as memory pool. Requires [serialram library](https://github.com/rhelmus/serialram). | \c \#include <alloc/spiram_alloc.h>
+virtmem::MultiSPIRAMVAllocP | Like virtmem::SPIRAMVAlloc, but supports multiple memory chips. | \c \#include <alloc/spiram_alloc.h>
+virtmem::SerialVAllocP | Uses RAM from a computer connected through serial as memory pool. The computer should run the `virtmem/extras/serial_host.py` Python script. | \c \#include <alloc/serial_alloc.h>
+virtmem::StaticVAllocP | Uses regular RAM as memory pool (for debugging). | \c \#include <alloc/static_alloc.h>
+virtmem::StdioVAllocP | Uses files through regular stdio functions as memory pool (for debugging purposes on PCs). | \c \#include <alloc/stdio_alloc.h>
+
 
 The following code demonstrates how to setup a virtual memory allocator:
 
@@ -307,7 +308,7 @@ and can be customized as described in @ref aConfigAlloc.
 To create a lock to virtual memory the virtmem::VPtrLock class is used:
 
 ~~~{.cpp}
-typedef virtmem::VPtr<char, virtmem::SDValloc> virtCharPtr; // shortcut
+typedef virtmem::VPtr<char, virtmem::SDVAlloc> virtCharPtr; // shortcut
 virtCharPtr vptr = valloc.alloc<char>(100); // allocate some virtual memory
 virtmem::VPtrLock<virtCharPtr> lock = virtmem::makeVirtPtrLock(vptr, 100, false);
 memset(*lock, 10, 100); // set all bytes to '10'
@@ -333,7 +334,7 @@ locked in one go, it is best create a loop that iteratively creates locks until
 all bytes have been dealt with:
 
 ~~~{.cpp}
-typedef virtmem::VPtr<char, virtmem::SDValloc> virtCharPtr; // shortcut
+typedef virtmem::VPtr<char, virtmem::SDVAlloc> virtCharPtr; // shortcut
 const int size = 10000;
 int sizeleft = size;
 
@@ -639,7 +640,7 @@ char buffer[128];
 VPtr<char, SDVAlloc> vbuffer = valloc.alloc<char>(128);
 
 int *ibuf = (int *)buffer; // or reinterpret_cast<int *>(buffer);
-VPtr<int, SDVAlloc> vibuf = (VPtr<int, SDValloc>)vbuffer; // or static_cast<VPtr<int, SDValloc> >(vbuffer);
+VPtr<int, SDVAlloc> vibuf = (VPtr<int, SDVAlloc>)vbuffer; // or static_cast<VPtr<int, SDVAlloc> >(vbuffer);
 ~~~
 
 ## C++11 support {#aCPP11Support}
@@ -713,6 +714,31 @@ The serial allocator needs to be connected with a computer which runs a script (
 During initialization of the allocator it will wait for an connection indefinitely.
 For more information, please see the documentation about the [serial alloactor](@ref virtmem::SerialVAllocP).
 
+## What's the deal with SerialVAllocP vs SerialVAlloc, SDVAllocP vs SDVAlloc etc.?
+All allocators are [template classes](https://isocpp.org/wiki/faq/templates). This was mainly done
+so that memory page settings [can be configured](@ref aConfigAlloc), for instance:
+~~~{.cpp}
+virtmem::SDVAllocP<AllocProperties> valloc;
+~~~
+
+However, often we don't need to configure anything, and the default is fine:
+~~~{.cpp}
+virtmem::SDVAllocP<virtmem::DefaultAllocProperties> valloc; // default
+~~~
+
+We don't actually have to specify virtmem::DefaultAllocProperties to stay with defaults:
+~~~{.cpp}
+virtmem::SDVAllocP<> valloc; // as above
+~~~
+
+To shorten it further, the 'non P' allocator shortcuts were made:
+~~~{.cpp}
+virtmem::SDVAlloc valloc; // as above, but no need for '<>'
+~~~
+
+Note that allocators such as virtmem::MultiSPIRAMVAllocP always require template parameters, hence, only
+a 'P version' exists.
+
 # Benchmarks {#bench}
 Some benchmarking results are shown below. Note that these numbers are generated with very simple,
 and possibly not so accurate tests, hence they should only be used as a rough indication (source
@@ -771,6 +797,7 @@ code can be found in `virtmem/examples/benchmark`).
 </table>
 
 Some notes:
+- Tests were performed with- and without [virtual data locks](@ref aLocking).
 - Native: Write speeds using a simple loop with a buffer. These results can be seen
 as a reference when regular (non virtual) data is used.
 - Data from static allocator is useful to measure overhead from virtual pointers.

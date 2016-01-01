@@ -1,11 +1,11 @@
 /*
  * Minimal example showing how to use the serial virtual memory allocator
- * (SerialValloc/SerialVallocP). This allocator uses RAM from an external device
+ * (SerialVAlloc/SerialVAllocP). This allocator uses RAM from an external device
  * connected through serial.
  *
  * The only requirement is that a so called 'RAM host' (for instance a PC) is
  * connected via the default serial port (Serial). The RAM host should run the
- * 'script/serial_host.py' Python script.
+ * 'virtmem/extras/serial_host.py' Python script.
  */
 
 

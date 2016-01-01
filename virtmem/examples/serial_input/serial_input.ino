@@ -1,11 +1,11 @@
 /*
  * This example shows how to handle serial input when using the serial virtual memory allocator
- * (SerialValloc/SerialVallocP) with a 'shared' serial port. In this example the default serial port,
+ * (SerialVAlloc/SerialVAllocP) with a 'shared' serial port. In this example the default serial port,
  * ('Serial') is used.
  *
  * The only requirement is that a so called 'RAM host' (for instance a PC) is
  * connected via the default serial port (Serial). The RAM host should run the
- * 'script/serial_host.py' Python script.
+ * 'virtmem/extras/serial_host.py' Python script.
  */
 
 
@@ -37,6 +37,7 @@ void loop()
         // availableAtLeast().
         int bytes = valloc.input.available();
 
+        // read a single byte first
         Serial.print("read single byte: "); Serial.println(valloc.input.read());
         --bytes;
 
