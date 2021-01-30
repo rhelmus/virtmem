@@ -5,13 +5,15 @@ Main
 `virtmem` is an Arduino library that allows your project to easily use an
 external memory source to extend the (limited) amount of available RAM. This
 library supports several memory resources, for instance, SPI ram (e.g. the
-`23LC1024` chip from Microchip), an SD card or even a computer connected via a
+`23LC1024` chip from Microchip), an SD card, flash using LittleFS on ESP32 and ESP8266
+or even a computer connected via a
 serial connection. The library is made in such a way that managing and using
 this _virtual memory_ closely resembles working with data from 'normal' memory.
 
 # Features
 * Extend the available memory with kilobytes, megabytes or even gigabytes
-* Supports SPI RAM (23LC series from Microchip), SD cards and RAM from a computer connected through serial
+* Supports SPI RAM (23LC series from Microchip), SD cards, flash using LittleFS on ESP32 and ESP8266
+and RAM from a computer connected through serial
 * Easy C++ interface that closely resembles regular data access
 * Memory page system to speed up access to virtual memory
 * New memory interfaces can be added easily
@@ -102,4 +104,5 @@ and possibly not so accurate tests, hence they should only be used as a rough in
 Some notes:
 - Serial: Virtual means that a USB serial connection is used, which is only limited by USB speeds.
 - SD/SPI RAM: measured at maximum SPI speeds. For SPI RAM a 23LCV1024 chip was used.
+- LittleFS: Only supported on ESP32 and ESP8266
 - More details in [the manual](http://rhelmus.github.io/virtmem/index.html#bench).

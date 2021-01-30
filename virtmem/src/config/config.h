@@ -76,7 +76,8 @@ namespace virtmem {
 // Default virtual memory page settings
 // NOTE: Take care of sufficiently large int types when increasing these values
 
-#if defined(__MK20DX256__) || defined(__SAM3X8E__) // Teensy 3.1 / Arduino Due (>= 64 kB sram)
+// Teensy 3.1 / Arduino Due / ESP32 / ESP8266 (>= 64 kB sram)
+#if defined(__MK20DX256__) || defined(__SAM3X8E__) || defined(ESP32) || defined(ESP8266)
 struct DefaultAllocProperties
 {
     static const uint8_t smallPageCount = 4, smallPageSize = 64;
