@@ -77,6 +77,7 @@ class LittleFSVAllocP : public VAlloc<Properties, LittleFSVAllocP<Properties> >
 //        const uint32_t t = micros();
         fileHandle.seek(offset, SeekSet);
         fileHandle.write((const uint8_t*) data, size);
+        fileHandle.flush();
 //        Serial.print("write: "); Serial.print(size); Serial.print("/"); Serial.println(micros() - t);
     }
 
