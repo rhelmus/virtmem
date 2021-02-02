@@ -34,6 +34,7 @@ template <typename Properties=DefaultAllocProperties>
 class LittleFSVAllocP : public VAlloc<Properties, LittleFSVAllocP<Properties> >
 {
     File fileHandle;
+    bool _mount = false;
 
     void doStart(void)
     {
@@ -44,6 +45,7 @@ class LittleFSVAllocP : public VAlloc<Properties, LittleFSVAllocP<Properties> >
           Serial.println("LittleFS mount failed");
           while (true);
         }
+        _mount = true;
       }
 
       // open the file for writing, creating if it does not exist
@@ -63,6 +65,7 @@ class LittleFSVAllocP : public VAlloc<Properties, LittleFSVAllocP<Properties> >
     void doStop(void)
     {
         fileHandle.close();
+        if (_mount) LittleFS.end(); // unmount the FS if we mounted it
     }
     void doRead(void *data, VPtrSize offset, VPtrSize size)
     {
