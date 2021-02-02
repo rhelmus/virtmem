@@ -10,6 +10,10 @@
 #include "config/config.h"
 #include "vptr.h"
 
+#if defined(ESP32) || defined(ESP8266)
+    #include <utility>
+#endif
+
 namespace virtmem {
 
 template <typename, typename> class VPtr;
@@ -133,6 +137,29 @@ public:
         new (ptr) T; // UNDONE: can this be ro?
         return ret;
     }
+
+#if defined(ESP32) || defined(ESP8266)
+  /**
+   * @brief Allocates memory and constructs data type with constructor arguments (ESP32 and ESP8266 only)
+   * @tparam T The data type to allocate for.
+   * @param args the arguments to pass to the object constructor
+   * @return Virtual pointer pointing to allocated memory.
+   *
+   * This function is similar to the C++ `new` operator. Similar to \ref alloc, this function will
+   * allocate a block of virtual memory. Subsequently, the constructor of the data type is
+   * called based in the passed srguments. For this reason, this function is typically used for C++ classes.
+   * @note This function should be used together with \ref deleteClass.
+   * @sa deleteClass, newArray, alloc
+   */
+    template<typename T, typename... Args>
+      VPtr<T, Derived> newClassP(Args&&... args)
+    {
+      virtmem::VPtr<T, Derived> ret = alloc<T>(sizeof(T));
+      T *ptr = static_cast<T *>(read(ret.getRawNum(), sizeof(T)));
+      new (ptr) T(std::forward<Args>(args)...); // UNDONE: can this be ro?
+      return ret;
+    }
+#endif
 
     /**
      * @brief Destructs data type and frees memory

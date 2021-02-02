@@ -14,7 +14,8 @@ this _virtual memory_ closely resembles working with data from 'normal' memory.
 
 # Features {#features}
 * Extend the available memory with kilobytes, megabytes or even gigabytes
-* Supports SPI RAM (23LC series from Microchip), SD cards and RAM from a computer connected through serial
+* Supports SPI RAM (23LC series from Microchip), SD cards, flash using LittleFS on ESP32 and ESP8266
+ and RAM from a computer connected through serial
 * Easy C++ interface that closely resembles regular data access
 * Memory page system to speed up access to virtual memory
 * New memory interfaces can be added easily
@@ -147,6 +148,7 @@ virtmem::MultiSPIRAMVAllocP | Like virtmem::SPIRAMVAlloc, but supports multiple 
 virtmem::SerialVAllocP | Uses RAM from a computer connected through serial as memory pool. The computer should run the `virtmem/extras/serial_host.py` Python script. | \c \#include <alloc/serial_alloc.h>
 virtmem::StaticVAllocP | Uses regular RAM as memory pool (for debugging). | \c \#include <alloc/static_alloc.h>
 virtmem::StdioVAllocP | Uses files through regular stdio functions as memory pool (for debugging purposes on PCs). | \c \#include <alloc/stdio_alloc.h>
+virtmem::LittleFSVAllocP | Uses flash formated as LittleFS as memory pool on ESP32 and ESP8266 only. | \c \#include <alloc/LittleFS_alloc.h>
 
 
 The following code demonstrates how to setup a virtual memory allocator:
